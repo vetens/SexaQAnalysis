@@ -1,0 +1,1 @@
+root://cmsxrootd.hep.wisc.edu//store/user/wvetens/crmc_Sexaq/Skimmed/TrackingNtuple/CRAB_AnalyzerAllSkimmed_SimSexaq_trial4_TrackingNtuple_14042022_v1/crab_FlatTreeProducerTracking_trial4_14042022_v1_1p8GeV/220414_154722/0000/output_1.root
