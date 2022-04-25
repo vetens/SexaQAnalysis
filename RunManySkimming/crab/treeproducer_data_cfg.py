@@ -19,6 +19,9 @@ collections_to_keep = cms.untracked.vstring(
 ##Following two kept in Signal MC, but not originally here, so I will add them for now
     'keep *_lambdaKshortVertexFilter_sParticles_*',
     'keep *_offlinePrimaryVertices_*_*',
+##Following two seem to be asked about by something, as I get an error without them
+    'keep *_pfIsolatedElectronsEI_*_*',
+    'keep *_pfIsolatedMuonsEI_*_*',
 ##
     "keep *_genParticlesPlusGEANT_*_*",
 #    "keep *_g4SimHits_*_*",
@@ -161,3 +164,4 @@ process.output_step = cms.EndPath(process.out)
 #file = open(iFileName,'w')
 #file.write(str(process.dumpPython()))
 #file.close()
+#print process.dumpPython()
