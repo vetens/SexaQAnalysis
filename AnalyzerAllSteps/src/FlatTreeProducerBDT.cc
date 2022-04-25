@@ -291,9 +291,11 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
         if(ngoodPVsPOG < AnalyzerAllSteps::v_mapPU.size() && bestMatchingAntiS > -1) {
 		event_weighting_factorPU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[ngoodPVsPOG],h_genParticles->at(bestMatchingAntiS).vz());
 	}
-	else if(ngoodPVsPOG < AnalyzerAllSteps::v_mapPU.size()){ //but if the MC does not contain any antiS you have to reweigh on the 'event', so pick a random PVz location to reweigh on
+	else if(!m_runningOnData && ngoodPVsPOG < AnalyzerAllSteps::v_mapPU.size()){ //but if the MC does not contain any antiS you have to reweigh on the 'event', so pick a random PVz location to reweigh on
 		event_weighting_factorPU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[ngoodPVsPOG],randomPVz);
-		event_weighting_factorPU = event_weighting_factorPU * ngoodPVsPOG / 18.479;
+		event_weighting_factorPU = event_weighting_factorPU * ngoodPVsPOG;
+                //sthe 18.479 below seems to be an overall scale factor for viewing purposes. It is unclear why this is hardcoded here when it should just be in a plotting macro so I am commenting it out for now
+		//event_weighting_factorPU = event_weighting_factorPU * ngoodPVsPOG / 18.479;
 	}
 
 	//some counter
