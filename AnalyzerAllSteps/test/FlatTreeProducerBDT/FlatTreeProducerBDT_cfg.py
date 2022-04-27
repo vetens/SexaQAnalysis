@@ -38,8 +38,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxE
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
+#inlist = open("crab/BPH2_Run2018B_BLOCK_A_Test.txt")
 process.source = cms.Source("PoolSource",
 	fileNames = cms.untracked.vstring(options.inputFiles),
+	#fileNames = cms.untracked.vstring(*(inlist.readlines())),
   duplicateCheckMode = cms.untracked.string ("noDuplicateCheck")
 )
 
