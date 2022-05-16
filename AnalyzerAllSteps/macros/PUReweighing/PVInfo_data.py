@@ -14,7 +14,7 @@ tdrstyle.setTDRStyle()
 
 plots_output_dir = "plots_data/"
 
-inlist = open("BPH2_Run2018B_BLOCK_A_Test.txt", "r").readlines()
+inlist = open("BPH2_Run2018B_BLOCK_A_Full.txt", "r").readlines()
 # For some reason, pyroot does not seem to want to work with xrootd or anything, so it will have to be run on local files...
 #inlist = ["output_1.root"]
 #inlist = ["TrackNtupleTrial4_Full.root"]
@@ -34,35 +34,18 @@ maxEvents1 = 1e4
 maxEvents2 = 1e99
 
 for iFile, fIn in enumerate(inlist,start = 1):
-        TFileIn = TFile.Open(fIn)
+        TFileIn = TFile.Open(str(fIn).strip())
         PV_dir.cd()
         print "Starting with inputFile: ", str(iFile) ,"/",str(len(inlist)), ':', TFileIn.GetName()
-	EvtTree = TFileIn.Get('Events')
+	EvtTree = TFileIn.Get('FlatTreeProducerBDT/FlatTreePV')
 	for ievt in range(0, EvtTree.GetEntries()):
                 EvtTree.GetEntry(ievt)
-		if(ievt>maxEvents1):
+		if(ievt>maxEvents2):
 			break
-                nGoodPV = 0
-                #PV_collection = event.recoVertexs_offlinePrimaryVertices__RECO.obj
-                PV_collection = EvtTree.recoVertexs_offlinePrimaryVertices__RECO
-                if not PV_collection.isValid(): continue
-                print PV_collection
-                for i in range(0, len(PV_collection)):
-                    x = PV_collection[i].position_fCoordinates.fX
-                    y = PV_collection[i].position_fCoordinates.fY
-                    z = PV_collection[i].position_fCoordinates.fZ
-                    ndof = PV_collection[i].ndof_
-                    r = TMath.Sqrt(x * x + y * y)
-                    if (ndof > 4 and r < 2 and TMath.Abs(z) < 24):
-                        nGoodPV+=1
-                for i in range(0, len(PV_collection)):
-                    x = PV_collection[i].position_fCoordinates.fX
-                    y = PV_collection[i].position_fCoordinates.fY
-                    z = PV_collection[i].position_fCoordinates.fZ
-                    ndof = PV_collection[i].ndof_
-                    r = TMath.Sqrt(x * x + y * y)
-                    if (ndof > 4 and r < 2 and TMath.Abs(z) < 24):
-                        h2_nPV_vzPV_Data.Fill(nGoodPV, z)
+                #print len(EvtTree._nGoodPVPOG), ", ", len(EvtTree._goodPVzPOG)
+                nPV = EvtTree._nGoodPVPOG[0]
+                for iPV in range(0, nPV):
+                    h2_nPV_vzPV_Data.Fill(nPV, EvtTree._goodPVzPOG[iPV])
         TFileIn.Close()
 h2_nPV_vzPV_Data.Write()
 
