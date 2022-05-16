@@ -1,6 +1,6 @@
 from WMCore.Configuration import Configuration
 
-day = "25042022"
+day = "27042022"
 version = "v1"
 trial = "1"
 mass = "1p8GeV"

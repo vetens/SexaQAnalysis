@@ -29,6 +29,8 @@ PV_dir = fOut.mkdir("PV")
 PV_dir.cd()
 
 h2_nPV_vzPV_Data = TH2F('h2_nPV_vzPV_Data','; #PV; absolute v_{z} PV (cm);  Events',60,-0.5,59.5,600,-30,30)
+h_PVz_Data = TH1F("h_PVz_non_weighed",";PV absolute z;Events/cm",600,-30,30)
+h_nPV_Data = TH1I('h_nPV_MC_non_weighed','; # valid PV; Events',60,-0.5,59.5)
 
 maxEvents1 = 1e4
 maxEvents2 = 1e99
@@ -46,6 +48,8 @@ for iFile, fIn in enumerate(inlist,start = 1):
                 nPV = EvtTree._nGoodPVPOG[0]
                 for iPV in range(0, nPV):
                     h2_nPV_vzPV_Data.Fill(nPV, EvtTree._goodPVzPOG[iPV])
+                    h_nPV_Data.Fill(nPV)
+                    h_PVz_Data.Fill(EvtTree._goodPVzPOG[iPV])
         TFileIn.Close()
 h2_nPV_vzPV_Data.Write()
 
