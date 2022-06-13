@@ -22,7 +22,7 @@ inlist = open("BPH2_Run2018B_BLOCK_A_Full.txt", "r").readlines()
 
 
 #fOut = TFile(plots_output_dir+'macro_combined_FlatTree_Tracking_Skimmed_trial17.root','RECREATE')
-fOut = TFile(plots_output_dir+'data_BlockA_Full.root','RECREATE')
+fOut = TFile(plots_output_dir+'data_BlockA_Full_With1D.root','RECREATE')
 
 #first make a few plots on the PV distribution to check the reweighing
 PV_dir = fOut.mkdir("PV")

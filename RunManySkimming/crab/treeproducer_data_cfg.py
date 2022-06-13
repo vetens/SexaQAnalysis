@@ -22,6 +22,9 @@ collections_to_keep = cms.untracked.vstring(
 ##Following two seem to be asked about by something, as I get an error without them
     'keep *_pfIsolatedElectronsEI_*_*',
     'keep *_pfIsolatedMuonsEI_*_*',
+##the above two no longer seem to be in the EDM info for data..... strange, but I will try something which is of the same datatype since the muons and electrons don't actually seem to be used anywhere...
+    'keep *_particleFlowPtrs_*_*',
+    'keep *_particleFlowPtrs_*_*',
 ##
     "keep *_genParticlesPlusGEANT_*_*",
 #    "keep *_g4SimHits_*_*",
