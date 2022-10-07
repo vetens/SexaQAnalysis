@@ -52,7 +52,7 @@ for iFile, fIn in enumerate(inlist,start = 1):
         print "Starting with inputFile: ", str(iFile) ,"/",str(len(inlist)), ':', TFileIn.GetName()
 	treePV = TFileIn.Get('FlatTreeProducerTracking/FlatTreePV')
 	for i in range(0,treePV.GetEntries()):
-		if(i>maxEvents1):
+		if(i>maxEvents2):
 			break
 
 		treePV.GetEntry(i)

@@ -40,7 +40,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 #inlist = open("gensimlist_trial3.txt", "r")
-inlist = open("EDM_SkimmedTrial7.txt", "r")
+#inlist = open("EDM_SkimmedTrial7.txt", "r")
+#inlist = open("TrackNtupleTrial4.txt", "r")
+#inlist = open("TrackNtupleTrial4_test.txt", "r")
 process.source = cms.Source("PoolSource",
 	fileNames = cms.untracked.vstring(options.inputFiles),
 	#fileNames = cms.untracked.vstring(*(inlist.readlines())),
@@ -61,17 +63,22 @@ process.source = cms.Source("PoolSource",
 #process.Troubleshoot = cms.Path(process.offlineBeamSpot * process.printTree)
 #without beamspot fix (should now be implemented at gensim level)
 #process.Troubleshoot = cms.Path(process.printTree)
-
+# introducing the below cut to ensure we are not working with sbar which interacted with the Inner tracker support at 2.5 cm
+#process.genAntiSGranddaughterFilterAntiLambda = cms.EDFilter("CandViewSelector",
+#     src = cms.InputTag("genParticlesPlusGEANT"),
+#     cut = cms.string("pdgId == -3122 && mother(0).pdgId == -1020000020 && sqrt(vx*vx+vy*vy) < 2.45")
+#     )
 
 process.load("SexaQAnalysis.AnalyzerAllSteps.FlatTreeProducerGENSIM_cfi")
+process.FlatTreeProducerGENSIM.PUReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/PU_Reweigh_SignalToDataBPH2018_Block_A.txt")
 process.FlatTreeProducerGENSIM.runningOnData = runningOnData
 process.FlatTreeProducerGENSIM.lookAtAntiS = lookAtAntiS
+#process.flattreeproducer = cms.Path(process.FlatTreeProducerGENSIM*process.genAntiSGranddaughterFilterAntiLambda)
 process.flattreeproducer = cms.Path(process.FlatTreeProducerGENSIM)
 
 process.p = cms.Schedule(
 # testing fix to beamspot issue & checking what gen info there is
 #  process.Troubleshoot,
-
   process.flattreeproducer
 )
 

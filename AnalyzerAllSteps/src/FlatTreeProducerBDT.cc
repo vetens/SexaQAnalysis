@@ -288,6 +288,7 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	double event_weighting_factor = AnalyzerAllSteps::EventWeightingFactor(RECO_S->theta()); 
 	double event_weighting_factorPU = 1.; 
 	//you only need to calculate a reweighing parameter for the PU and z location if you are running on MC
+	// bestMatchingAntiS > -1 only when not data per above if statement, so this still only runs on MC
         if(ngoodPVsPOG < AnalyzerAllSteps::v_mapPU.size() && bestMatchingAntiS > -1) {
 		event_weighting_factorPU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[ngoodPVsPOG],h_genParticles->at(bestMatchingAntiS).vz());
 	}

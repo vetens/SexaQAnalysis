@@ -1,6 +1,6 @@
 from WMCore.Configuration import Configuration
 
-day = "14042022"
+day = "20052022"
 version = "v1"
 mass = "1p8GeV"
 trial = "4"
@@ -9,7 +9,7 @@ config = Configuration()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.requestName = 'FlatTreeProducerTracking_trial'+trial+'_'+day+'_'+version+'_'+mass 
+config.General.requestName = 'FlatTreeProducerTracking_BlockAPUReweighed_trial'+trial+'_'+day+'_'+version+'_'+mass 
 
 config.section_('JobType') 
 config.JobType.pluginName = 'Analysis' 
