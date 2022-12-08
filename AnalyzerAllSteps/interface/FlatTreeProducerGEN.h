@@ -14,12 +14,13 @@ class FlatTreeProducerGEN : public edm::EDAnalyzer
     virtual ~FlatTreeProducerGEN();
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
     void FillBranchesPion(double eta);
-    void FillBranchesGENAntiS(const reco::Candidate  * genParticle, TVector3 beamspot, TVector3 beamspotVariance);
+    void FillBranchesGENAntiS(const reco::Candidate  * genParticle, TVector3 beamspot, TVector3 beamspotVariance, int nSbar);
 
   private:
     //some counters
     int nPions=0;
     int nPionsEtaSmaller4=0;
+    int nSbar = 0;
     int nTotalGENS=0;
     int nEvents = 0;
     int nTotalGENSNegEta=0;
@@ -59,6 +60,7 @@ class FlatTreeProducerGEN : public edm::EDAnalyzer
 
     //definition of variables which should go to _tree
     std::vector<float> _S_charge;
+    std::vector<int> _N_Sbar;
     std::vector<float> _S_mass;
     std::vector<float> _S_dxy;
     std::vector<float> _S_eta;

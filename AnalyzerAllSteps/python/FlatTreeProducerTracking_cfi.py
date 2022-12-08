@@ -12,6 +12,7 @@ FlatTreeProducerTracking= cms.EDAnalyzer('FlatTreeProducerTracking',
     V0LCollection = cms.InputTag("generalV0Candidates","Lambda",""), #can also be SEXAQ
     trackAssociators = cms.InputTag("quickTrackAssociatorByHits"),
     TrackingParticles = cms.InputTag("mix","MergedTrackTruth"),
+    PUReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/PU_NoReweigh.txt"),
 #    PileupInfo = cms.InputTag("addPileupInfo","","HLT")
 
     #################

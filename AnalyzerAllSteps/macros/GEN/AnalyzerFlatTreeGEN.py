@@ -17,18 +17,17 @@ tdrstyle.setTDRStyle()
 
 colours = [1,2,4,35,38,41]
 
-#fIn = [
-#TFile('/pnfs/iihe/cms/store/user/jdeclerc/crmc_Sexaq/crmc/Sexaquark_13TeV_trial20/FlatTree/FlatTree_GEN_trial20.root', 'read'),
-#TFile('/pnfs/iihe/cms/store/user/jdeclerc/crmc_Sexaq/crmc/Sexaquark_13TeV_trial19/FlatTree/FlatTree_GEN_trial19.root', 'read'),
-#TFile('/pnfs/iihe/cms/store/user/jdeclerc/crmc_Sexaq/crmc/Sexaquark_13TeV_trial17/FlatTree/FlatTree_GEN_trial17.root', 'read'),
-#TFile('/pnfs/iihe/cms/store/user/jdeclerc/crmc_Sexaq/crmc/Sexaquark_13TeV_trial18/FlatTree/FlatTree_GEN_trial18.root', 'read'),
-#]
-
-#mass = ["1.2","1.5","1.8","2.1"]
 fIn = [
-TFile('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGEN/output.root', 'read')
+TFile('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGEN/output.root', 'read'),
+TFile('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGEN/MultiSQEV.root', 'read'),
+TFile('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGEN/MultiSQEV.root', 'read')
 ]
-mass = ["1.8"]
+
+mass = ["Single #bar{S} Events at mass = 1.8","Multi-#bar{S} Events at mass = 1.8","All Events at mass = 1.8"]
+#fIn = [
+#TFile('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGEN/output.root', 'read')
+#]
+#mass = ["1.8"]
 
 plots_output_dir = "plots_GEN/"
 
@@ -38,7 +37,7 @@ TH1_ll = [] #list of list of 1D histos
 TH2_ll = [] #list of list of 2D histos
 
 iFile = 0
-for f in fIn:
+for j, f in enumerate(fIn):
 	tree = f.Get('FlatTreeProducerGEN/FlatTreeGENLevel') 
 
 	#h_antiS_pt = TH1F('h_antiS_pt','; #bar{S} p_{T} (GeV/c); 1/N_{ev} Events/0.1GeV/c',100,0,10)
@@ -50,6 +49,7 @@ for f in fIn:
 
 	#h_antiS_eta_pt = TH2F('h_antiS_eta_pt',';#bar{S} #eta; #bar{S} p_{T} (GeV/c); 1/N_{ev} Events/0.1#eta/0.1GeV/c',160,-8,8,100,0,10)
 	#h_antiS_eta_pz = TH2F('h_antiS_eta_pz',';#bar{S} #eta; #bar{S} |p_{z}| (GeV/c); 1/N_{ev} Events/0.1#eta/1GeV/c',160,-8,8,100,0,100)
+        h_antiS_N_Sbar = TH1I('h_N_antiS','; Number of #bar{S}; 1/N_{ev} Events/0.1GeV/c',20,0,20)
 	h_antiS_pt = TH1F('h_antiS_pt','; #bar{S} p_{T} (GeV/c); 1/N_{ev} Events/0.1GeV/c',100,0,10)
 	h_antiS_pz = TH1F('h_antiS_pz','; #bar{S} |p_{z}| (GeV/c); 1/N_{ev} Events/1GeV/c',80,0,80)
 	h_antiS_eta = TH1F('h_antiS_eta','; #bar{S} #eta ; 1/N_{ev} Events/0.1#eta',160,-8,8)
@@ -62,12 +62,15 @@ for f in fIn:
 
 	nEntries = tree.GetEntries()
 	print 'Number of entries in the tree: ', nEntries
+        print "input file", j
 	for i in range(0,nEntries):
 		if(i==maxEvents):
 			break
 		if(i%1e4 == 0):
 			print "reached entry: ", i
 		tree.GetEntry(i)
+                if( j == 1 and tree._N_Sbar[0] <= 1): continue
+                h_antiS_N_Sbar.Fill(tree._N_Sbar[0])
 		h_antiS_pt.Fill(tree._S_pt[0])
 		h_antiS_pz.Fill(tree._S_pz[0])
 		h_antiS_eta.Fill(tree._S_eta[0])
@@ -79,7 +82,7 @@ for f in fIn:
 		h_antiS_eta_pt.Fill(tree._S_eta[0],tree._S_pt[0])
 		h_antiS_eta_pz.Fill(tree._S_eta[0],abs(tree._S_pz[0]))
 
-	TH1_l = [h_antiS_pt,h_antiS_pz,h_antiS_eta,h_antiS_vz,h_antiS_vz_interaction_vertex,h_antiS_lxy]
+	TH1_l = [h_antiS_N_Sbar,h_antiS_pt,h_antiS_pz,h_antiS_eta,h_antiS_vz,h_antiS_vz_interaction_vertex,h_antiS_lxy]
 	for h in TH1_l:
 		h.SetDirectory(0) 
 	TH1_ll.append(TH1_l)
@@ -91,7 +94,7 @@ for f in fIn:
 
 	iFile+=1
 
-fOut = TFile('macro_FlatTree_GEN_trial17.root','RECREATE')
+fOut = TFile('macro_FlatTree_GEN_trial4_MultiSQ_Comparison.root','RECREATE')
 
 nHistos = len(TH1_ll[0])
 nMasses = len(TH1_ll)
@@ -105,7 +108,8 @@ for i in range(0,nHistos):#each list contains a list of histograms. Each list re
 		h = TH1_ll[j][i]
 		if(h.GetSumw2N() == 0):
 			h.Sumw2(kTRUE)
-		h.Scale(1./h.Integral(), "width");
+                if h.Integral() != 0:
+		    h.Scale(1./h.Integral(), "width");
 		if j == 0:
 			h.Draw("PCE1")
 		else:
@@ -114,7 +118,8 @@ for i in range(0,nHistos):#each list contains a list of histograms. Each list re
 		h.SetMarkerStyle(22+j)
 		h.SetMarkerColor(colours[j])
 		h.SetStats(0)
-		legend.AddEntry(h,"#bar{S} mass = "+ mass[j] +" GeV/c^{2}  ","lep")
+		#legend.AddEntry(h,"#bar{S} mass = "+ mass[j] +" GeV/c^{2}  ","lep")
+		legend.AddEntry(h,mass[j] +" GeV/c^{2}  ","lep")
 	legend.Draw()
 	CMS_lumi.CMS_lumi(c, 0, 11)
         gPad.Update()
@@ -130,7 +135,8 @@ for l in TH2_ll:
 		c.SetRightMargin(0.2) #make room for the tile of the z scale
 		if(h.GetSumw2N() == 0):
 			h.Sumw2(kTRUE)
-		h.Scale(1./h.Integral(), "width");
+                if h.Integral() != 0:
+		    h.Scale(1./h.Integral(), "width");
 		h.Draw("colz")
 		h.SetStats(0)
 		CMS_lumi.CMS_lumi(c, 0, 11)

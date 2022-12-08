@@ -61,6 +61,8 @@ class FlatTreeProducerGENSIM : public edm::EDAnalyzer
     edm::InputTag m_genParticlesTag_SIM_GEANT;
     edm::InputTag m_TPTag;
 
+    edm::FileInPath m_PUReweighingMapIn;   
+
     edm::EDGetTokenT<reco::BeamSpot> m_bsToken;
     edm::EDGetTokenT<vector<reco::Vertex>> m_offlinePVToken;
     edm::EDGetTokenT<vector<reco::GenParticle>> m_genParticlesToken_GEN; 

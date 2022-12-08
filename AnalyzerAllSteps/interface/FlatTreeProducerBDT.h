@@ -13,7 +13,7 @@ class FlatTreeProducerBDT : public edm::EDAnalyzer
     explicit FlatTreeProducerBDT(edm::ParameterSet const& cfg);
     virtual ~FlatTreeProducerBDT();
     static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-    void FillBranches(const reco::VertexCompositeCandidate * antiS, TVector3 beamspot, TVector3 beamspotVariance, edm::Handle<vector<reco::Vertex>> h_offlinePV,  bool m_runningOnData, edm::Handle<vector<reco::GenParticle>> h_genParticles, edm::Handle<vector<reco::VertexCompositeCandidate> > h_V0Ks, edm::Handle<vector<reco::VertexCompositeCandidate> > h_V0L, unsigned int ngoodPVsPOG, double randomPVz);    
+    void FillBranches(const reco::VertexCompositeCandidate * antiS, TVector3 beamspot, TVector3 beamspotVariance, edm::Handle<vector<reco::Vertex>> h_offlinePV,  bool m_runningOnData, edm::Handle<vector<reco::GenParticle>> h_genParticles, edm::Handle<vector<reco::VertexCompositeCandidate> > h_V0Ks, edm::Handle<vector<reco::VertexCompositeCandidate> > h_V0L, unsigned int ngoodPVsPOG, double randomPVz, int NSCands);    
 
   private:
 
@@ -53,6 +53,9 @@ class FlatTreeProducerBDT : public edm::EDAnalyzer
     edm::InputTag m_V0KsTag;
     edm::InputTag m_V0LTag;
 
+    edm::FileInPath m_PUReweighingMapIn;
+    bool m_savePVInfo;
+
     edm::EDGetTokenT<reco::BeamSpot> m_bsToken;
     edm::EDGetTokenT<vector<reco::Vertex>> m_offlinePVToken;
     edm::EDGetTokenT<vector<reco::GenParticle>> m_genParticlesToken_GEN; 
@@ -73,6 +76,8 @@ class FlatTreeProducerBDT : public edm::EDAnalyzer
 
     //definition of variables which should go to tree
     std::vector<float> _S_charge;
+    std::vector<int> _N_GenS;
+    std::vector<int> _N_SCands;
     std::vector<float> _S_deltaLInteractionVertexAntiSmin,_S_deltaRAntiSmin,_S_deltaRKsAntiSmin,_S_deltaRLambdaAntiSmin;
     std::vector<float> _S_lxy_interaction_vertex, _S_lxy_interaction_vertex_beampipeCenter, _S_error_lxy_interaction_vertex,_S_error_lxy_interaction_vertex_beampipeCenter,_Ks_lxy_decay_vertex,_Lambda_lxy_decay_vertex,_S_mass,_S_chi2_ndof,_S_event_weighting_factor,_S_event_weighting_factorPU,_S_event_weighting_factorALL;
     std::vector<float> _S_daughters_deltaphi,_S_daughters_deltaeta,_S_daughters_openingsangle,_S_Ks_openingsangle,_S_Lambda_openingsangle,_S_daughters_DeltaR,_S_eta,_Ks_eta,_Lambda_eta;

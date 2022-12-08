@@ -17,22 +17,25 @@ tdrstyle.setTDRStyle()
 
 colours = [1,2,4,35,38,41]
 
-maxNEntries = 1e5
+#maxNEntries = 1e4
+maxNEntries = 1e12
 
 plots_output_dir = "plots_GENSIM/"
 #plots_output_dir = "plots_GENSIM_test/"
 
 #loading input
 #inputFile = '/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/test_FlatTreeGENSIM_Skimmed_trial17_1p8GeV_17102019_v1.root'
-#inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/output.root'
+#inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/output_Trial4.root'
+inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/hadd_Trial5_MultiSQEV_v4.root'
+#inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/output_Trial5_MultiSQEV.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/Skimmed_Final_out.root'
-inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/Test_Ntuple_Trial4.root'
+#inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/Test_Ntuple_Trial4.root'
 fIn = TFile(inputFile,'read')
 tree = fIn.Get('FlatTreeProducerGENSIM/FlatTreeGENLevel') 
 treeAllAntiS = fIn.Get('FlatTreeProducerGENSIM/FlatTreeGENLevelAllAntiS') 
 
 #define where output should go
-fOut = TFile('Trial3_macro_'+inputFile.rsplit('/', 1)[-1],'RECREATE')
+fOut = TFile('MacroOut_'+inputFile.rsplit('/', 1)[-1],'RECREATE')
 
 #defining histograms
 all_antiS_dir = fOut.mkdir("all_antiS")
@@ -65,6 +68,8 @@ h_denom_pz_antiS_reconstructable = TH1F('h_denom_pz_antiS_reconstructable','; |p
 #first do this small loop which runs over the tree containing all the antiS (i.e. also the ones which do not go the correct granddaughters)
 nAntiSReconstructable = 0.
 nAntiSTotal = 0.
+nAntiSReconstructableUnweighted = 0.
+nAntiSTotalUnweighted = 0.
 for i in range(0,treeAllAntiS.GetEntries()):
 	treeAllAntiS.GetEntry(i)
 	#the AntiS does not necessarily have two daughters, so I cannot get the vz through that for all antiS, so have to calculate the vz from eta assuming the beampipe is infinitely thin and at a radius of 2.21cm 
@@ -91,6 +96,7 @@ for i in range(0,treeAllAntiS.GetEntries()):
 
 	if(treeAllAntiS._S_reconstructable_all[0] == 1):
 		nAntiSReconstructable += weight_factor
+		nAntiSReconstructableUnweighted += 1
 		h_nom_vz_antiS_reconstructable.Fill(vz_interaction_antiS,weight_factor)
 		h_nom_eta_antiS_reconstructable.Fill(treeAllAntiS._S_eta_all[0],weight_factor)
 		h_nom_pt_antiS_reconstructable.Fill(treeAllAntiS._S_pt_all[0],weight_factor)
@@ -101,7 +107,9 @@ for i in range(0,treeAllAntiS.GetEntries()):
 	h_denom_pt_antiS_reconstructable.Fill(treeAllAntiS._S_pt_all[0],weight_factor)
 	h_denom_pz_antiS_reconstructable.Fill(treeAllAntiS._S_pz_all[0],weight_factor)
 	nAntiSTotal += weight_factor
+	nAntiSTotalUnweighted += 1
 
+print 'the unweighted antiS reconstructability: ', nAntiSReconstructableUnweighted, '/', nAntiSTotalUnweighted, '=', float(nAntiSReconstructableUnweighted)/float(nAntiSTotalUnweighted)
 print 'the overall antiS reconstructability: ', nAntiSReconstructable, '/', nAntiSTotal, '=', float(nAntiSReconstructable)/float(nAntiSTotal)
 
 l_nom = [h_nom_vz_antiS_reconstructable,h_nom_eta_antiS_reconstructable,h_nom_pt_antiS_reconstructable,h_nom_pz_antiS_reconstructable]
@@ -240,8 +248,8 @@ h_interaction_vertex_lxy_unweighted = TH1F("h_interaction_vertex_lxy_unweighted"
 h_interaction_vertex_lxy_absolute_unweighted = TH1F("h_interaction_vertex_lxy_absolute_unweighted","; absolute l_{xy} #bar{S} interaction vertex (cm); Events/0.1mm",10,2.16,2.26)
 h2_interaction_vertex_vx_vy_unweighted = TH2F("h2_interaction_vertex_vx_vy_unweighted","; v_{x} #bar{S} interaction vertex (cm); v_{y} #bar{S} interaction vertex (cm);Events/(0.1mm x 0.1mm)",2000,-10,10,2000,-10,10)
 h2_interaction_vertex_vx_vy_zoom_unweighted = TH2F("h2_interaction_vertex_vx_vy_zoom_unweighted","; absolute v_{x} #bar{S} interaction vertex (cm); absolute v_{y} #bar{S} interaction vertex (cm);Events/(0.1mm x 0.1mm)",600,-3,3,600,-3,3)
-h2_interaction_vertex_vz_lxy_unweighted = TH2F("h2_interaction_vertex_vz_lxy_unweighted","; v_{z} #bar{S} interaction vertex (cm); l_{0} #bar{S} interaction vertex (cm);Events/(10cm x 0.1mm)",34,-170,170,1000,0,10)
-h2_interaction_vertex_vz_lxy_zoom_unweighted = TH2F("h2_interaction_vertex_vz_lxy_zoom_unweighted","; v_{z} #bar{S} interaction vertex (cm); l_{0} #bar{S} interaction vertex (cm);Events/(10cm x 0.1mm)",34,-170,170,10,2.16,2.26)
+h2_interaction_vertex_vz_lxy_unweighted = TH2F("h2_interaction_vertex_vz_lxy_unweighted","; v_{z} #bar{S} interaction vertex (cm); l_{0} #bar{S} interaction vertex (cm);Events/(10cm x 0.1mm)",34,-170,170,300,0,3)
+h2_interaction_vertex_vz_lxy_zoom_unweighted = TH2F("h2_interaction_vertex_vz_lxy_zoom_unweighted","; v_{z} #bar{S} interaction vertex (cm); l_{0} #bar{S} interaction vertex (cm);Events/(10cm x 0.1mm)",34,-170,170,50,2.16,2.66)
 
 for i in range(0,tree.GetEntries()):
 	if i > maxNEntries:
@@ -276,7 +284,7 @@ for h in l_TH1F:
 	else:	
 		h.Draw("sameL")
 	h.SetLineColor(colours[i_l_TH1F])
-	h.SetMarkerStyle(22+i)
+	h.SetMarkerStyle(22+i_l_TH1F)
 	h.SetMarkerColor(colours[i_l_TH1F])
 	h.SetStats(0)
 	legend_c_n_interactions_vs_n_loops.AddEntry(h,legend_text_c_n_interactions_vs_n_loops[i_l_TH1F],"lep")
@@ -320,8 +328,8 @@ antiS_properties_dir.cd()
 #interaction vertex 2D plots, this time weighted
 h2_interaction_vertex_vx_vy= TH2F("h2_interaction_vertex_vx_vy","; v_{x} #bar{S} interaction vertex (cm); v_{y} #bar{S} interaction vertex (cm);Events/(0.1mm x 0.1mm)",2000,-10,10,2000,-10,10)
 h2_interaction_vertex_vx_vy_zoom= TH2F("h2_interaction_vertex_vx_vy_zoom","; v_{x} #bar{S} interaction vertex (cm); v_{y} #bar{S} interaction vertex (cm);Events/(0.1mm x 0.1mm)",600,-3,3,600,-3,3)
-h2_interaction_vertex_vz_lxy= TH2F("h2_interaction_vertex_vz_lxy","; v_{z} #bar{S} interaction vertex (cm); l_{0} #bar{S} interaction vertex (cm);Events/(10cm x 0.1mm)",34,-170,170,1000,0,10)
-h2_interaction_vertex_vz_lxy_zoom= TH2F("h2_interaction_vertex_vz_lxy_zoom","; v_{z} #bar{S} interaction vertex (cm); l_{0} #bar{S} interaction vertex (cm);Events/(10cm x 0.1mm)",34,-170,170,10,2.16,2.26)
+h2_interaction_vertex_vz_lxy= TH2F("h2_interaction_vertex_vz_lxy","; v_{z} #bar{S} interaction vertex (cm); l_{0} #bar{S} interaction vertex (cm);Events/(10cm x 0.1mm)",34,-170,170,300,0,3)
+h2_interaction_vertex_vz_lxy_zoom= TH2F("h2_interaction_vertex_vz_lxy_zoom","; v_{z} #bar{S} interaction vertex (cm); l_{0} #bar{S} interaction vertex (cm);Events/(10cm x 0.1mm)",34,-170,170,50,2.16,2.66)
 
 #properties of the antiS, so these are the ones which interact and go the correct granddaughters:
 h_antiS_eta = TH1F('h_antiS_eta','; #bar{S} #eta ; Events/mm',160,-8,8)

@@ -325,16 +325,12 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 						AntiSReconstructable = FillBranchesGENAntiS(genParticle,beamspot, beamspotVariance, v_antiS_momenta_and_itt,  h_TP,nGoodPV);
 						if(AntiSReconstructable)nTotalCorrectGENS_Reconstructable_weighted = nTotalCorrectGENS_Reconstructable_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;
 					}// if((graddaughters0ParticlesTypes == 1 && graddaughters1ParticlesTypes == 2) || (graddaughters1ParticlesTypes == 1 && graddaughters0ParticlesTypes == 2))
-                //                    else { std::cout << "Anti S Non reconstructable because there is no decay mode which would lead to a RECO AntiLambda Ks pair. Ks->pi+pi-, AntiLambda->p-pi+." << std::endl;
-		//		}
-			}//if((graddaughters0ParticlesTypes == 1 && graddaughters1ParticlesTypes == 2) || (graddaughters1ParticlesTypes == 1 && graddaughters0ParticlesTypes == 2))
-                    //else { std::cout << "Anti S Non reconstructable because its daughters are not AntiLambda & Ks" << std::endl;
-                    //    }
+			        }//if((genParticle->daughter(0)->numberOfDaughters()==2 && genParticle->daughter(1)->numberOfDaughters()==2 && daughterParticlesTypes == 3))
+	                }//if(genParticle->numberOfDaughters()==2)
 			//now save for this antiS in v_antiS_eta_reconstructable the or of the reconstructability flag which was already in this vector and the the current AntiSReconstructable, 
 			//like that you will check for any of the duplicates if it was reconstructable
 			v_antiS_eta_reconstructable[antiS_it][1] = (int)v_antiS_eta_reconstructable[antiS_it][1] | AntiSReconstructable;
 		
-	                }//if(genParticle->numberOfDaughters()==2)
 	      }//for(unsigned int i = 0; i < h_genParticles->size(); ++i)
             //else { std::cout << "Anti S Non reconstructable because it does not have two daughters, it has: " << genParticle->numberOfDaughters() << std::endl; }
 

@@ -2,8 +2,10 @@ import sys
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 
-runningOnData = True#important, because this will choose rather to calculate lxy of the antiS interaction vertex wrt  (0,0) (for MC) or wrt the location of the center of the beampipe (for data)
-#lookAtAntiS =   True 
+runningOnData = False#important, because this will choose rather to calculate lxy of the antiS interaction vertex wrt  (0,0) (for MC) or wrt the location of the center of the beampipe (for data)
+#runningOnData = True#important, because this will choose rather to calculate lxy of the antiS interaction vertex wrt  (0,0) (for MC) or wrt the location of the center of the beampipe (for data)
+lookAtAntiS =   True 
+#lookAtAntiS =   False 
 
 options = VarParsing ('analysis')
 options.parseArguments()
@@ -14,9 +16,10 @@ options.register(
 
 options.register(
 	'maxEvts',-1,VarParsing.multiplicity.singleton,VarParsing.varType.int,
+	#'maxEvts',1000,VarParsing.multiplicity.singleton,VarParsing.varType.int,
 	'flag to indicate max events to process')
 	
-options.isData==True
+options.isData==False
 
 process = cms.Process("SEXAQDATAANA")
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -29,16 +32,20 @@ process.load('Configuration/EventContent/EventContent_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 
 if(options.isData==True):
-    process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v35', '') 
+    #process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v35', '') 
+    process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v7', '') 
     # we are using 106X_dataRun2_v35 GlobalTag because it is what was used for the B-parking rereco according to: https://cms-pdmv.cern.ch/rereco/api/requests/get_cmsdriver/ReReco-Run2018D-ParkingBPH2-20Jun2021_UL2018-00002
+    #using a different GlobalTag for data when running on MC because the 106X globaltag seems to have some issues with CMSSW_10_2_X...
 else:
-    process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v15' '')
+    process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v15', '')
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvts))
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
+#inlist = open("EDM_RECOSKIM_Trial4_test.txt", "r")
 process.source = cms.Source("PoolSource",
+        #fileNames = cms.untracked.vstring(*(inlist.readlines())),
 	fileNames = cms.untracked.vstring(options.inputFiles),
   duplicateCheckMode = cms.untracked.string ("noDuplicateCheck")
 )
@@ -48,6 +55,8 @@ process.source = cms.Source("PoolSource",
 
 process.load("SexaQAnalysis.AnalyzerAllSteps.FlatTreeProducerBDT_cfi")
 process.FlatTreeProducerBDT.runningOnData = runningOnData
+process.FlatTreeProducerBDT.savePVInfo= True
+process.FlatTreeProducerBDT.PUReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/PU_Reweigh_SignalToDataBPH2018_Block_A.txt")
 #process.FlatTreeProducerBDT.lookAtAntiS = lookAtAntiS
 process.flattreeproducer = cms.Path(process.FlatTreeProducerBDT)
 

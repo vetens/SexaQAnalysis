@@ -26,6 +26,7 @@ FlatTreeProducerTracking::FlatTreeProducerTracking(edm::ParameterSet const& pset
   m_V0LTag(pset.getParameter<edm::InputTag>("V0LCollection")),
   m_trackAssociatorTag(pset.getParameter<edm::InputTag>("trackAssociators")),
   m_TPTag(pset.getParameter<edm::InputTag>("TrackingParticles")),
+  m_PUReweighingMapIn(pset.getParameter<edm::FileInPath>("PUReweighting")),
 //  m_PileupInfoTag(pset.getParameter<edm::InputTag>("PileupInfo")),
 
   m_bsToken    (consumes<reco::BeamSpot>(m_bsTag)),
@@ -237,7 +238,7 @@ void FlatTreeProducerTracking::analyze(edm::Event const& iEvent, edm::EventSetup
                         _goodPVyPOG.push_back(h_offlinePV->at(i).y());
                         _goodPVzPOG.push_back(h_offlinePV->at(i).z());
 			double weightPU = 0.;
-			if(nGoodPV < AnalyzerAllSteps::v_mapPU.size()) weightPU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[nGoodPV], h_offlinePV->at(i).z());
+			if(nGoodPV < 60) weightPU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV, h_offlinePV->at(i).z(), m_PUReweighingMapIn);
         		_goodPV_weightPU.push_back(weightPU);
 		}
 	}
@@ -284,7 +285,7 @@ void FlatTreeProducerTracking::analyze(edm::Event const& iEvent, edm::EventSetup
 	}
 	else{//this is a new antiS
 		double weight_PU = 0.;
-		if(nGoodPV < AnalyzerAllSteps::v_mapPU.size()) weight_PU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[nGoodPV],genParticle->vz());
+		if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
 		nTotalUniqueGenS_weighted = nTotalUniqueGenS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;
 		nTotalUniqueGenS_Nonweighted = nTotalUniqueGenS_Nonweighted + 1;
 		vector<float> dummyVec; 
@@ -739,7 +740,7 @@ int FlatTreeProducerTracking::FillTreesAntiSAndDaughters(const TrackingParticle&
 	double weightBeampipe = AnalyzerAllSteps::EventWeightingFactor(tp.theta());
 	_tpsAntiS_event_weighting_factor.push_back(weightBeampipe);
 	double weightPV = 0.;
-	if(nGoodPV < AnalyzerAllSteps::v_mapPU.size()) weightPV = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[nGoodPV],tp.vz());
+	if(nGoodPV < 60) weightPV = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,tp.vz(), m_PUReweighingMapIn);
 	_tpsAntiS_event_weighting_factorPU.push_back(weightPV);
 
 	if(bestMatchingAntiS>-1){//for the antiS just save a few extras, which you do not save for the other particles:

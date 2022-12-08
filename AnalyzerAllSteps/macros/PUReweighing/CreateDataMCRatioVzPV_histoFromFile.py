@@ -38,9 +38,9 @@ h_reweighingFactor_nPV = TH1F('h_reweighingFactor_nPV','; #PV; Events',n_PVn,min
 h2_reweighingFactor_nPV_PVz = TH2F('h2_reweighingFactor_nPV_PVz','; #PV; absolute v_{z} PV (cm);  Events',n_PVn,min_PVn,max_PVn,n_PVZ,min_PVZ,max_PVZ)
 
 #Get the 2D histograms containing data and MC nPV versus PV_vz
-fData = TFile.Open('file:/storage_mnt/storage/user/jdeclerc/Analysis/SexaQuark/CMSSW_8_0_30/src/SexaQAnalysis/PrimaryDataInvestigation/combined_PVDistributionsData_allPrimaryDatasets.root')
+fData = TFile.Open('file:/afs/cern.ch/work/w/wvetens/Sexaquarks/data/CMSSW_10_6_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/PUReweighing/plots_data/data_BlockA_Full_With1D.root')
 h2_nPV_vzPV_Data = fData.Get('PV/h2_nPV_vzPV_Data') 
-fMC = TFile('file:/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/macros/Tracking/plots_Tracking_AntiS_specific_prePVWeighing_trial17/macro_combined_FlatTree_Tracking_Skimmed_trial17.root')
+fMC = TFile('file:/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/PUReweighing/plots_MC/Trial4_Full.root')
 h2_nPV_vzPV_MC = fMC.Get('PV/h2_nPV_vzPV_MC')
 
 #you first need to scale the data to the number of events in MC
@@ -66,7 +66,7 @@ if(h2_nPV_vzPV_Data.GetNbinsY() != h2_nPV_vzPV_MC.GetNbinsY()):
 
 
 
-f = open(plots_output_dir+'PUReweighing.txt', "w")
+f = open(plots_output_dir+'PUReweigh_SignalToDataBPH2018_BLOCK_A.txt', "w")
 
 #fill the plots with the reweighing parameter
 for i in range(1,h_vzPV_Data.GetNbinsX()+1):
@@ -92,8 +92,9 @@ for i in range(1,h_nPV_Data.GetNbinsX()+1):
 #f.write("\n")
 
 #loop over the PU
+f.write('# nPV   PVz     Weight\n')
 for i in range(1,h2_nPV_vzPV_Data.GetNbinsX()+1):
-	f.write('map<double,double>AnalyzerAllSteps::mapPU'+str(int(h2_reweighingFactor_nPV_PVz.GetXaxis().GetBinCenter(i)))+' = ' + '{' )
+#	f.write('map<double,double>AnalyzerAllSteps::mapPU'+str(int(h2_reweighingFactor_nPV_PVz.GetXaxis().GetBinCenter(i)))+' = ' + '{' )
 	for j in range(1,h2_nPV_vzPV_Data.GetNbinsY()+1):
 		data_nPV_vzPV = h2_nPV_vzPV_Data.GetBinContent(i,j)
 		mc_nPV_vzPV = h2_nPV_vzPV_MC.GetBinContent(i,j)
@@ -101,16 +102,18 @@ for i in range(1,h2_nPV_vzPV_Data.GetNbinsX()+1):
 		if(mc_nPV_vzPV>0.):
 			dataToMC_nPV_vzPV = data_nPV_vzPV/mc_nPV_vzPV
 		h2_reweighingFactor_nPV_PVz.SetBinContent(i,j,dataToMC_nPV_vzPV)	
-		f.write('{'+str(h2_reweighingFactor_nPV_PVz.GetYaxis().GetBinCenter(j)) + ','+str(dataToMC_nPV_vzPV)+"}")
-		if(j != h2_nPV_vzPV_Data.GetNbinsY()):
-			f.write(',')
-	f.write("};\n")
-f.write('vector<map<double,double>>AnalyzerAllSteps::v_mapPU{')
-for i in range(1,h2_nPV_vzPV_Data.GetNbinsX()+1):
-	f.write('mapPU'+str(int(h2_reweighingFactor_nPV_PVz.GetXaxis().GetBinCenter(i))))
-	if i != h2_nPV_vzPV_Data.GetNbinsX():
-		f.write(',')
-f.write('};')
+#		f.write('{'+str(h2_reweighingFactor_nPV_PVz.GetYaxis().GetBinCenter(j)) + ','+str(dataToMC_nPV_vzPV)+"}")
+		f.write(str(int(h2_reweighingFactor_nPV_PVz.GetXaxis().GetBinCenter(i))) + '       ' + str(h2_reweighingFactor_nPV_PVz.GetYaxis().GetBinCenter(j)) + ' ' + str(dataToMC_nPV_vzPV)+"\n")
+#		if(j != h2_nPV_vzPV_Data.GetNbinsY()):
+#			f.write(',')
+#	f.write("};\n")
+#f.write('vector<map<double,double>>AnalyzerAllSteps::v_mapPU{')
+#for i in range(1,h2_nPV_vzPV_Data.GetNbinsX()+1):
+#	f.write('mapPU'+str(int(h2_reweighingFactor_nPV_PVz.GetXaxis().GetBinCenter(i))))
+#	if i != h2_nPV_vzPV_Data.GetNbinsX():
+#		f.write(',')
+#f.write('};')
+    
 f.close()
 
 #now do the reweighing: loop over the events again and reeigh the mc to data. Do this for the vz distribution of the PV as a test that your reweighing works.

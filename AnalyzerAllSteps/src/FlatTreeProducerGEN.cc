@@ -27,6 +27,7 @@ void FlatTreeProducerGEN::beginJob() {
 	//some GEN Sbar kinematics
         _tree = fs->make <TTree>("FlatTreeGENLevel","tree");
 	_tree->Branch("_S_charge",&_S_charge);
+	_tree->Branch("_N_Sbar",&_N_Sbar);
 	_tree->Branch("_S_mass",&_S_mass);
 	_tree->Branch("_S_eta",&_S_eta);
 	_tree->Branch("_S_pt",&_S_pt);
@@ -68,6 +69,7 @@ void FlatTreeProducerGEN::analyze(edm::Event const& iEvent, edm::EventSetup cons
 	      int nPionsThisEvent = 0;
 	      int nPionsThisEventEtaSmaller4 = 0;
 	      InitPi();
+    	      nSbar = 0;
 	      for(unsigned int i = 0; i < h_genParticles->size(); ++i){//loop all genparticlesPlusGEANT
 
 			const reco::Candidate * genParticle = &h_genParticles->at(i);
@@ -77,14 +79,14 @@ void FlatTreeProducerGEN::analyze(edm::Event const& iEvent, edm::EventSetup cons
 				 if(abs(genParticle->eta()) < 4) nPionsThisEventEtaSmaller4++;
 				 FillBranchesPion(genParticle->eta());
 			}
-
 			//and now for antiS
 			if(genParticle->pdgId() != AnalyzerAllSteps::pdgIdAntiS) continue;
+                        nSbar++; 
 			nTotalGENS++;	
 			if(genParticle->eta()>0)nTotalGENSPosEta++;	
 			if(genParticle->eta()<0)nTotalGENSNegEta++;
 				
-			FillBranchesGENAntiS(genParticle,beamspot, beamspotVariance);
+			FillBranchesGENAntiS(genParticle,beamspot, beamspotVariance, nSbar);
 
 
 	      }//for(unsigned int i = 0; i < h_genParticles->size(); ++i)
@@ -102,11 +104,13 @@ void FlatTreeProducerGEN::FillBranchesPion(double eta){
 	_pi_eta.push_back(eta);	
 }
 
-void FlatTreeProducerGEN::FillBranchesGENAntiS(const reco::Candidate  * genParticle, TVector3 beamspot, TVector3 beamspotVariance){
+void FlatTreeProducerGEN::FillBranchesGENAntiS(const reco::Candidate  * genParticle, TVector3 beamspot, TVector3 beamspotVariance, int nSbar){
 	
 	Init(); 
 
 	_S_charge.push_back(genParticle->charge());
+        cout << "N Sbar: " << nSbar <<endl;
+	_N_Sbar.push_back(nSbar);
 	_S_mass.push_back(genParticle->mass());
 	_S_eta.push_back(genParticle->eta());
 	_S_pt.push_back(genParticle->pt());
@@ -184,6 +188,7 @@ void FlatTreeProducerGEN::Init()
 {
 
     	_S_charge.clear();
+    	_N_Sbar.clear();
     	_S_mass.clear();
 	_S_eta.clear();
 	_S_pt.clear();
