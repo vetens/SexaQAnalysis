@@ -1,6 +1,6 @@
 from WMCore.Configuration import Configuration
 
-day = "28032022"
+day = "13062022"
 version = "v2"
 
 config = Configuration()
@@ -15,7 +15,7 @@ config.JobType.psetName = 'treeproducer_data_cfg.py'
 config.JobType.priority = 150
 
 config.section_('Data') 
-config.Data.unitsPerJob = 1 
+config.Data.unitsPerJob = 1000 
 config.Data.totalUnits = 1
 config.Data.publication = False 
 config.Data.splitting = 'Automatic' #FileBased 

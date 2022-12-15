@@ -84,10 +84,10 @@ class FlatTreeProducerBDT : public edm::EDAnalyzer
     std::vector<float> _S_vz_interaction_vertex,_Ks_vz_decay_vertex,_Lambda_vz_decay_vertex;
     std::vector<float> _S_vx,_S_vy,_S_vz;
     std::vector<float> _Lambda_mass,_Ks_mass;
-    std::vector<float> _RECO_Lambda_daughter0_charge,_RECO_Lambda_daughter0_pt,_RECO_Lambda_daughter0_pz,_RECO_Lambda_daughter0_dxy_beamspot,_RECO_Lambda_daughter0_dz_beamspot;   
-    std::vector<float> _RECO_Lambda_daughter1_charge,_RECO_Lambda_daughter1_pt,_RECO_Lambda_daughter1_pz,_RECO_Lambda_daughter1_dxy_beamspot,_RECO_Lambda_daughter1_dz_beamspot;   
-    std::vector<float> _RECO_Ks_daughter0_charge,_RECO_Ks_daughter0_pt,_RECO_Ks_daughter0_pz,_RECO_Ks_daughter0_dxy_beamspot,_RECO_Ks_daughter0_dz_beamspot;   
-    std::vector<float> _RECO_Ks_daughter1_charge,_RECO_Ks_daughter1_pt,_RECO_Ks_daughter1_pz,_RECO_Ks_daughter1_dxy_beamspot,_RECO_Ks_daughter1_dz_beamspot;   
+    std::vector<float> _RECO_Lambda_daughter0_charge,_RECO_Lambda_daughter0_pt,_RECO_Lambda_daughter0_pz,_RECO_Lambda_daughter0_dxy_beamspot,_RECO_Lambda_daughter0_dz_beamspot,_RECO_Lambda_daughter0_dz_min_PV;   
+    std::vector<float> _RECO_Lambda_daughter1_charge,_RECO_Lambda_daughter1_pt,_RECO_Lambda_daughter1_pz,_RECO_Lambda_daughter1_dxy_beamspot,_RECO_Lambda_daughter1_dz_beamspot,_RECO_Lambda_daughter1_dz_min_PV;   
+    std::vector<float> _RECO_Ks_daughter0_charge,_RECO_Ks_daughter0_pt,_RECO_Ks_daughter0_pz,_RECO_Ks_daughter0_dxy_beamspot,_RECO_Ks_daughter0_dz_beamspot,_RECO_Ks_daughter0_dz_min_PV;   
+    std::vector<float> _RECO_Ks_daughter1_charge,_RECO_Ks_daughter1_pt,_RECO_Ks_daughter1_pz,_RECO_Ks_daughter1_dxy_beamspot,_RECO_Ks_daughter1_dz_beamspot,_RECO_Ks_daughter1_dz_min_PV;   
 
     //definition of variables which should go to _tree_counter
     std::vector<float> _RECO_S_total_lxy_beampipeCenter, _RECO_S_saved_lxy_beampipeCenter;
