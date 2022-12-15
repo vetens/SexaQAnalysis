@@ -411,6 +411,7 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	TVector3 RECO_Lambda_Daughter0Vertex( Lambda.daughter(0)->vx(), Lambda.daughter(0)->vy(), Lambda.daughter(0)->vz() );	
 	double RECO_Lambda_daughter0_dxy_beamspot = AnalyzerAllSteps::dxy_signed_line_point(RECO_Lambda_Daughter0Vertex, RECO_Lambda_Daughter0Momentum, beamspot);
 	double RECO_Lambda_daughter0_dz_beamspot = AnalyzerAllSteps::dz_line_point(RECO_Lambda_Daughter0Vertex, RECO_Lambda_Daughter0Momentum, beamspot);
+	double RECO_Lambda_daughter0_dz_min_PV = AnalyzerAllSteps::dz_line_point(RECO_Lambda_Daughter0Vertex, RECO_Lambda_Daughter0Momentum, bestPVdzLambda);
 	//track2	
 	double RECO_Lambda_daughter1_charge = Lambda.daughter(1)->charge();
 	double RECO_Lambda_daughter1_pt = Lambda.daughter(1)->pt();
@@ -419,6 +420,7 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	TVector3 RECO_Lambda_Daughter1Vertex( Lambda.daughter(1)->vx(), Lambda.daughter(1)->vy(), Lambda.daughter(1)->vz() );	
 	double RECO_Lambda_daughter1_dxy_beamspot = AnalyzerAllSteps::dxy_signed_line_point(RECO_Lambda_Daughter1Vertex, RECO_Lambda_Daughter1Momentum, beamspot);
 	double RECO_Lambda_daughter1_dz_beamspot = AnalyzerAllSteps::dz_line_point(RECO_Lambda_Daughter1Vertex, RECO_Lambda_Daughter1Momentum, beamspot);
+	double RECO_Lambda_daughter1_dz_min_PV = AnalyzerAllSteps::dz_line_point(RECO_Lambda_Daughter1Vertex, RECO_Lambda_Daughter1Momentum, bestPVdzLambda);
 
 	//for the Ks: get info on the tracks
 	//track1
@@ -429,6 +431,7 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	TVector3 RECO_Ks_Daughter0Vertex( Ks.daughter(0)->vx(), Ks.daughter(0)->vy(), Ks.daughter(0)->vz() );	
 	double RECO_Ks_daughter0_dxy_beamspot = AnalyzerAllSteps::dxy_signed_line_point(RECO_Ks_Daughter0Vertex, RECO_Ks_Daughter0Momentum, beamspot);
 	double RECO_Ks_daughter0_dz_beamspot = AnalyzerAllSteps::dz_line_point(RECO_Ks_Daughter0Vertex, RECO_Ks_Daughter0Momentum, beamspot);
+	double RECO_Ks_daughter0_dz_min_PV = AnalyzerAllSteps::dz_line_point(RECO_Ks_Daughter0Vertex, RECO_Ks_Daughter0Momentum, bestPVdzKs);
 	//track2	
 	double RECO_Ks_daughter1_charge = Ks.daughter(1)->charge();
 	double RECO_Ks_daughter1_pt = Ks.daughter(1)->pt();
@@ -437,6 +440,7 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	TVector3 RECO_Ks_Daughter1Vertex( Ks.daughter(1)->vx(), Ks.daughter(1)->vy(), Ks.daughter(1)->vz() );	
 	double RECO_Ks_daughter1_dxy_beamspot = AnalyzerAllSteps::dxy_signed_line_point(RECO_Ks_Daughter1Vertex, RECO_Ks_Daughter1Momentum, beamspot);
 	double RECO_Ks_daughter1_dz_beamspot = AnalyzerAllSteps::dz_line_point(RECO_Ks_Daughter1Vertex, RECO_Ks_Daughter1Momentum, beamspot);
+	double RECO_Ks_daughter1_dz_min_PV = AnalyzerAllSteps::dz_line_point(RECO_Ks_Daughter1Vertex, RECO_Ks_Daughter1Momentum, bestPVdzKs);
 
 
 	//if the RECO S particle fails the below cut than don't fill the tree. These already cut the majority of the background, so the background trees will be much smaller, which is nice for computational reasons
