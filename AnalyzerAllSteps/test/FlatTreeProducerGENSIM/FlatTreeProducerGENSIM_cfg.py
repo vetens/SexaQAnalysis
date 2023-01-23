@@ -9,14 +9,15 @@ options = VarParsing ('analysis')
 options.parseArguments()
 ## data or MC options
 options.register(
-	'isData',True,VarParsing.multiplicity.singleton,VarParsing.varType.bool,
+	'isData',False,VarParsing.multiplicity.singleton,VarParsing.varType.bool,
 	'flag to indicate data or MC')
 
 options.register(
 	'maxEvts',-1,VarParsing.multiplicity.singleton,VarParsing.varType.int,
 	'flag to indicate max events to process')
 	
-options.isData==True
+#options.isData==True
+#options.maxEvts=1000
 
 process = cms.Process("SEXAQDATAANA")
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -71,6 +72,7 @@ process.source = cms.Source("PoolSource",
 
 process.load("SexaQAnalysis.AnalyzerAllSteps.FlatTreeProducerGENSIM_cfi")
 process.FlatTreeProducerGENSIM.PUReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/PU_Reweigh_SignalToDataBPH2018_Block_A.txt")
+process.FlatTreeProducerGENSIM.MC_MultiToSingleReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/MultiToSingleSbar_EtaReweigh.txt")
 process.FlatTreeProducerGENSIM.runningOnData = runningOnData
 process.FlatTreeProducerGENSIM.lookAtAntiS = lookAtAntiS
 #process.flattreeproducer = cms.Path(process.FlatTreeProducerGENSIM*process.genAntiSGranddaughterFilterAntiLambda)

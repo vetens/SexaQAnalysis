@@ -27,6 +27,7 @@ FlatTreeProducerTracking::FlatTreeProducerTracking(edm::ParameterSet const& pset
   m_trackAssociatorTag(pset.getParameter<edm::InputTag>("trackAssociators")),
   m_TPTag(pset.getParameter<edm::InputTag>("TrackingParticles")),
   m_PUReweighingMapIn(pset.getParameter<edm::FileInPath>("PUReweighting")),
+  m_MultiToSingleReweighingMapIn(pset.getParameter<edm::FileInPath>("MC_MultiToSingleReweighting")),
 //  m_PileupInfoTag(pset.getParameter<edm::InputTag>("PileupInfo")),
 
   m_bsToken    (consumes<reco::BeamSpot>(m_bsTag)),
@@ -168,6 +169,8 @@ void FlatTreeProducerTracking::beginJob() {
 	_tree_tpsAntiS->Branch("_tpsAntiS_returnCodeV0Fitter",&_tpsAntiS_returnCodeV0Fitter);
 	_tree_tpsAntiS->Branch("_tpsAntiS_event_weighting_factor",&_tpsAntiS_event_weighting_factor);
 	_tree_tpsAntiS->Branch("_tpsAntiS_event_weighting_factorPU",&_tpsAntiS_event_weighting_factorPU);
+	_tree_tpsAntiS->Branch("_tpsAntiS_event_weighting_factorM2S",&_tpsAntiS_event_weighting_factorM2S);
+	_tree_tpsAntiS->Branch("_tpsAntiS_event_weighting_factorERR",&_tpsAntiS_event_weighting_factorERR);
 
 }
 
@@ -285,8 +288,9 @@ void FlatTreeProducerTracking::analyze(edm::Event const& iEvent, edm::EventSetup
 	}
 	else{//this is a new antiS
 		double weight_PU = 0.;
+		std::vector<double> weight_M2S = AnalyzerAllSteps::MC_M2SReweighingFactor(genParticle->eta(), m_MultiToSingleReweighingMapIn);
 		if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
-		nTotalUniqueGenS_weighted = nTotalUniqueGenS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;
+		nTotalUniqueGenS_weighted = nTotalUniqueGenS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
 		nTotalUniqueGenS_Nonweighted = nTotalUniqueGenS_Nonweighted + 1;
 		vector<float> dummyVec; 
 		dummyVec.push_back(genParticle->eta());
@@ -736,9 +740,12 @@ int FlatTreeProducerTracking::FillTreesAntiSAndDaughters(const TrackingParticle&
 	//as entry 0 is the the antiS, 1 is the Ks, 2 is the antiLambda, 3 is the pi plus of the ks, 4 the pi minus of the Ks, 5 the pos pion of the antiLambda, 6 the anti proton of the antiLambda. 
 	FillFlatTreeTpsAntiS(beamspot,AntiSCreationVertex,tp,RECOAntiSFound,0,deltaRminAntiS,999,deltaLInteractionVertexAntiSmin, theMagneticField);
 
-	//calculate the weight parameter for the pathlength through the beampipe and the reweighing for the PV
+	//calculate the weight parameter for the pathlength through the beampipe and the reweighing for the PV and Multi to Single Sbar 
 	double weightBeampipe = AnalyzerAllSteps::EventWeightingFactor(tp.theta());
 	_tpsAntiS_event_weighting_factor.push_back(weightBeampipe);
+	std::vector<double> weightM2S = AnalyzerAllSteps::MC_M2SReweighingFactor(tp.eta(), m_MultiToSingleReweighingMapIn); 
+	_tpsAntiS_event_weighting_factorM2S.push_back(weightM2S[0]);
+	_tpsAntiS_event_weighting_factorERR.push_back(weightM2S[1]);
 	double weightPV = 0.;
 	if(nGoodPV < 60) weightPV = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,tp.vz(), m_PUReweighingMapIn);
 	_tpsAntiS_event_weighting_factorPU.push_back(weightPV);
@@ -796,7 +803,7 @@ int FlatTreeProducerTracking::FillTreesAntiSAndDaughters(const TrackingParticle&
 	_tree_tpsAntiS->Fill();
 
 
-	if(RECOAntiSFound) weighedRecoAntiS  += weightBeampipe*weightPV; 
+	if(RECOAntiSFound) weighedRecoAntiS  += weightBeampipe*weightPV*weightM2S[0]; 
 	if(RECOAntiSFound) nonweighedRecoAntiS  = nonweighedRecoAntiS + 1; 
 	
 	return RECOAntiSFound;
@@ -1316,6 +1323,8 @@ void FlatTreeProducerTracking::InitTrackingAntiS(){
 
 	_tpsAntiS_event_weighting_factor.clear();
 	_tpsAntiS_event_weighting_factorPU.clear();
+	_tpsAntiS_event_weighting_factorM2S.clear();
+	_tpsAntiS_event_weighting_factorERR.clear();
 
 }
 

@@ -62,6 +62,7 @@ class FlatTreeProducerGENSIM : public edm::EDAnalyzer
     edm::InputTag m_TPTag;
 
     edm::FileInPath m_PUReweighingMapIn;   
+    edm::FileInPath m_MultiToSingleReweighingMapIn;   
 
     edm::EDGetTokenT<reco::BeamSpot> m_bsToken;
     edm::EDGetTokenT<vector<reco::Vertex>> m_offlinePVToken;
@@ -74,14 +75,14 @@ class FlatTreeProducerGENSIM : public edm::EDAnalyzer
     TTree* _tree;   
 
     //definition of variables which should go to _treeAllAntiS
-    std::vector<float> _S_eta_all,_S_event_weighting_factor_all,_S_event_weighting_factor_PU_all,_S_vz_creation_vertex_all,_S_pt_all,_S_pz_all;
+    std::vector<float> _S_eta_all,_S_event_weighting_factor_all,_S_event_weighting_factor_PU_all,_S_event_weighting_factor_M2S_all,_S_event_weighting_factor_ERR_all,_S_vz_creation_vertex_all,_S_pt_all,_S_pz_all;
     std::vector<int> _S_reconstructable_all, _S_nGoodPV_all;
 
     //definition of variables which should go to _tree
     std::vector<float> _S_n_loops;
     std::vector<float> _S_charge;
     std::vector<float> _S_nGoodPV;
-    std::vector<float> _S_event_weighting_factor,_S_event_weighting_factor_PU;
+    std::vector<float> _S_event_weighting_factor,_S_event_weighting_factor_PU,_S_event_weighting_factor_M2S,_S_event_weighting_factor_ERR;
     std::vector<float> _S_lxy_interaction_vertex, _S_lxy_interaction_vertex_beamspot, _S_lxy_interaction_vertex_beampipeCenterData, _S_lxyz_interaction_vertex,  _S_error_lxy_interaction_vertex,_S_mass,_S_Mt,_S_chi2_ndof;
     std::vector<float> _n_M, _n_p;
     std::vector<float> _S_daughters_deltaphi,_S_daughters_deltaeta,_S_daughters_openingsangle,_S_Ks_openingsangle,_S_Lambda_openingsangle,_S_sumDaughters_openingsangle,_S_sumDaughters_deltaPhi,_S_sumDaughters_deltaEta,_S_sumDaughters_deltaR,_S_daughters_DeltaR,_S_eta,_Ks_eta,_Lambda_eta;

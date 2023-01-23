@@ -10,6 +10,7 @@ FlatTreeProducerGENSIM::FlatTreeProducerGENSIM(edm::ParameterSet const& pset):
   m_genParticlesTag_SIM_GEANT(pset.getParameter<edm::InputTag>("genCollection_SIM_GEANT")),
   m_TPTag(pset.getParameter<edm::InputTag>("TrackingParticles")),
   m_PUReweighingMapIn(pset.getParameter<edm::FileInPath>("PUReweighting")),
+  m_MultiToSingleReweighingMapIn(pset.getParameter<edm::FileInPath>("MC_MultiToSingleReweighting")),
 
   m_bsToken    (consumes<reco::BeamSpot>(m_bsTag)),
   m_offlinePVToken    (consumes<vector<reco::Vertex>>(m_offlinePVTag)),
@@ -36,6 +37,8 @@ void FlatTreeProducerGENSIM::beginJob() {
 	_treeAllAntiS->Branch("_S_reconstructable_all",&_S_reconstructable_all);
 	_treeAllAntiS->Branch("_S_event_weighting_factor_all",&_S_event_weighting_factor_all);
 	_treeAllAntiS->Branch("_S_event_weighting_factor_PU_all",&_S_event_weighting_factor_PU_all);
+	_treeAllAntiS->Branch("_S_event_weighting_factor_M2S_all",&_S_event_weighting_factor_M2S_all);
+	_treeAllAntiS->Branch("_S_event_weighting_factor_ERR_all",&_S_event_weighting_factor_ERR_all);
 	_treeAllAntiS->Branch("_S_vz_creation_vertex_all",&_S_vz_creation_vertex_all);
 	_treeAllAntiS->Branch("_S_nGoodPV_all",&_S_nGoodPV_all);
 	_treeAllAntiS->Branch("_S_pt_all",&_S_pt_all);
@@ -48,6 +51,8 @@ void FlatTreeProducerGENSIM::beginJob() {
 	_tree->Branch("_S_nGoodPV",&_S_nGoodPV);
 	_tree->Branch("_S_event_weighting_factor",&_S_event_weighting_factor);
 	_tree->Branch("_S_event_weighting_factor_PU",&_S_event_weighting_factor_PU);
+	_tree->Branch("_S_event_weighting_factor_M2S",&_S_event_weighting_factor_M2S);
+	_tree->Branch("_S_event_weighting_factor_ERR",&_S_event_weighting_factor_ERR);
 	_tree->Branch("_S_lxy_interaction_vertex",&_S_lxy_interaction_vertex);
 	_tree->Branch("_S_lxy_interaction_vertex_beamspot",&_S_lxy_interaction_vertex_beamspot);
 	_tree->Branch("_S_lxy_interaction_vertex_beampipeCenterData",&_S_lxy_interaction_vertex_beampipeCenterData);
@@ -248,7 +253,8 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 		nTotalUniqueGenS++;
 		double weight_PU = 0.;
 		if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
-		nTotalUniqueGenS_weighted = nTotalUniqueGenS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;
+                std::vector<double> weight_M2S = AnalyzerAllSteps::MC_M2SReweighingFactor(genParticle->eta(), m_MultiToSingleReweighingMapIn);
+		nTotalUniqueGenS_weighted = nTotalUniqueGenS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
 		vector<float> dummyVec; 
 		dummyVec.push_back(genParticle->eta());
 		dummyVec.push_back(1.);//encountered this antiS once
@@ -300,30 +306,31 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 
 			double weight_PU = 0.;
                 	if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
+                        std::vector<double> weight_M2S = AnalyzerAllSteps::MC_M2SReweighingFactor(genParticle->eta(), m_MultiToSingleReweighingMapIn);
 			//check if this is a reconstructable antiS, so should have 2 daughters of correct type, each daughter should have 2 daughters with the correct type
 			//the below implicitely neglects the duplitcate antiS due to looping, because only 1 of the duplicates will interact and give daughters. The others do not have any daughters.
 			if(genParticle->numberOfDaughters()==2){
 
 				nTotalGiving2DaughtersGENS++;
-				nTotalGiving2DaughtersGENS_weighted = nTotalGiving2DaughtersGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;
+				nTotalGiving2DaughtersGENS_weighted = nTotalGiving2DaughtersGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
 
 				int daughterParticlesTypes = AnalyzerAllSteps::getDaughterParticlesTypes(genParticle);//returns 3 if daughters from antiS are Ks and AntiLambda
  
 				if(genParticle->daughter(0)->numberOfDaughters()==2 && genParticle->daughter(1)->numberOfDaughters()==2 && daughterParticlesTypes == 3){
 
 					nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS++;
-					nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS_weighted = nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;
+					nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS_weighted = nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
 					int graddaughters0ParticlesTypes = AnalyzerAllSteps::getDaughterParticlesTypes(genParticle->daughter(0));
 					int graddaughters1ParticlesTypes = AnalyzerAllSteps::getDaughterParticlesTypes(genParticle->daughter(1));
 					if((graddaughters0ParticlesTypes == 1 && graddaughters1ParticlesTypes == 2) || (graddaughters1ParticlesTypes == 1 && graddaughters0ParticlesTypes == 2)){
 						std::cout << "AntiS with all CORRECT: correct types and numbers of daughters and granddaughters and eta " << genParticle->eta() << std::endl;
 						nTotalCorrectGENS++;
-						nTotalCorrectGENS_weighted = nTotalCorrectGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;
-						if(genParticle->eta()>0) {nTotalGENSPosEta++; nTotalGENSPosEta_weighted = nTotalGENSPosEta_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;}
-						if(genParticle->eta()<0) {nTotalGENSNegEta++; nTotalGENSNegEta_weighted = nTotalGENSNegEta_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;}
+						nTotalCorrectGENS_weighted = nTotalCorrectGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
+						if(genParticle->eta()>0) {nTotalGENSPosEta++; nTotalGENSPosEta_weighted = nTotalGENSPosEta_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];}
+						if(genParticle->eta()<0) {nTotalGENSNegEta++; nTotalGENSNegEta_weighted = nTotalGENSNegEta_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];}
 						//fill the tree with kinematics of Sbar events which go to all correct final state particles
 						AntiSReconstructable = FillBranchesGENAntiS(genParticle,beamspot, beamspotVariance, v_antiS_momenta_and_itt,  h_TP,nGoodPV);
-						if(AntiSReconstructable)nTotalCorrectGENS_Reconstructable_weighted = nTotalCorrectGENS_Reconstructable_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;
+						if(AntiSReconstructable)nTotalCorrectGENS_Reconstructable_weighted = nTotalCorrectGENS_Reconstructable_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
 					}// if((graddaughters0ParticlesTypes == 1 && graddaughters1ParticlesTypes == 2) || (graddaughters1ParticlesTypes == 1 && graddaughters0ParticlesTypes == 2))
 			        }//if((genParticle->daughter(0)->numberOfDaughters()==2 && genParticle->daughter(1)->numberOfDaughters()==2 && daughterParticlesTypes == 3))
 	                }//if(genParticle->numberOfDaughters()==2)
@@ -346,6 +353,8 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 		_S_vz_creation_vertex_all.push_back(v_antiS_eta_reconstructable[j][3]);
 		_S_pt_all.push_back(v_antiS_eta_reconstructable[j][4]);
 		_S_pz_all.push_back(v_antiS_eta_reconstructable[j][5]);
+		_S_event_weighting_factor_M2S_all.push_back(AnalyzerAllSteps::MC_M2SReweighingFactor(v_antiS_eta_reconstructable[j][0], m_MultiToSingleReweighingMapIn)[0]);
+		_S_event_weighting_factor_ERR_all.push_back(AnalyzerAllSteps::MC_M2SReweighingFactor(v_antiS_eta_reconstructable[j][0], m_MultiToSingleReweighingMapIn)[1]);
 		_S_nGoodPV_all.push_back(nGoodPV);
 
 		_treeAllAntiS->Fill();
@@ -354,6 +363,8 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 		_S_reconstructable_all.clear();
 		_S_event_weighting_factor_all.clear();
 		_S_event_weighting_factor_PU_all.clear();
+		_S_event_weighting_factor_M2S_all.clear();
+		_S_event_weighting_factor_ERR_all.clear();
 		_S_vz_creation_vertex_all.clear();
 		_S_pt_all.clear();
 		_S_pz_all.clear();
@@ -407,10 +418,11 @@ bool FlatTreeProducerGENSIM::FillBranchesGENAntiS(const reco::Candidate  * genPa
 
 	double weight_PU = 0.;
 	if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
+        std::vector<double> weight_M2S = AnalyzerAllSteps::MC_M2SReweighingFactor(genParticle->eta(), m_MultiToSingleReweighingMapIn);
 	//count the number of AntiS going to fully correct granddaughters and which interact in the beampipe 
 	if(GENLxy_interactionVertex < 2.26){ 
 		nTotalCorrectGENSInteractingInBeampipe++; 
-		nTotalCorrectGENSInteractingInBeampipe_weighted = nTotalCorrectGENSInteractingInBeampipe_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;
+		nTotalCorrectGENSInteractingInBeampipe_weighted = nTotalCorrectGENSInteractingInBeampipe_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
 	} 
 
 	reco::LeafCandidate::LorentzVector n_(0,0,0,0.939565);
@@ -613,6 +625,8 @@ bool FlatTreeProducerGENSIM::FillBranchesGENAntiS(const reco::Candidate  * genPa
 	_S_nGoodPV.push_back(nGoodPV);
 	_S_event_weighting_factor.push_back(AnalyzerAllSteps::EventWeightingFactor(genParticle->theta()));
 	_S_event_weighting_factor_PU.push_back(weight_PU);
+	_S_event_weighting_factor_M2S.push_back(weight_M2S[0]);
+	_S_event_weighting_factor_ERR.push_back(weight_M2S[1]);
 
 	_S_lxy_interaction_vertex.push_back(GENLxy_interactionVertex);
 	_S_lxy_interaction_vertex_beamspot.push_back(GENLxy_interactionVertex_beamspot);
@@ -859,6 +873,8 @@ FlatTreeProducerGENSIM::Init()
     	_S_nGoodPV.clear();
     	_S_event_weighting_factor.clear();
     	_S_event_weighting_factor_PU.clear();
+    	_S_event_weighting_factor_M2S.clear();
+    	_S_event_weighting_factor_ERR.clear();
 
     	_S_lxy_interaction_vertex.clear();
     	_S_lxy_interaction_vertex_beamspot.clear();

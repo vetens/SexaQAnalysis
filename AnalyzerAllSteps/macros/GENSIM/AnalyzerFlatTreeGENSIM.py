@@ -26,7 +26,7 @@ plots_output_dir = "plots_GENSIM/"
 #loading input
 #inputFile = '/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/test_FlatTreeGENSIM_Skimmed_trial17_1p8GeV_17102019_v1.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/output_Trial4.root'
-inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/hadd_Trial5_MultiSQEV_v4.root'
+inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/hadd_Trial5_MultiSQEV_Reweighed_v4.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/output_Trial5_MultiSQEV.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/Skimmed_Final_out.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/Test_Ntuple_Trial4.root'
@@ -76,6 +76,7 @@ for i in range(0,treeAllAntiS.GetEntries()):
 	vz_interaction_antiS = 2.21/np.tan( 2*np.arctan( np.exp(-treeAllAntiS._S_eta_all[0]) ) ) 
 # right now ignoring pileup weighting factor as this is carried out during reconstruction
 #	weight_factor = treeAllAntiS._S_event_weighting_factor_all[0]*treeAllAntiS._S_event_weighting_factor_PU_all[0]
+	#weight_factor = treeAllAntiS._S_event_weighting_factor_all[0]*treeAllAntiS._S_event_weighting_factor_M2S_all[0]
 	weight_factor = treeAllAntiS._S_event_weighting_factor_all[0]
 
 	h_eta_all_AntiS_non_weighted.Fill(treeAllAntiS._S_eta_all[0],1)
@@ -95,12 +96,13 @@ for i in range(0,treeAllAntiS.GetEntries()):
 	h_nPV_all_AntiS.Fill(treeAllAntiS._S_nGoodPV_all[0],weight_factor)
 
 	if(treeAllAntiS._S_reconstructable_all[0] == 1):
-		nAntiSReconstructable += weight_factor
+                #reconstructable S get the Multi-to-Single reweighting
+		nAntiSReconstructable += weight_factor*treeAllAntiS._S_event_weighting_factor_M2S_all[0]
 		nAntiSReconstructableUnweighted += 1
-		h_nom_vz_antiS_reconstructable.Fill(vz_interaction_antiS,weight_factor)
-		h_nom_eta_antiS_reconstructable.Fill(treeAllAntiS._S_eta_all[0],weight_factor)
-		h_nom_pt_antiS_reconstructable.Fill(treeAllAntiS._S_pt_all[0],weight_factor)
-		h_nom_pz_antiS_reconstructable.Fill(treeAllAntiS._S_pz_all[0],weight_factor)
+		h_nom_vz_antiS_reconstructable.Fill(vz_interaction_antiS,weight_factor*treeAllAntiS._S_event_weighting_factor_M2S_all[0])
+		h_nom_eta_antiS_reconstructable.Fill(treeAllAntiS._S_eta_all[0],weight_factor*treeAllAntiS._S_event_weighting_factor_M2S_all[0])
+		h_nom_pt_antiS_reconstructable.Fill(treeAllAntiS._S_pt_all[0],weight_factor*treeAllAntiS._S_event_weighting_factor_M2S_all[0])
+		h_nom_pz_antiS_reconstructable.Fill(treeAllAntiS._S_pz_all[0],weight_factor*treeAllAntiS._S_event_weighting_factor_M2S_all[0])
 
 	h_denom_vz_antiS_reconstructable.Fill(vz_interaction_antiS,weight_factor)
 	h_denom_eta_antiS_reconstructable.Fill(treeAllAntiS._S_eta_all[0],weight_factor)
@@ -123,6 +125,11 @@ for i in range(0,len(l_nom)):
 	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
 	c.Write()
 	teff.Write()
+        c2 = TCanvas("c_"+l_nom[i].GetName())
+        l_nom[i].Draw("")
+	CMS_lumi.CMS_lumi(c2, 0, 11)
+	c2.SaveAs(plots_output_dir+c2.GetName()+".pdf")
+	c.Write()
 	
 l_tprof  = [h_eta_all_AntiS,h_vz_interaction_all_AntiS,h_vz_interaction_all_AntiS_zoom,h_pt_all_AntiS,h_pz_all_AntiS,tprof_eta_weighting_factor,tprof_vz_weighting_factor,tprof_vz_weighting_factor_zoom]
 for h in l_tprof:
@@ -439,7 +446,7 @@ for i in range(0,tree.GetEntries()):
 	#only make these plots for reconstructable antiS which means that all their granddaughters should have 7 hits
 	if(tree._GEN_Ks_daughter0_numberOfTrackerHits[0] < 7 or tree._GEN_Ks_daughter1_numberOfTrackerHits[0] < 7 or tree._GEN_AntiLambda_AntiProton_numberOfTrackerHits[0] < 7 or tree._GEN_AntiLambda_Pion_numberOfTrackerHits[0] < 7 ):
 		continue
-	weight_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factor_PU[0]
+	weight_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factor_PU[0]*tree._S_event_weighting_factor_M2S[0]
 
 	h2_interaction_vertex_vx_vy.Fill(tree._S_vx_interaction_vertex[0],tree._S_vy_interaction_vertex[0],weight_factor)
 	h2_interaction_vertex_vx_vy_zoom.Fill(tree._S_vx_interaction_vertex[0],tree._S_vy_interaction_vertex[0],weight_factor)

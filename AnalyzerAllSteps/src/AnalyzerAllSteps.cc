@@ -1,4 +1,5 @@
 #include "../interface/AnalyzerAllSteps.h"
+//#include <iostream>
 
 //3D openingsangle between two vectors
 double AnalyzerAllSteps::openings_angle(reco::Candidate::Vector momentum1, reco::Candidate::Vector momentum2){
@@ -245,9 +246,53 @@ std::vector<double> AnalyzerAllSteps::isTpGrandDaughterAntiS(TrackingParticleCol
 }
 
 //weight factor for the fact that Sbar with higher eta have a larger pathlength through the beampipe
-double AnalyzerAllSteps::EventWeightingFactor(double etaAntiS){
-	return 1/TMath::Sin(etaAntiS);
+double AnalyzerAllSteps::EventWeightingFactor(double thetaAntiS){
+	return 1/TMath::Sin(thetaAntiS);
 }
+
+//extract the reweighing factor for Multi-to-Single Sbar kinematic reweighting
+std::vector<double> AnalyzerAllSteps::MC_M2SReweighingFactor(double MC_etaAntiS, edm::FileInPath filePath_To_M2SReweigh){
+ //       std::cout << "Getting Reweighting factor for Eta of: " << MC_etaAntiS << std::endl;
+	double eta_map_prev = -999.;
+	double weight_map_prev = 0.;
+	double err_map_prev = 0.;
+        std::vector<double> returnWeight; //this vector contains as first element the weight, and second element the error in the weight
+        //Initialize weight and error
+        returnWeight.push_back(1.0);
+        returnWeight.push_back(0.0);
+
+        std::string EtaMapFilePath = filePath_To_M2SReweigh.fullPath();
+        std::ifstream configFile(EtaMapFilePath.c_str());
+        std::string line;
+  //      std::cout << "variables initialized " << std::endl;
+	
+        while(getline(configFile, line))
+        {
+            line.erase(0, line.find_first_not_of(" \t")); // Remove leading whitespace
+            if ( line.length() == 0 || line.at(0) == '#') {continue;} //Skip comments and blank lines
+            double eta_map;
+            double weight_map;
+            double err_map;
+            std::stringstream lineStream(line);
+            lineStream >> eta_map >> weight_map >> err_map;
+   //         std::cout << "checking eta: " << eta_map << ", with weight: " << weight_map << std::endl;
+            if ( eta_map > MC_etaAntiS) {
+		returnWeight[0] = weight_map;
+		returnWeight[1] = err_map;
+		if(abs(eta_map_prev-MC_etaAntiS) < abs(eta_map-MC_etaAntiS)) {
+                    returnWeight[0] = weight_map_prev;
+                    returnWeight[1] = err_map_prev;
+                    }
+    //            std::cout << "best match found! eta: " << eta_map << ", weight: " << returnWeight[0] << "+/-" << returnWeight[1] << std::endl;
+		break;	
+                }
+	    eta_map_prev = eta_map;
+	    weight_map_prev = weight_map;   
+	    err_map_prev = err_map;   
+        }
+     //   std::cout << "loop closed" << std::endl;
+   	return returnWeight;
+    }
 
 //extract the reweighing factor for PV distribution. 
 double AnalyzerAllSteps::PUReweighingFactor(int MC_nPV, double MC_PV_vz, edm::FileInPath filePath){

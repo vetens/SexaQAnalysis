@@ -13,6 +13,7 @@ FlatTreeProducerBDT::FlatTreeProducerBDT(edm::ParameterSet const& pset):
   m_V0KsTag(pset.getParameter<edm::InputTag>("V0KsCollection")),
   m_V0LTag(pset.getParameter<edm::InputTag>("V0LCollection")),
   m_PUReweighingMapIn(pset.getParameter<edm::FileInPath>("PUReweighting")),
+  m_MultiToSingleReweighingMapIn(pset.getParameter<edm::FileInPath>("MC_MultiToSingleReweighting")),
   m_savePVInfo(pset.getUntrackedParameter<bool>("savePVInfo")),
 
   m_bsToken    (consumes<reco::BeamSpot>(m_bsTag)),
@@ -53,6 +54,9 @@ void FlatTreeProducerBDT::beginJob() {
 	//Sbar event information to be (potentially) used in the BDT    
         _tree = fs->make <TTree>("FlatTree","tree");
 
+	_tree->Branch("_S_nGoodPVs",&_S_nGoodPVs);
+	_tree->Branch("_S_bestPVz",&_S_bestPVz);
+
 	_tree->Branch("_S_charge",&_S_charge);
 	_tree->Branch("_N_GenS",&_N_GenS);
 	_tree->Branch("_N_SCands",&_N_SCands);
@@ -71,7 +75,9 @@ void FlatTreeProducerBDT::beginJob() {
 	_tree->Branch("_S_chi2_ndof",&_S_chi2_ndof);
 	_tree->Branch("_S_event_weighting_factor",&_S_event_weighting_factor);
 	_tree->Branch("_S_event_weighting_factorPU",&_S_event_weighting_factorPU);
+	_tree->Branch("_S_event_weighting_factorM2S",&_S_event_weighting_factorM2S);
 	_tree->Branch("_S_event_weighting_factorALL",&_S_event_weighting_factorALL);
+	_tree->Branch("_S_event_weighting_factorERR",&_S_event_weighting_factorERR);
 
 	_tree->Branch("_S_daughters_deltaphi",&_S_daughters_deltaphi);
 	_tree->Branch("_S_daughters_deltaeta",&_S_daughters_deltaeta);
@@ -254,7 +260,6 @@ void FlatTreeProducerBDT::analyze(edm::Event const& iEvent, edm::EventSetup cons
 
 //fill the ntuple branches
 void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RECO_S, TVector3 beamspot, TVector3 beamspotVariance, edm::Handle<vector<reco::Vertex>> h_offlinePV, bool m_runningOnData, edm::Handle<vector<reco::GenParticle>> h_genParticles, edm::Handle<vector<reco::VertexCompositeCandidate> > h_V0Ks, edm::Handle<vector<reco::VertexCompositeCandidate> > h_V0L, unsigned int ngoodPVsPOG, double randomPVz, int NSCands){
-
 	//below calculate some kinematic variables on the event and then fill them in the branches	
 
 	//this is the interaction vertex of the antiS and the neutron. (Check in the skimming code if you want to check)
@@ -299,6 +304,7 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	}
 	//the weighting factor for events will depend on their pathlength through the beampipe
 	double event_weighting_factor = AnalyzerAllSteps::EventWeightingFactor(RECO_S->theta()); 
+	std::vector<double> event_weighting_factorM2S = AnalyzerAllSteps::MC_M2SReweighingFactor(RECO_S->eta(), m_MultiToSingleReweighingMapIn); 
 	double event_weighting_factorPU = 1.; 
 	//you only need to calculate a reweighing parameter for the PU and z location if you are running on MC
 	// bestMatchingAntiS > -1 only when not data per above if statement, so this still only runs on MC
@@ -314,7 +320,7 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 
 	//some counter
 	nTotalRECOS++;
-	nTotalRECOSWeighed = nTotalRECOSWeighed + event_weighting_factor*event_weighting_factorPU;
+	nTotalRECOSWeighed = nTotalRECOSWeighed + event_weighting_factor*event_weighting_factorPU*event_weighting_factorM2S[0];
 
 	//calculate some kinematic variables for the RECO AntiS
 	TVector3 RECOAntiSMomentumVertex(RECO_S->px(),RECO_S->py(),RECO_S->pz());
@@ -476,6 +482,8 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	nSavedRECOSWeighed++;
 
 	Init();	
+	_S_nGoodPVs.push_back(ngoodPVsPOG);
+	_S_bestPVz.push_back(bestPVdzAntiS.Z());
 
 	_S_charge.push_back(RECO_S->charge());
         _N_SCands.push_back(NSCands);
@@ -495,7 +503,10 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	_S_chi2_ndof.push_back(RECO_S->vertexNormalizedChi2());
 	_S_event_weighting_factor.push_back(event_weighting_factor);
 	_S_event_weighting_factorPU.push_back(event_weighting_factorPU);
+	_S_event_weighting_factorM2S.push_back(event_weighting_factorM2S[0]);
 	_S_event_weighting_factorALL.push_back(event_weighting_factor*event_weighting_factorPU);
+	_S_event_weighting_factorALL.push_back(event_weighting_factor*event_weighting_factorPU*event_weighting_factorM2S[0]);
+	_S_event_weighting_factorERR.push_back(event_weighting_factorM2S[1]);
 
 	_S_daughters_deltaphi.push_back(RECODeltaPhiDaughters);
 	_S_daughters_deltaeta.push_back(RECODeltaEtaDaughters);
@@ -649,6 +660,8 @@ void FlatTreeProducerBDT::Init_Counter()
 void FlatTreeProducerBDT::Init()
 {
 
+    	_S_nGoodPVs.clear();
+    	_S_bestPVz.clear();
 
     	_S_charge.clear();
     	_N_GenS.clear();
@@ -668,7 +681,9 @@ void FlatTreeProducerBDT::Init()
         _S_chi2_ndof.clear();
         _S_event_weighting_factor.clear();
         _S_event_weighting_factorPU.clear();
+        _S_event_weighting_factorM2S.clear();
         _S_event_weighting_factorALL.clear();
+        _S_event_weighting_factorERR.clear();
 
 	_S_daughters_deltaphi.clear();
 	_S_daughters_deltaeta.clear();

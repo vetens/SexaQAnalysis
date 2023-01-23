@@ -80,6 +80,7 @@ class FlatTreeProducerTracking : public edm::EDAnalyzer
 
     //Path to Pileup Reweighing map
     edm::FileInPath m_PUReweighingMapIn;
+    edm::FileInPath m_MultiToSingleReweighingMapIn;
 
 //    edm::InputTag m_PileupInfoTag;
 
@@ -112,7 +113,7 @@ class FlatTreeProducerTracking : public edm::EDAnalyzer
     std::vector<int> _matchedTrack_trackQuality,_matchedTrack_charge,_matchedTrack_isLooper;
 
     TTree* _tree_tpsAntiS;
-    std::vector<float> _tpsAntiS_bestDeltaRWithRECO,_tpsAntiS_deltaLInteractionVertexAntiSmin,_tpsAntiS_mass,_tpsAntiS_pt,_tpsAntiS_eta,_tpsAntiS_phi,_tpsAntiS_pz,_tpsAntiS_Lxy_beampipeCenter,_tpsAntiS_Lxy_beamspot,_tpsAntiS_vz,_tpsAntiS_vz_beamspot,_tpsAntiS_dxy_beamspot,_tpsAntiS_dz_beamspot,_tpsAntiS_dz_AntiSCreationVertex,_tpsAntiS_dxyTrack_beamspot,_tpsAntiS_dzTrack_beamspot,_tpsAntiS_numberOfTrackerHits,_tpsAntiS_charge,_tpsAntiS_reconstructed,_tpsAntiS_event_weighting_factor,_tpsAntiS_event_weighting_factorPU;
+    std::vector<float> _tpsAntiS_bestDeltaRWithRECO,_tpsAntiS_deltaLInteractionVertexAntiSmin,_tpsAntiS_mass,_tpsAntiS_pt,_tpsAntiS_eta,_tpsAntiS_phi,_tpsAntiS_pz,_tpsAntiS_Lxy_beampipeCenter,_tpsAntiS_Lxy_beamspot,_tpsAntiS_vz,_tpsAntiS_vz_beamspot,_tpsAntiS_dxy_beamspot,_tpsAntiS_dz_beamspot,_tpsAntiS_dz_AntiSCreationVertex,_tpsAntiS_dxyTrack_beamspot,_tpsAntiS_dzTrack_beamspot,_tpsAntiS_numberOfTrackerHits,_tpsAntiS_charge,_tpsAntiS_reconstructed,_tpsAntiS_event_weighting_factor,_tpsAntiS_event_weighting_factorPU,_tpsAntiS_event_weighting_factorM2S,_tpsAntiS_event_weighting_factorERR;
     std::vector<float> _tpsAntiS_bestRECO_mass,_tpsAntiS_bestRECO_massMinusNeutron,_tpsAntiS_bestRECO_pt,_tpsAntiS_bestRECO_eta,_tpsAntiS_bestRECO_phi,_tpsAntiS_bestRECO_pz,_tpsAntiS_bestRECO_Lxy_beampipeCenter,_tpsAntiS_bestRECO_Lxy_beamspot,_tpsAntiS_bestRECO_error_Lxy_beampipeCenter,_tpsAntiS_bestRECO_error_Lxy_beamspot,_tpsAntiS_bestRECO_vz,_tpsAntiS_bestRECO_vz_beamspot,_tpsAntiS_bestRECO_dxy_beamspot,_tpsAntiS_bestRECO_dz_beamspot,_tpsAntiS_bestRECO_dxyTrack_beamspot,_tpsAntiS_bestRECO_dzTrack_beamspot,_tpsAntiS_bestRECO_charge,_tpsAntiS_returnCodeV0Fitter;
     std::vector<int> _tpsAntiS_type,_tpsAntiS_pdgId;
 

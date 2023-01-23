@@ -443,7 +443,7 @@ for iFile, fIn in enumerate(inFiles,start = 1):
 
 		tree.GetEntry(i)
 
-		weightFactor = tree._tpsAntiS_event_weighting_factor[0]*tree._tpsAntiS_event_weighting_factorPU[0]
+		weightFactor = tree._tpsAntiS_event_weighting_factor[0]*tree._tpsAntiS_event_weighting_factorPU[0]*tree._tpsAntiS_event_weighting_factorM2S[0]
 
 		nAntiS+=weightFactor
 

@@ -2,7 +2,8 @@
 import numpy as np
 
 #BDT classifier cut
-BDT_classifier_cut = 0.35
+#BDT_classifier_cut = 0.35
+BDT_classifier_cut = -999.0
 
 #matching criteria for the GEN and RECO for the Ks, AntiLambda and AntiS
 GENRECO_matcher_AntiS_deltaL = 2.
@@ -17,7 +18,8 @@ pre_BDT_noCut = "Alt$(_S_lxy_interaction_vertex_beampipeCenter,0) < 99999999." #
 #the 3 below cuts are the ones used pre-BDT (see AN for the explanation). The numbering is historical and not necessarily the order in which they are explained in the AN
 pre_BDT_cut1 =  "Alt$(_S_lxy_interaction_vertex_beampipeCenter,0) > 2.02 && Alt$(_S_lxy_interaction_vertex_beampipeCenter,0) < 2.4"
 pre_BDT_cut3 = "Alt$(_S_dxy_over_lxy,0) >= 0 && Alt$(_S_dxy_over_lxy,0) <= 0.5"
-pre_BDT_cut4 = "(Alt$(_S_daughters_deltaphi,0) < -0.5 || Alt$(_S_daughters_deltaphi,0) > 0.5)"
+#pre_BDT_cut4 = "(Alt$(_S_daughters_deltaphi,0) < -0.5 || Alt$(_S_daughters_deltaphi,0) > 0.5)"
+pre_BDT_cut4 = "(Alt$(_S_daughters_deltaphi,0) < -0.4 || Alt$(_S_daughters_deltaphi,0) > 0.4)"
 
 #pre-BDT cuts also include the fiducial region in which we understand the systematics, this is defined by:
 FiducialRegionptMin = 0.33
@@ -51,29 +53,54 @@ fiducial_region_cuts = "Alt$(_Lambda_vz_decay_vertex,0) >= "+str(FiducialRegionv
 +" && Alt$(_RECO_Lambda_daughter0_pz,0) <= "+str(FiducialRegionpzMax)\
 +" && Alt$(_RECO_Lambda_daughter0_dxy_beamspot,0) >= "+str(FiducialRegiondxyMin)\
 +" && Alt$(_RECO_Lambda_daughter0_dxy_beamspot,0) <= "+str(FiducialRegiondxyMax)\
-+" && Alt$(_RECO_Lambda_daughter0_dz_beamspot,0) >= "+str(FiducialRegiondzMin)\
-+" && Alt$(_RECO_Lambda_daughter0_dz_beamspot,0) <= "+str(FiducialRegiondzMax)\
++" && Alt$(_RECO_Lambda_daughter0_dz_min_PV,0) >= "+str(FiducialRegiondzMin)\
++" && Alt$(_RECO_Lambda_daughter0_dz_min_PV,0) <= "+str(FiducialRegiondzMax)\
 +" && Alt$(_RECO_Lambda_daughter1_pt,0) >= "+str(FiducialRegionptMin)\
 +" && Alt$(_RECO_Lambda_daughter1_pz,0) >= "+str(FiducialRegionpzMin)\
 +" && Alt$(_RECO_Lambda_daughter1_pz,0) <= "+str(FiducialRegionpzMax)\
 +" && Alt$(_RECO_Lambda_daughter1_dxy_beamspot,0) >= "+str(FiducialRegiondxyMin)\
 +" && Alt$(_RECO_Lambda_daughter1_dxy_beamspot,0) <= "+str(FiducialRegiondxyMax)\
-+" && Alt$(_RECO_Lambda_daughter1_dz_beamspot,0) >= "+str(FiducialRegiondzMin)\
-+" && Alt$(_RECO_Lambda_daughter1_dz_beamspot,0) <= "+str(FiducialRegiondzMax)\
++" && Alt$(_RECO_Lambda_daughter1_dz_min_PV,0) >= "+str(FiducialRegiondzMin)\
++" && Alt$(_RECO_Lambda_daughter1_dz_min_PV,0) <= "+str(FiducialRegiondzMax)\
 +" && Alt$(_RECO_Ks_daughter0_pt,0) >= "+str(FiducialRegionptMin)\
 +" && Alt$(_RECO_Ks_daughter0_pz,0) >= "+str(FiducialRegionpzMin)\
 +" && Alt$(_RECO_Ks_daughter0_pz,0) <= "+str(FiducialRegionpzMax)\
 +" && Alt$(_RECO_Ks_daughter0_dxy_beamspot,0) >= "+str(FiducialRegiondxyMin)\
 +" && Alt$(_RECO_Ks_daughter0_dxy_beamspot,0) <= "+str(FiducialRegiondxyMax)\
-+" && Alt$(_RECO_Ks_daughter0_dz_beamspot,0) >= "+str(FiducialRegiondzMin)\
-+" && Alt$(_RECO_Ks_daughter0_dz_beamspot,0) <= "+str(FiducialRegiondzMax)\
++" && Alt$(_RECO_Ks_daughter0_dz_min_PV,0) >= "+str(FiducialRegiondzMin)\
++" && Alt$(_RECO_Ks_daughter0_dz_min_PV,0) <= "+str(FiducialRegiondzMax)\
 +" && Alt$(_RECO_Ks_daughter1_pt,0) >= "+str(FiducialRegionptMin)\
 +" && Alt$(_RECO_Ks_daughter1_pz,0) >= "+str(FiducialRegionpzMin)\
 +" && Alt$(_RECO_Ks_daughter1_pz,0) <= "+str(FiducialRegionpzMax)\
 +" && Alt$(_RECO_Ks_daughter1_dxy_beamspot,0) >= "+str(FiducialRegiondxyMin)\
 +" && Alt$(_RECO_Ks_daughter1_dxy_beamspot,0) <= "+str(FiducialRegiondxyMax)\
-+" && Alt$(_RECO_Ks_daughter1_dz_beamspot,0) >= "+str(FiducialRegiondzMin)\
-+" && Alt$(_RECO_Ks_daughter1_dz_beamspot,0) <= "+str(FiducialRegiondzMax)
++" && Alt$(_RECO_Ks_daughter1_dz_min_PV,0) >= "+str(FiducialRegiondzMin)\
++" && Alt$(_RECO_Ks_daughter1_dz_min_PV,0) <= "+str(FiducialRegiondzMax)
+
+##additional preselection cuts:
+##TODO: Edit to the same format as above cuts and input into config_dict
+#Opt_VzMax = 28.0
+#Opt_DeltaEtaMax = 2
+#Opt_DeltaAlpha_daughters_Max = 2
+#Opt_DeltaAlpha_daughters_Min = 0.4
+#Opt_DeltaAlpha_S_Kshort_Max = 1.8
+#Opt_DeltaAlpha_S_Kshort_Min = 0.1
+#Opt_DeltaAlpha_S_Lambda_Max = 1.0
+#Opt_DeltaAlpha_S_Lambda_Min = 0.05
+#Opt_EtaSMax = 3.5
+#Opt_EtaKshortMax = 2.5
+#Opt_SdzminMax = 6
+#Opt_pTKshortMin = 0.8
+#
+#"S v_z interaction vertex":"abs(tree._S_vz_interaction_vertex[0]) <= Opt_VzMax",
+#"Delta eta of S daughters":"abs(tree._S_daughters_deltaeta[0]) <= Opt_DeltaEtaMax",
+#"3D Openingsangle of S daughters":"tree._S_daughters_openingsangle[0] <= Opt_DeltaAlpha_daughters_Max and tree._S_daughters_openingsangle[0] >= Opt_DeltaAlpha_daughters_Min",
+#"3D Openingsangle of S and Ks":"tree._S_Ks_openingsangle[0] <= Opt_DeltaAlpha_S_Kshort_Max and tree._S_Ks_openingsangle[0] >= Opt_DeltaAlpha_S_Kshort_Min",
+#"3D Openingsangle of S and Lambda":"tree._S_Lambda_openingsangle[0] <= Opt_DeltaAlpha_S_Lambda_Max and tree._S_Lambda_openingsangle[0] >= Opt_DeltaAlpha_S_Lambda_Min",
+#"S eta":"abs(tree._S_eta[0]) <= Opt_EtaSMax",
+#"K_s eta":"abs(tree._Ks_eta[0]) <= Opt_EtaKshortMax",
+#"minimum impact parameter of S":"abs(tree._S_dz_min[0]) <= Opt_SdzminMax",
+#"K_s p_T":"tree._Ks_pt[0] >= Opt_pTKshortMin"
 
 
 #dictionary to load in several macros

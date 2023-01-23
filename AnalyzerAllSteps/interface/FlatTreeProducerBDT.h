@@ -54,6 +54,7 @@ class FlatTreeProducerBDT : public edm::EDAnalyzer
     edm::InputTag m_V0LTag;
 
     edm::FileInPath m_PUReweighingMapIn;
+    edm::FileInPath m_MultiToSingleReweighingMapIn;
     bool m_savePVInfo;
 
     edm::EDGetTokenT<reco::BeamSpot> m_bsToken;
@@ -75,11 +76,14 @@ class FlatTreeProducerBDT : public edm::EDAnalyzer
     std::vector<float> _PVx,_PVy,_PVz,_goodPVx,_goodPVy,_goodPVz,_goodPVxPOG,_goodPVyPOG,_goodPVzPOG;
 
     //definition of variables which should go to tree
+    std::vector<int> _S_nGoodPVs;
+    std::vector<float> _S_bestPVz;
+
     std::vector<float> _S_charge;
     std::vector<int> _N_GenS;
     std::vector<int> _N_SCands;
     std::vector<float> _S_deltaLInteractionVertexAntiSmin,_S_deltaRAntiSmin,_S_deltaRKsAntiSmin,_S_deltaRLambdaAntiSmin;
-    std::vector<float> _S_lxy_interaction_vertex, _S_lxy_interaction_vertex_beampipeCenter, _S_error_lxy_interaction_vertex,_S_error_lxy_interaction_vertex_beampipeCenter,_Ks_lxy_decay_vertex,_Lambda_lxy_decay_vertex,_S_mass,_S_chi2_ndof,_S_event_weighting_factor,_S_event_weighting_factorPU,_S_event_weighting_factorALL;
+    std::vector<float> _S_lxy_interaction_vertex, _S_lxy_interaction_vertex_beampipeCenter, _S_error_lxy_interaction_vertex,_S_error_lxy_interaction_vertex_beampipeCenter,_Ks_lxy_decay_vertex,_Lambda_lxy_decay_vertex,_S_mass,_S_chi2_ndof,_S_event_weighting_factor,_S_event_weighting_factorPU,_S_event_weighting_factorM2S,_S_event_weighting_factorALL,_S_event_weighting_factorERR;
     std::vector<float> _S_daughters_deltaphi,_S_daughters_deltaeta,_S_daughters_openingsangle,_S_Ks_openingsangle,_S_Lambda_openingsangle,_S_daughters_DeltaR,_S_eta,_Ks_eta,_Lambda_eta;
     std::vector<float> _S_dxy,_Ks_dxy,_Lambda_dxy,_S_dxy_dzPVmin,_Ks_dxy_dzPVmin,_Lambda_dxy_dzPVmin;
     std::vector<float> _S_dxy_over_lxy,_Ks_dxy_over_lxy,_Lambda_dxy_over_lxy;

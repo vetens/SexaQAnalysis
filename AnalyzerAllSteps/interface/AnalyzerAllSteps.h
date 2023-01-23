@@ -107,7 +107,8 @@ class AnalyzerAllSteps : public edm::EDAnalyzer
     int static getDaughterParticlesTypes(const reco::Candidate * genParticle);
     int static trackQualityAsInt(const reco::Track * track);
     std::vector<double> static isTpGrandDaughterAntiS(TrackingParticleCollection const & TPColl, const TrackingParticle& tp);
-    double static EventWeightingFactor(double etaAntiS);
+    double static EventWeightingFactor(double thetaAntiS);
+    std::vector<double> static MC_M2SReweighingFactor(double MC_etaAntiS, edm::FileInPath filePath_To_M2SReweigh);
     double static PUReweighingFactor(int MC_nPV,double MC_PV_vz, edm::FileInPath filePath);
 
     //definitions of the maps for the PU reweighing. These maps are obtained with /user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/macros/PUReweighing each map is for a certain PU, starting at PU0. Each map has as key the absolute z location and as value the 2D (PU and z location of the valid PVs) reweighing parameter. At the end it includes a vector with all the maps, so when you need the reweighing parameter you need to go to a certain location in the vector, given by the PU, and then find the best mathing z value and get that key's value --> see src/AnalyzerAllSteps.cc for the actual values

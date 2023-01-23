@@ -13,5 +13,6 @@ FlatTreeProducerBDT = cms.EDAnalyzer('FlatTreeProducerBDT',
     V0KsCollection = cms.InputTag("generalV0Candidates","Kshort",""),
     V0LCollection = cms.InputTag("generalV0Candidates","Lambda",""),
     PUReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/PU_NoReweigh.txt"),
+    MC_MultiToSingleReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/MultiToSingleSbar_NoReweigh.txt"),
     savePVInfo = cms.untracked.bool(False)
 )

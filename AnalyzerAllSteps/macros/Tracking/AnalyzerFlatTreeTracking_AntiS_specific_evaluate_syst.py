@@ -156,7 +156,7 @@ for iFile, fIn in enumerate(inFiles,start = 1):
 		tree.GetEntry(i)
 		printProgress(i)
 
-		weightFactor = tree._tpsAntiS_event_weighting_factor[0]*tree._tpsAntiS_event_weighting_factorPU[0]
+		weightFactor = tree._tpsAntiS_event_weighting_factor[0]*tree._tpsAntiS_event_weighting_factorPU[0]*tree._tpsAntiS_event_weighting_factorM2S[0]
 
 	
 		#check the reconstructability requirement for the AntiS, all 4 final state particles (these aer particles 3,4,5,6 in the vector) should have more than 6 hits

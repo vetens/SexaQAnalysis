@@ -57,6 +57,7 @@ process.load("SexaQAnalysis.AnalyzerAllSteps.FlatTreeProducerBDT_cfi")
 process.FlatTreeProducerBDT.runningOnData = runningOnData
 process.FlatTreeProducerBDT.savePVInfo= True
 process.FlatTreeProducerBDT.PUReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/PU_Reweigh_SignalToDataBPH2018_Block_A.txt")
+process.FlatTreeProducerBDT.MC_MultiToSingleReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/MultiToSingleSbar_EtaReweigh.txt")
 #process.FlatTreeProducerBDT.lookAtAntiS = lookAtAntiS
 process.flattreeproducer = cms.Path(process.FlatTreeProducerBDT)
 

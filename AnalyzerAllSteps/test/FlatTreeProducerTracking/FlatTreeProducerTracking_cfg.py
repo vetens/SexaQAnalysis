@@ -79,6 +79,7 @@ process.validation = cms.Sequence(
 
 process.load("SexaQAnalysis.AnalyzerAllSteps.FlatTreeProducerTracking_cfi")
 process.FlatTreeProducerTracking.PUReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/PU_Reweigh_SignalToDataBPH2018_Block_A.txt")
+process.FlatTreeProducerGENSIM.MC_MultiToSingleReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/MultiToSingleSbar_EtaReweigh.txt")
 process.FlatTreeProducerTracking.innerHitPosCut = -1
 process.FlatTreeProducerTracking.cosThetaXYCut = -1
 process.FlatTreeProducerTracking.kShortMassCut = 0.03

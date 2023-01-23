@@ -1,9 +1,10 @@
 from WMCore.Configuration import Configuration
 
-day = "15082022"
+day = "13012023"
 version = "v2"
 #trial = "4"
-trial = "4_MultiSQEV"
+#trial = "4_MultiSQEV"
+trial = "5_MultiToSingleReweighed"
 mass = "1p8GeV"
 
 
@@ -25,8 +26,8 @@ config.Data.totalUnits = 10000
 config.Data.publication = True
 config.Data.splitting = 'FileBased' 
 config.Data.outLFNDirBase = '/store/user/wvetens/crmc_Sexaq/FlatTree_BDT' 
-config.Data.userInputFiles = open('MCSbar_MultiSQEV_Trial4.txt').readlines() 
-#config.Data.userInputFiles = open('EDM_RECOSKIM_Trial4.txt').readlines() 
+#config.Data.userInputFiles = open('MCSbar_MultiSQEV_Trial4.txt').readlines() 
+config.Data.userInputFiles = open('EDM_RECOSKIM_Trial5_M2SReweigh.txt').readlines() 
 #config.Data.inputDataset = '/CRAB_SimSexaq_trial21/lowette-crab_Step1_Step2_Skimming_FlatTree_trial21_1p8GeV_23102019_v1-8925145305413877174dac643a893255/USER'
 config.Data.inputDBS = 'phys03'
 config.Data.outputPrimaryDataset = "SbarSignalMC_FlatTreeProducerBDT_BlockAPUReweigh_trial"+trial+"_"+mass+"_"+day+'_'+version
