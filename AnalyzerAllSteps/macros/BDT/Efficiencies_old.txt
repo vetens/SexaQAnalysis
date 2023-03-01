@@ -1,0 +1,152 @@
+---------------------------------------------------
+running for MC-Multi-to-Single-Reweighed-#bar{S}-Signal
+N entries:8897
+charge of the S/antiS: -1.0
+Number of valid Sbar before fiducial cuts in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:5594.0
+Number of valid Sbar (weighed) before fiducial cuts in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:5594.0
+Individual efficiencies of fiducial cuts in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:
+	Lambda Daughter 1 p_z:
+		5594.0/5594.0 = 1.0
+	 weighted:
+		5594.0/5594.0 = 1.0
+	K_s Daughter 0 p_z:
+		5594.0/5594.0 = 1.0
+	 weighted:
+		5594.0/5594.0 = 1.0
+	K_s Daughter 1 d_z Best PV:
+		5528.0/5594.0 = 0.988201644619
+	 weighted:
+		5528.0/5594.0 = 0.988201644619
+	K_s Daughter 0 p_T:
+		5594.0/5594.0 = 1.0
+	 weighted:
+		5594.0/5594.0 = 1.0
+	K_s Daughter 1 d_xy beamspot:
+		4063.0/5594.0 = 0.726313907758
+	 weighted:
+		4063.0/5594.0 = 0.726313907758
+	K_s Daughter 0 d_z Best PV:
+		5529.0/5594.0 = 0.98838040758
+	 weighted:
+		5529.0/5594.0 = 0.98838040758
+	Lambda v_z decay vertex:
+		5437.0/5594.0 = 0.971934215231
+	 weighted:
+		5437.0/5594.0 = 0.971934215231
+	K_s Daughter 0 d_xy beamspot:
+		4059.0/5594.0 = 0.725598855917
+	 weighted:
+		4059.0/5594.0 = 0.725598855917
+	Lambda Daughter 1 p_T:
+		5593.0/5594.0 = 0.99982123704
+	 weighted:
+		5593.0/5594.0 = 0.99982123704
+	Lambda l_xy decay vertex:
+		5480.0/5594.0 = 0.979621022524
+	 weighted:
+		5480.0/5594.0 = 0.979621022524
+	Lambda Daughter 1 d_z Best PV:
+		5551.0/5594.0 = 0.992313192706
+	 weighted:
+		5551.0/5594.0 = 0.992313192706
+	Lambda Daughter 0 p_z:
+		5594.0/5594.0 = 1.0
+	 weighted:
+		5594.0/5594.0 = 1.0
+	K_s l_xy decay vertex:
+		5546.0/5594.0 = 0.991419377905
+	 weighted:
+		5546.0/5594.0 = 0.991419377905
+	K_s Daughter 1 p_z:
+		5594.0/5594.0 = 1.0
+	 weighted:
+		5594.0/5594.0 = 1.0
+	K_s v_z decay vertex:
+		5513.0/5594.0 = 0.985520200215
+	 weighted:
+		5513.0/5594.0 = 0.985520200215
+	K_s Daughter 1 p_T:
+		5594.0/5594.0 = 1.0
+	 weighted:
+		5594.0/5594.0 = 1.0
+	Lambda Daughter 1 d_xy beamspot:
+		4867.0/5594.0 = 0.870039327851
+	 weighted:
+		4867.0/5594.0 = 0.870039327851
+	Lambda Daughter 0 d_xy beamspot:
+		4887.0/5594.0 = 0.873614587058
+	 weighted:
+		4887.0/5594.0 = 0.873614587058
+	Lambda Daughter 0 d_z Best PV:
+		5573.0/5594.0 = 0.996245977833
+	 weighted:
+		5573.0/5594.0 = 0.996245977833
+	Lambda Daughter 0 p_T:
+		5594.0/5594.0 = 1.0
+	 weighted:
+		5594.0/5594.0 = 1.0
+Total efficiency of all fiducial cuts in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:3238.0/5594.0=0.578834465499
+Total efficiency (weighed) of all fiducial cuts in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:3238.0/5594.0=0.578834465499
+
+Individual efficiencies of initial preselection in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:
+	S Daughters delta phi:
+		2715.0/3238.0 = 0.838480543545
+	 weighted:
+		2715.0/3238.0 = 0.838480543545
+	S l_xy interaction vertex to beampipe center:
+		2530.0/3238.0 = 0.781346510191
+	 weighted:
+		2530.0/3238.0 = 0.781346510191
+	S d_xy/l_xy:
+		1929.0/3238.0 = 0.595738109944
+	 weighted:
+		1929.0/3238.0 = 0.595738109944
+Total efficiency of initial preselection in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:1514.0/3238.0=0.467572575664
+Total efficiency (weighed) of initial preselection in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:1514.0/3238.0=0.467572575664
+Total COMBINED efficiency of initial preselection and fiducial cuts in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:1514.0/5594.0=0.270647121916
+Total COMBINED efficiency (weighed) of initial preselection and fiducial cuts in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:1514.0/5594.0=0.270647121916
+
+Individual efficiencies of optional preselection in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:
+	S v_z interaction vertex:
+		1499.0/1514.0 = 0.990092470277
+	 weighted:
+		1499.0/1514.0 = 0.990092470277
+	Delta eta of S daughters:
+		1419.0/1514.0 = 0.937252311757
+	 weighted:
+		1419.0/1514.0 = 0.937252311757
+	K_s p_T:
+		1485.0/1514.0 = 0.980845442536
+	 weighted:
+		1485.0/1514.0 = 0.980845442536
+	minimum impact parameter of S:
+		1485.0/1514.0 = 0.980845442536
+	 weighted:
+		1485.0/1514.0 = 0.980845442536
+	3D Openingsangle of S and Ks:
+		1433.0/1514.0 = 0.946499339498
+	 weighted:
+		1433.0/1514.0 = 0.946499339498
+	3D Openingsangle of S daughters:
+		1374.0/1514.0 = 0.907529722589
+	 weighted:
+		1374.0/1514.0 = 0.907529722589
+	K_s eta:
+		1512.0/1514.0 = 0.998678996037
+	 weighted:
+		1512.0/1514.0 = 0.998678996037
+	S eta:
+		1504.0/1514.0 = 0.993394980185
+	 weighted:
+		1504.0/1514.0 = 0.993394980185
+	3D Openingsangle of S and Lambda:
+		1465.0/1514.0 = 0.967635402906
+	 weighted:
+		1465.0/1514.0 = 0.967635402906
+Total efficiency of optional preselection in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:1306.0/1514.0=0.862615587847
+Total efficiency (weighed) of optional preselection in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:1306.0/1514.0=0.862615587847
+Total efficiency of ALL preselection cuts (initial + optional) in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:1306.0/3238.0=0.403335392217
+Total efficiency (weighed) of ALL preselection cuts (initial + optional) in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:1306.0/3238.0=0.403335392217
+Total COMBINED efficiency of all considered cuts (fiducial + initial preselection + optional preselection) in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:1306.0/5594.0=0.233464426171
+Total COMBINED efficiency (weighed) of all considered cuts (fiducial + initial preselection + optional preselection) in MC-Multi-to-Single-Reweighed-#bar{S}-Signal:1306.0/5594.0=0.233464426171
+---------------------------------------------------

@@ -1,0 +1,1 @@
+root://cmsxrootd.hep.wisc.edu//store/user/wvetens/crmc_Sexaq/Skimmed/CRAB_SimSexaq_trial5_MultiSQEV/crab_Step1_Step2_Skimming_FlatTree_trial5_MultiSQEV_1p8GeV_21112022_v4/221121_185348/0000/EDM_output_events_skimmed_1.root
