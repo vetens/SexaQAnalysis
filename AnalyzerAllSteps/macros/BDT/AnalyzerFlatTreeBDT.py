@@ -25,12 +25,13 @@ tdrstyle.setTDRStyle()
 colours = [4,2,35,30,43,1,6]
 markerStyle = [20,21,22,23,33,34,35]
 
-maxEvents = 1e99
+#maxEvents = 1e5
+maxEvents = 1e9
 
 applyFiducial = True
-#applyPreselection = True
+applyPreselection = True
 #apply_optional_Preselection = True
-applyPreselection = False
+#applyPreselection = False
 apply_optional_Preselection = False
 
 FiducialRegionptMin = 0.33
@@ -221,6 +222,8 @@ MC_Signal_Truth_cutoff = 0.5
 
 l_y_axis_ranges = [
 0.08,
+0.16,
+0.08,
 14.,
 1.1,
 1,
@@ -262,7 +265,10 @@ l_tree = [MC_S_Bkg_Tree,MC_Sbar_Bkg_Tree,MC_Sbar_Xevt_Bkg_Tree,Data_Sbar_Xevt_Bk
 #l_tree = [Data_S_Bkg_Tree, MC_AntiS_Sgn_Tree_MultiSQEV]
 
 #plots_output_dir = "plots_BackgroundVsSignal/"+configuration+"/"
-plots_output_dir = "plots_BDTInputs_NoPresel/"
+#plots_output_dir = "plots_BDTInputs_NoPresel/"
+plots_output_dir = "plots_BDTInputs_MinPresel/"
+#plots_output_dir = "plots_BDTInputs/"
+#plots_output_dir = "plots_BDTInputs_Test/"
 
 TH1_ll = [] #list of list of 1D histos 
 TH2_ll = [] #list of list of 2D histos
@@ -277,6 +283,9 @@ for tree in l_tree:
         nFiducialPass = 0
 	print "---------------------------------------------------"
 	print "running for ", Legend[iTree]
+
+	h_S_nGoodPVs = TH1F('h_S_nGoodPVs','; Number of Primary Vertices; 1/N_{ev} Events/3cm',60,0,60)
+	h_S_bestPVz = TH1F('h_S_bestPVz','; PV Z location (cm); 1/N_{ev} Events/3cm',50,-25,25)
 
 	h_S_vz_interaction_vertex= TH1F('h_S_vz_interaction_vertex','; absolute v_{z} iv ^{(}#bar{S} ^{)} (cm); 1/N_{ev} Events/3cm',20,-40,40)
 	h_S_lxy_interaction_vertex = TH1F('h_S_lxy_interaction_vertex','; l_{0,bpc} iv ^{(}#bar{S} ^{)} (cm); 1/N_{ev} Events/0.2mm',31,1.9,2.52)
@@ -310,6 +319,9 @@ for tree in l_tree:
 	h_S_error_lxy_interaction_vertex = TH1F('h_S_error_lxy_interaction_vertex','; #sigma(l_{0,bpc} iv ^{(}#bar{S} ^{)} ) (cm); 1/N_{ev} Events/0.004mm',10,0,0.04)
 	h_S_mass = TH1F('h_S_mass','; m_{ ^{(} #bar{S} ^{)} ,obs} (GeV/c^{2}); 1/N_{ev} Events/0.25GeV/c^{2}',40,-5,5)
 
+	h2_S_daughters_DeltaR_vs_S_lxy_interaction_vertex = TH2F('h_S_daughters_DeltaR_vs_S_lxy_interaction_vertex','; #DeltaR( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0} ); l_{0,bpc} iv ^{(}#bar{S} ^{)} (cm); 1/N_{ev} Events/0.25GeV/c^{2}',35,0,3.5,31,1.9,2.52)
+	h2_S_daughters_openingsangle_vs_S_lxy_interaction_vertex = TH2F('h_S_daughters_openingsangle_vs_S_lxy_interaction_vertex','; openings angle( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0} ) (rad); l_{0,bpc} iv ^{(}#bar{S} ^{)} (cm);1/N_{ev} Events/0.25GeV/c^{2}',35,0,3.5,31,1.9,2.52)
+
 	#h_S_BDT = TH1F('h_S_BDT','; BDT classifier; 1/N_{ev} Events/0.05 BDT class.',40,-1,1)
 	tprof_reweighing_factor = TProfile('tprof_reweighing_factor',';#eta ^{(}#bar{S} ^{)};reweighing factor',20,-5,5,0,50)
 
@@ -337,8 +349,10 @@ for tree in l_tree:
                             continue
                         if ('MC-Multi-to-Single-Reweighed-#bar{S}-Signal' in Legend[iTree]):
 			    reweighing_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factorPU[0]*tree._S_event_weighting_factorM2S[0]
+			    #reweighing_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factorM2S[0]
                         else:
 			    reweighing_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factorPU[0]
+			    #reweighing_factor = tree._S_event_weighting_factor[0]
                 ## TODO: Implement pileup reweighting for MC BKG?
 		#elif('MC-S-BKG' in Legend[iTree] or 'MC-#bar{S}-BKG' or 'MC-#bar{S}-Xevt-BKG' in Legend[iTree]):#if MC background only reweigh for the z location of the PV and PU
 		#	reweighing_factor = tree._S_event_weighting_factorPU[0]
@@ -374,6 +388,9 @@ for tree in l_tree:
 
                 nFiducialPass += 1
 
+		h_S_nGoodPVs.Fill(tree._S_nGoodPVs[0],reweighing_factor)
+		h_S_bestPVz.Fill(tree._S_bestPVz[0],reweighing_factor)
+
 		h_S_vz_interaction_vertex.Fill(tree._S_vz_interaction_vertex[0],reweighing_factor)
 		h_S_lxy_interaction_vertex.Fill(tree._S_lxy_interaction_vertex_beampipeCenter[0],reweighing_factor)
 
@@ -406,17 +423,21 @@ for tree in l_tree:
 		h_S_error_lxy_interaction_vertex.Fill(tree._S_error_lxy_interaction_vertex_beampipeCenter[0],reweighing_factor)  
 		h_S_mass.Fill(tree._S_mass[0],reweighing_factor)
 		#h_S_BDT.Fill(tree.SexaqBDT,reweighing_factor)
+	        h2_S_daughters_DeltaR_vs_S_lxy_interaction_vertex.Fill(tree._S_daughters_DeltaR[0], tree._S_lxy_interaction_vertex_beampipeCenter[0], reweighing_factor)
+	        h2_S_daughters_openingsangle_vs_S_lxy_interaction_vertex.Fill(tree._S_daughters_openingsangle[0], tree._S_lxy_interaction_vertex_beampipeCenter[0], reweighing_factor)
 
 		tprof_reweighing_factor.Fill(tree._S_eta[0],reweighing_factor)	
 
 #	TH1_l = [h_S_vz_interaction_vertex,h_S_lxy_interaction_vertex,h_S_daughters_deltaphi,h_S_daughters_deltaeta,h_S_daughters_openingsangle,h_S_daughters_DeltaR,h_S_Ks_openingsangle,h_S_Lambda_openingsangle,h_S_eta,h_Ks_eta,h_Lambda_eta,h_S_dxy_over_lxy,h_Ks_dxy_over_lxy,h_Lambda_dxy_over_lxy,h_S_dz_min,h_Ks_dz_min,h_Lambda_dz_min,h_Ks_pt,h_Lambda_lxy_decay_vertex,h_S_chi2_ndof,h_S_pz,h_S_error_lxy_interaction_vertex,h_S_mass,h_S_BDT,tprof_reweighing_factor]
 # For now, not doing the h_S_BDT
-	TH1_l = [h_S_vz_interaction_vertex,h_S_lxy_interaction_vertex,h_S_daughters_deltaphi,h_S_daughters_deltaeta,h_S_daughters_openingsangle,h_S_daughters_DeltaR,h_S_Ks_openingsangle,h_S_Lambda_openingsangle,h_S_eta,h_Ks_eta,h_Lambda_eta,h_S_dxy_over_lxy,h_Ks_dxy_over_lxy,h_Lambda_dxy_over_lxy,h_S_dz_min,h_Ks_dz_min,h_Lambda_dz_min,h_Ks_pt,h_Lambda_lxy_decay_vertex,h_S_chi2_ndof,h_S_pz,h_S_error_lxy_interaction_vertex,h_S_mass,tprof_reweighing_factor]
+	TH1_l = [h_S_nGoodPVs, h_S_bestPVz, h_S_vz_interaction_vertex,h_S_lxy_interaction_vertex,h_S_daughters_deltaphi,h_S_daughters_deltaeta,h_S_daughters_openingsangle,h_S_daughters_DeltaR,h_S_Ks_openingsangle,h_S_Lambda_openingsangle,h_S_eta,h_Ks_eta,h_Lambda_eta,h_S_dxy_over_lxy,h_Ks_dxy_over_lxy,h_Lambda_dxy_over_lxy,h_S_dz_min,h_Ks_dz_min,h_Lambda_dz_min,h_Ks_pt,h_Lambda_lxy_decay_vertex,h_S_chi2_ndof,h_S_pz,h_S_error_lxy_interaction_vertex,h_S_mass,tprof_reweighing_factor]
+	#TH1_l = [h_S_nGoodPVs, h_S_bestPVz]
 	for h in TH1_l:
 		h.SetDirectory(0) 
 	TH1_ll.append(TH1_l)
 
-	TH2_l = []
+	TH2_l = [h2_S_daughters_DeltaR_vs_S_lxy_interaction_vertex, h2_S_daughters_openingsangle_vs_S_lxy_interaction_vertex]
+	#TH2_l = []
 	for h in TH2_l:
 		h.SetDirectory(0) 
 	TH2_ll.append(TH2_l)
@@ -425,7 +446,7 @@ for tree in l_tree:
 	iTree+=1
 print "n Sbar:", nSbar
 
-fOut = TFile(plots_output_dir+'macro_FlatTree_BDT_trial17.root','RECREATE')
+fOut = TFile(plots_output_dir+'macro_FlatTree_BDT.root','RECREATE')
 
 nHistos = len(TH1_ll[0])
 nSamples = len(TH1_ll)

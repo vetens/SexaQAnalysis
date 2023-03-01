@@ -1,7 +1,7 @@
 from WMCore.Configuration import Configuration
 
-day = "13012023"
-version = "v2"
+day = "23012023"
+version = "v3"
 #trial = "4"
 #trial = "4_MultiSQEV"
 trial = "5_MultiToSingleReweighed"

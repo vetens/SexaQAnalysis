@@ -116,20 +116,26 @@ print 'the overall antiS reconstructability: ', nAntiSReconstructable, '/', nAnt
 
 l_nom = [h_nom_vz_antiS_reconstructable,h_nom_eta_antiS_reconstructable,h_nom_pt_antiS_reconstructable,h_nom_pz_antiS_reconstructable]
 l_denom = [h_denom_vz_antiS_reconstructable,h_denom_eta_antiS_reconstructable,h_denom_pt_antiS_reconstructable,h_denom_pz_antiS_reconstructable]
+l_recobility_y_axis_range = [0.12,0.13, 0.14, 0.12]
 for i in range(0,len(l_nom)):
 	teff = TEfficiency(l_nom[i],l_denom[i])
 	teff.SetName('teff_'+l_nom[i].GetName())
 	c = TCanvas("c_"+teff.GetName(),"");
 	teff.Draw("")
+        gPad.Update()
+        graph = teff.GetPaintedGraph()
+        graph.SetMinimum(0)
+        graph.SetMaximum(l_recobility_y_axis_range[i])
 	CMS_lumi.CMS_lumi(c, 0, 11)
 	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
 	c.Write()
 	teff.Write()
+        l_nom[i].GetYaxis().SetTitle("#Entries")
         c2 = TCanvas("c_"+l_nom[i].GetName())
         l_nom[i].Draw("")
 	CMS_lumi.CMS_lumi(c2, 0, 11)
 	c2.SaveAs(plots_output_dir+c2.GetName()+".pdf")
-	c.Write()
+	c2.Write()
 	
 l_tprof  = [h_eta_all_AntiS,h_vz_interaction_all_AntiS,h_vz_interaction_all_AntiS_zoom,h_pt_all_AntiS,h_pz_all_AntiS,tprof_eta_weighting_factor,tprof_vz_weighting_factor,tprof_vz_weighting_factor_zoom]
 for h in l_tprof:
