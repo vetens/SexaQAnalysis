@@ -27,6 +27,8 @@ markerStyle = [20,21,22,23,33,34,35]
 
 maxEvents = 1e99
 
+applyFiducial = True
+
 #the below is a bit historical, it is by default "all" now
 configuration = "all"
 #cut on the BDT parameter to select a minimal BDT, to go and look in the tail of the BDT distribution (towards the signal), put to -999 if you want all the events
@@ -240,6 +242,63 @@ for tree in l_tree:
 		elif('MC-S-BKG' in Legend[iTree] or 'MC-#bar{S}-BKG' in Legend[iTree]):#if MC background only reweigh for the z location of the PV and PU
 			reweighing_factor = tree._S_event_weighting_factorPU[0]
 
+
+                #FIDUCIAL CUTS
+                if( applyFiducial ):
+                    FiducialRegionptMin = 0.33
+                    FiducialRegionptMax = 999999999.
+                    
+                    FiducialRegionpzMin = -22.
+                    FiducialRegionpzMax = 22.
+                    
+                    FiducialRegiondxyMin = 0.
+                    FiducialRegiondxyMax = 9.5
+                    
+                    FiducialRegiondzMin = -27.
+                    FiducialRegiondzMax = 27.
+                    
+                    FiducialRegionlxyMax = 44.5
+                    
+                    FiducialRegionvzMin = -125.
+                    FiducialRegionvzMax = 125.
+                    if(tree._Lambda_vz_decay_vertex[0] >= FiducialRegionvzMax): continue
+                    if(tree._Lambda_vz_decay_vertex[0] <= FiducialRegionvzMin): continue
+                    if(tree._Lambda_lxy_decay_vertex[0] >= FiducialRegionlxyMax): continue
+                    if(tree._Ks_vz_decay_vertex[0] >= FiducialRegionvzMax): continue
+                    if(tree._Ks_vz_decay_vertex[0] <= FiducialRegionvzMin): continue
+                    if(tree._Ks_lxy_decay_vertex[0] >= FiducialRegionlxyMax): continue
+                    if(tree._RECO_Lambda_daughter0_pt[0] >= FiducialRegionptMax): continue
+                    if(tree._RECO_Lambda_daughter0_pt[0] <= FiducialRegionptMin): continue
+                    if(tree._RECO_Lambda_daughter0_pz[0] >= FiducialRegionpzMax): continue
+                    if(tree._RECO_Lambda_daughter0_pz[0] <= FiducialRegionpzMin): continue
+                    if(tree._RECO_Lambda_daughter0_dxy_beamspot[0] >= FiducialRegiondxyMax): continue
+                    if(tree._RECO_Lambda_daughter0_dxy_beamspot[0] <= FiducialRegiondxyMin): continue
+                    if(tree._RECO_Lambda_daughter0_dz_beamspot[0] >= FiducialRegiondzMax): continue
+                    if(tree._RECO_Lambda_daughter0_dz_beamspot[0] <= FiducialRegiondzMin): continue
+                    if(tree._RECO_Lambda_daughter1_pt[0] >= FiducialRegionptMax): continue
+                    if(tree._RECO_Lambda_daughter1_pt[0] <= FiducialRegionptMin): continue
+                    if(tree._RECO_Lambda_daughter1_pz[0] >= FiducialRegionpzMax): continue
+                    if(tree._RECO_Lambda_daughter1_pz[0] <= FiducialRegionpzMin): continue
+                    if(tree._RECO_Lambda_daughter1_dxy_beamspot[0] >= FiducialRegiondxyMax): continue
+                    if(tree._RECO_Lambda_daughter1_dxy_beamspot[0] <= FiducialRegiondxyMin): continue
+                    if(tree._RECO_Lambda_daughter1_dz_beamspot[0] >= FiducialRegiondzMax): continue
+                    if(tree._RECO_Lambda_daughter1_dz_beamspot[0] <= FiducialRegiondzMin): continue
+                    if(tree._RECO_Ks_daughter0_pt[0] >= FiducialRegionptMax): continue
+                    if(tree._RECO_Ks_daughter0_pt[0] <= FiducialRegionptMin): continue
+                    if(tree._RECO_Ks_daughter0_pz[0] >= FiducialRegionpzMax): continue
+                    if(tree._RECO_Ks_daughter0_pz[0] <= FiducialRegionpzMin): continue
+                    if(tree._RECO_Ks_daughter0_dxy_beamspot[0] >= FiducialRegiondxyMax): continue
+                    if(tree._RECO_Ks_daughter0_dxy_beamspot[0] <= FiducialRegiondxyMin): continue
+                    if(tree._RECO_Ks_daughter0_dz_beamspot[0] >= FiducialRegiondzMax): continue
+                    if(tree._RECO_Ks_daughter0_dz_beamspot[0] <= FiducialRegiondzMin): continue
+                    if(tree._RECO_Ks_daughter1_pt[0] >= FiducialRegionptMax): continue
+                    if(tree._RECO_Ks_daughter1_pt[0] <= FiducialRegionptMin): continue
+                    if(tree._RECO_Ks_daughter1_pz[0] >= FiducialRegionpzMax): continue
+                    if(tree._RECO_Ks_daughter1_pz[0] <= FiducialRegionpzMin): continue
+                    if(tree._RECO_Ks_daughter1_dxy_beamspot[0] >= FiducialRegiondxyMax): continue
+                    if(tree._RECO_Ks_daughter1_dxy_beamspot[0] <= FiducialRegiondxyMin): continue
+                    if(tree._RECO_Ks_daughter1_dz_beamspot[0] >= FiducialRegiondzMax): continue
+                    if(tree._RECO_Ks_daughter1_dz_beamspot[0] <= FiducialRegiondzMin): continue
 
 		h_S_vz_interaction_vertex.Fill(tree._S_vz_interaction_vertex[0],reweighing_factor)
 		h_S_lxy_interaction_vertex.Fill(tree._S_lxy_interaction_vertex_beampipeCenter[0],reweighing_factor)

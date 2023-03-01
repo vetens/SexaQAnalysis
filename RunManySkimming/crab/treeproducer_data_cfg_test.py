@@ -77,10 +77,10 @@ else:
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvts))
 
 
-#inlist = open("testDataFiles.txt", "r")
+inlist = open("testDataFiles.txt", "r")
 process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(options.inputFiles),
-#        fileNames = cms.untracked.vstring(*(inlist.readlines())),
+#        fileNames = cms.untracked.vstring(options.inputFiles),
+        fileNames = cms.untracked.vstring(*(inlist.readlines())),
   duplicateCheckMode = cms.untracked.string ("noDuplicateCheck")
 )
 
@@ -113,6 +113,7 @@ process.lambdaKshortFilter.minPtLambda = 0.
 process.lambdaKshortFilter.minPtKshort = 0. 
 #Fiducial cuts:
 process.lambdaKshortFilter.doFiducialCuts = True
+#process.lambdaKshortFilter.doFiducialCuts = False
 process.lambdaKshortFilter.maxVzDecayLambda = 125.
 process.lambdaKshortFilter.maxVzDecayKshort = 125.
 process.lambdaKshortFilter.maxLxyDecayLambda = 44.5
@@ -147,6 +148,7 @@ process.lambdaKshortVertexFilter.kshortCollection = cms.InputTag("lambdaKshortFi
 process.lambdaKshortVertexFilter.maxchi2ndofVertexFit = 10.
 #Initial Preselection:
 process.lambdaKshortVertexFilter.doInitialPreselection = True
+#process.lambdaKshortVertexFilter.doInitialPreselection = False
 process.lambdaKshortVertexFilter.minDeltaPhi_LambdaKshort = 0.4
 process.lambdaKshortVertexFilter.minLxy_SInteractionToBPC = 2.02
 process.lambdaKshortVertexFilter.maxLxy_SInteractionToBPC = 2.4
@@ -154,6 +156,7 @@ process.lambdaKshortVertexFilter.minDxyOverLxy_SInteractionToBeamspot = 0.
 process.lambdaKshortVertexFilter.maxDxyOverLxy_SInteractionToBeamspot = 0.5
 #Additional Preselection:
 process.lambdaKshortVertexFilter.doAdditionalPreselection = True
+#process.lambdaKshortVertexFilter.doAdditionalPreselection = False
 process.lambdaKshortVertexFilter.maxVzInteraction_S = 28.
 process.lambdaKshortVertexFilter.maxDeltaEta_LambdaKs = 2.
 process.lambdaKshortVertexFilter.minOpeningsAngle_LambdaKs = 0.4
@@ -202,8 +205,9 @@ process.TFileService = cms.Service('TFileService',
 #Keep edm output file --> used in the analyzer
 process.out = cms.OutputModule("PoolOutputModule",
   outputCommands = collections_to_keep,
-   #fileName = cms.untracked.string("events_skimmed.root"),
-   fileName = cms.untracked.string(options.outputFile),
+   fileName = cms.untracked.string("events_skimmed.root"),
+   #fileName = cms.untracked.string("events_skimmed_NoExtraCuts.root"),
+   #fileName = cms.untracked.string(options.outputFile),
     SelectEvents = cms.untracked.PSet(
     SelectEvents = cms.vstring('p')
   )
@@ -212,8 +216,8 @@ process.out = cms.OutputModule("PoolOutputModule",
 process.output_step = cms.EndPath(process.out)
 
 
-iFileName = "configDump_cfg.py"
-file = open(iFileName,'w')
-file.write(str(process.dumpPython()))
-file.close()
-print process.dumpPython()
+#iFileName = "configDump_cfg.py"
+#file = open(iFileName,'w')
+#file.write(str(process.dumpPython()))
+#file.close()
+#print process.dumpPython()

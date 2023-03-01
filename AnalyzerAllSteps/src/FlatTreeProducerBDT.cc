@@ -51,6 +51,9 @@ void FlatTreeProducerBDT::beginJob() {
 	//Sbar event information to be (potentially) used in the BDT    
         _tree = fs->make <TTree>("FlatTree","tree");
 
+        _tree->Branch("_S_nGoodPVs",&_S_nGoodPVs);
+        _tree->Branch("_S_bestPVz",&_S_bestPVz);
+
 	_tree->Branch("_S_charge",&_S_charge);
 	_tree->Branch("_S_deltaLInteractionVertexAntiSmin",&_S_deltaLInteractionVertexAntiSmin);
 	_tree->Branch("_S_deltaRAntiSmin",&_S_deltaRAntiSmin);
@@ -466,6 +469,8 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	nSavedRECOSWeighed++;
 
 	Init();	
+        _S_nGoodPVs.push_back(ngoodPVsPOG);
+        _S_bestPVz.push_back(bestPVdzAntiS.Z());
 
 	_S_charge.push_back(RECO_S->charge());
 	_S_deltaLInteractionVertexAntiSmin.push_back(deltaLInteractionVertexAntiSmin);
@@ -637,6 +642,8 @@ void FlatTreeProducerBDT::Init_Counter()
 void FlatTreeProducerBDT::Init()
 {
 
+        _S_nGoodPVs.clear();
+        _S_bestPVz.clear();
 
     	_S_charge.clear();
 	_S_deltaLInteractionVertexAntiSmin.clear();

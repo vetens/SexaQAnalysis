@@ -72,6 +72,9 @@ class FlatTreeProducerBDT : public edm::EDAnalyzer
     std::vector<float> _PVx,_PVy,_PVz,_goodPVx,_goodPVy,_goodPVz,_goodPVxPOG,_goodPVyPOG,_goodPVzPOG;
 
     //definition of variables which should go to tree
+    std::vector<int> _S_nGoodPVs; 
+    std::vector<float> _S_bestPVz;
+
     std::vector<float> _S_charge;
     std::vector<float> _S_deltaLInteractionVertexAntiSmin,_S_deltaRAntiSmin,_S_deltaRKsAntiSmin,_S_deltaRLambdaAntiSmin;
     std::vector<float> _S_lxy_interaction_vertex, _S_lxy_interaction_vertex_beampipeCenter, _S_error_lxy_interaction_vertex,_S_error_lxy_interaction_vertex_beampipeCenter,_Ks_lxy_decay_vertex,_Lambda_lxy_decay_vertex,_S_mass,_S_chi2_ndof,_S_event_weighting_factor,_S_event_weighting_factorPU,_S_event_weighting_factorALL;

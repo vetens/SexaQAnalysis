@@ -8,17 +8,42 @@ LambdaKshortVertexFilter::LambdaKshortVertexFilter(edm::ParameterSet const& pset
   lambdaCollectionTag_		(pset.getParameter<edm::InputTag>("lambdaCollection")),
   kshortCollectionTag_		(pset.getParameter<edm::InputTag>("kshortCollection")),
   genCollectionTag_  		(pset.getParameter<edm::InputTag>("genparticlesCollection")),
+  bsCollectionTag_  		(pset.getParameter<edm::InputTag>("beamspot")),
+  PVCollectionTag_  		(pset.getParameter<edm::InputTag>("offlinePV")),
   //parameters
-  maxchi2ndofVertexFit_  	(pset.getParameter<double>("maxchi2ndofVertexFit"))
+  maxchi2ndofVertexFit_  	(pset.getParameter<double>("maxchi2ndofVertexFit")),
+  doInitialPresel_  	        (pset.getParameter<bool>("doInitialPreselection")),
+  doAdditionalPresel_  	        (pset.getParameter<bool>("doAdditionalPreselection")),
+  //Initial Preselection parameters
+  minDeltaPhi_LambdaKshort_     (pset.getParameter<double>("minDeltaPhi_LambdaKshort")),
+  minLxy_SInteractionToBPC_     (pset.getParameter<double>("minLxy_SInteractionToBPC")),
+  maxLxy_SInteractionToBPC_     (pset.getParameter<double>("maxLxy_SInteractionToBPC")),
+  minDxyOverLxy_SInteractionToBeamspot_(pset.getParameter<double>("minDxyOverLxy_SInteractionToBeamspot")),
+  maxDxyOverLxy_SInteractionToBeamspot_(pset.getParameter<double>("maxDxyOverLxy_SInteractionToBeamspot")),
+  //Additional Preselection parameters
+  maxVzInteraction_S_           (pset.getParameter<double>("maxVzInteraction_S")),
+  maxDeltaEta_LambdaKs_         (pset.getParameter<double>("maxDeltaEta_LambdaKs")),
+  minOpeningsAngle_LambdaKs_    (pset.getParameter<double>("minOpeningsAngle_LambdaKs")),
+  maxOpeningsAngle_LambdaKs_    (pset.getParameter<double>("maxOpeningsAngle_LambdaKs")),
+  minOpeningsAngle_SKshort_     (pset.getParameter<double>("minOpeningsAngle_SKshort")),
+  maxOpeningsAngle_SKshort_     (pset.getParameter<double>("maxOpeningsAngle_SKshort")),
+  minOpeningsAngle_SLambda_     (pset.getParameter<double>("minOpeningsAngle_SLambda")),
+  maxOpeningsAngle_SLambda_     (pset.getParameter<double>("maxOpeningsAngle_SLambda")),
+  maxEta_S_                     (pset.getParameter<double>("maxEta_S")),
+  maxDzmin_S_                   (pset.getParameter<double>("maxDzmin_S")),
+  maxEta_Kshort_                (pset.getParameter<double>("maxEta_Kshort")),
+  minPT_Kshort_                 (pset.getParameter<double>("minPT_Kshort"))
 {
   //collections
   lambdaCollectionToken_ = consumes<reco::CandidatePtrVector>(lambdaCollectionTag_);
   kshortCollectionToken_ = consumes<reco::CandidatePtrVector>(kshortCollectionTag_);
   genCollectionToken_    = consumes<std::vector<reco::GenParticle> > (genCollectionTag_);
+  bsCollectionToken_    = consumes<reco::BeamSpot> (bsCollectionTag_);
+  PVCollectionToken_    = consumes<std::vector<reco::Vertex> > (PVCollectionTag_);
   //producer
   produces<std::vector<reco::VertexCompositeCandidate> >("sParticles");
   //the reconstruction of X events S and Sbar is disabled for now as it was giving a mysterious seg violation
-  produces<std::vector<reco::VertexCompositeCandidate> >("sParticlesXEvent");
+  //  produces<std::vector<reco::VertexCompositeCandidate> >("sParticlesXEvent");
 
 }
 
@@ -37,7 +62,7 @@ bool LambdaKshortVertexFilter::filter(edm::Event & iEvent, edm::EventSetup const
 
   //these are for the producer
   auto sParticles = std::make_unique<std::vector<reco::VertexCompositeCandidate> >();
-  auto sParticlesXEvent = std::make_unique<std::vector<reco::VertexCompositeCandidate> >();
+  //auto sParticlesXEvent = std::make_unique<std::vector<reco::VertexCompositeCandidate> >();
 
 
   // collections
@@ -47,9 +72,16 @@ bool LambdaKshortVertexFilter::filter(edm::Event & iEvent, edm::EventSetup const
   iEvent.getByToken(kshortCollectionToken_ , h_kshort);
   edm::Handle<std::vector<reco::GenParticle>> h_gen;
   iEvent.getByToken(genCollectionToken_ , h_gen);
+  edm::Handle<reco::BeamSpot> h_bs;
+  iEvent.getByToken(bsCollectionToken_ , h_bs);
+  edm::Handle<std::vector<reco::Vertex>> h_offlinePV;
+  iEvent.getByToken(PVCollectionToken_ , h_offlinePV);
  
   //check all the above collections and return false if any of them is invalid
   if (!allCollectionValid(h_lambda, h_kshort)) return false;
+  if (!h_bs.isValid()) return false;
+  TVector3 beamspot(h_bs->x0(), h_bs->y0(), h_bs->z0());
+  if (!h_offlinePV.isValid()) return false;
   //special collection to check of the gen particles. It will not always be there... depending on the input file
   bool isMC = false;
   if(h_gen.isValid()) {
@@ -65,7 +97,7 @@ bool LambdaKshortVertexFilter::filter(edm::Event & iEvent, edm::EventSetup const
   
   // loop over all the lambdas in an event
   for (unsigned int l = 0; l < h_lambda->size(); ++l) {
-    //print the momenta from the lambdas for debugging:
+    //print the momenta from the lambdas f
 
     //get the daughters from the Lambdas
     const Candidate * V0LambdasDaughter1 = (*h_lambda)[l]->daughter(0);
@@ -118,10 +150,25 @@ bool LambdaKshortVertexFilter::filter(edm::Event & iEvent, edm::EventSetup const
     //now do a kinfit to the two transient tracks
     RefCountedKinematicTree  KshortTree = KinfitTwoTTracks(TTrackV0KaonsDaughter1, TTrackV0KaonsDaughter2, charged_pi_mass, charged_pi_mass_sigma, charged_pi_mass, charged_pi_mass_sigma, KshortMass, KshortMassSigma);
     if(!checkRefCountedKinematicTree(KshortTree)){cout << "Kshort tree not succesfully build" << endl; return false;}
-    //get the Kshort particle from the tree and put in a vector
-   KshortTree->movePointerToTheTop(); 
-   kshortKinFitted.push_back(KshortTree->currentParticle());
-   kshortKinFittedVertex.push_back(KshortTree->currentDecayVertex());
+    //Check Additional Preselection criteria for Kshort
+    if (doAdditionalPresel_) {
+        bool KPassedAdditionalPreselection = false;
+        if ( fabs(KshortTree->currentParticle()->currentState().globalMomentum().eta()) < maxEta_Kshort_ 
+          && KshortTree->currentParticle()->currentState().globalMomentum().perp() > minPT_Kshort_ ) {
+            KPassedAdditionalPreselection = true;
+        }
+        if (KPassedAdditionalPreselection) {
+        //with preselection: get the Kshort particle from the tree and put in a vector iff it passes preselection
+            KshortTree->movePointerToTheTop(); 
+            kshortKinFitted.push_back(KshortTree->currentParticle());
+            kshortKinFittedVertex.push_back(KshortTree->currentDecayVertex());
+        }
+    } else {
+    //get the Kshort particle from the tree and put in a vector if you aren't doing preselection on it
+    KshortTree->movePointerToTheTop(); 
+    kshortKinFitted.push_back(KshortTree->currentParticle());
+    kshortKinFittedVertex.push_back(KshortTree->currentDecayVertex());
+    }
 
   }
 
@@ -132,45 +179,97 @@ bool LambdaKshortVertexFilter::filter(edm::Event & iEvent, edm::EventSetup const
 	}//end loop over gen particles
   }//end isMC
 
-
+//Normal S/Sbar reconstruction
   for (unsigned int l = 0; l < lambdaKinFitted.size(); ++l) {
     for(unsigned int k = 0; k < kshortKinFitted.size(); ++k){
 
+      RefCountedKinematicParticle lambda_l = lambdaKinFitted.at(l);
+      RefCountedKinematicParticle kshort_k = kshortKinFitted.at(k);
+      RefCountedKinematicVertex V_lambda_l = lambdaKinFittedVertex.at(l);
+      RefCountedKinematicVertex V_kshort_k = kshortKinFittedVertex.at(k);
+
       int cProton =  chargeProton[l];
-      reco::VertexCompositeCandidate S = FitS(lambdaKinFitted.at(l),kshortKinFitted.at(k),lambdaKinFittedVertex.at(l),kshortKinFittedVertex.at(k),cProton);
+      reco::VertexCompositeCandidate S = FitS(lambda_l,kshort_k,V_lambda_l,V_kshort_k,cProton);
+      TVector3 SInteractionVertex(S.vx(), S.vy(), S.vz());
+      TVector3 T_SMomentum(S.px(), S.py(), S.pz());
+      reco::Candidate::Vector SMomentum(S.px(), S.py(), S.pz());
+
+      TVector3 T_Lambda_p(lambda_l->currentState().globalMomentum().x(), lambda_l->currentState().globalMomentum().y(), lambda_l->currentState().globalMomentum().z());
+      reco::Candidate::Vector Lambda_p(lambda_l->currentState().globalMomentum().x(), lambda_l->currentState().globalMomentum().y(), lambda_l->currentState().globalMomentum().z());
+
+      TVector3 T_Kshort_p(kshort_k->currentState().globalMomentum().x(), kshort_k->currentState().globalMomentum().y(), kshort_k->currentState().globalMomentum().z());
+      reco::Candidate::Vector Kshort_p(kshort_k->currentState().globalMomentum().x(), kshort_k->currentState().globalMomentum().y(), kshort_k->currentState().globalMomentum().z());
+
 
        //adding Sparticles to the event
       if(S.vertexNdof() != 999.){
+        //Initial Preselection
+        if ( doInitialPresel_ ) {
+          bool SPassedInitialPresel = false;
+          TVector3 BeamPipeCenter(AnalyzerAllSteps::center_beampipe_x, AnalyzerAllSteps::center_beampipe_y, 0);
+          if (isMC) {BeamPipeCenter.SetXYZ(0, 0, 0);}
+          if ( ( fabs(Lambda_p.phi() - Kshort_p.phi()) >= minDeltaPhi_LambdaKshort_ )
+            && ( sqrt(pow(S.vx() - BeamPipeCenter.X(),2) + pow(S.vy() - BeamPipeCenter.Y(),2)) > minLxy_SInteractionToBPC_ )
+            && ( sqrt(pow(S.vx() - BeamPipeCenter.X(),2) + pow(S.vy() - BeamPipeCenter.Y(),2)) < maxLxy_SInteractionToBPC_ )
+            && ( AnalyzerAllSteps::dxy_signed_line_point(SInteractionVertex, T_SMomentum, beamspot) / AnalyzerAllSteps::lxy(beamspot, SInteractionVertex) < maxDxyOverLxy_SInteractionToBeamspot_ )
+            ) {
+            SPassedInitialPresel = true;
+          }
+          //Additional Preselection (Cuts on Ks done in the Ks section of the code)
+          if ( SPassedInitialPresel && doAdditionalPresel_ ) {
+              TVector3 bestPVdzAntiS = AnalyzerAllSteps::dz_line_point_min(SInteractionVertex, T_SMomentum, h_offlinePV);
+              bool SPassedAdditionalPresel = false;
+              if ( ( fabs(S.vz() - beamspot.Z()) < maxVzInteraction_S_ )
+                && ( fabs(Lambda_p.eta() - Kshort_p.eta()) < maxDeltaEta_LambdaKs_ )
+                && ( AnalyzerAllSteps::openings_angle(Lambda_p,Kshort_p) > minOpeningsAngle_LambdaKs_ )
+                && ( AnalyzerAllSteps::openings_angle(Lambda_p,Kshort_p) < maxOpeningsAngle_LambdaKs_ )
+                && ( AnalyzerAllSteps::openings_angle(Kshort_p,SMomentum) > minOpeningsAngle_SKshort_ )
+                && ( AnalyzerAllSteps::openings_angle(Kshort_p,SMomentum) < maxOpeningsAngle_SKshort_ )
+                && ( AnalyzerAllSteps::openings_angle(Lambda_p,SMomentum) > minOpeningsAngle_SLambda_ )
+                && ( AnalyzerAllSteps::openings_angle(Lambda_p,SMomentum) < maxOpeningsAngle_SLambda_ )
+                && ( fabs(S.eta()) < maxEta_S_ )
+                && ( fabs(AnalyzerAllSteps::dz_line_point(SInteractionVertex, T_SMomentum, bestPVdzAntiS)) < maxDzmin_S_ )
+                ) {
+                SPassedAdditionalPresel = true;
+              }
+              if ( SPassedInitialPresel && SPassedAdditionalPresel ){
+	        sParticles->push_back(std::move(S)); 
+              }
+          } else if ( SPassedInitialPresel ) {
+	    sParticles->push_back(std::move(S)); 
+          }
+        } else {
 	sParticles->push_back(std::move(S)); 
+        }
       }
     }//end loop over kshort
   }//end loop over lambda
 
   //std::cout << "size of lambdaKinFitted and kshortKinFittedPrevEvent: " << lambdaKinFitted.size() << " " << kshortKinFittedPrevEvent.size() << std::endl;
-  for (unsigned int l = 0; l < lambdaKinFitted.size(); ++l) {
-    for(unsigned int k = 0; k < kshortKinFittedPrevEvent.size(); ++k){
-
-      //std::cout << "l, k = " << l <<  ", " << k << std::endl;
-      int cProton =  chargeProton[l];
-      reco::VertexCompositeCandidate S = FitS(lambdaKinFitted.at(l),kshortKinFittedPrevEvent.at(k),lambdaKinFittedVertex.at(l),kshortKinFittedVertexPrevEvent.at(k),cProton);
-
-       //adding Sparticles to the event
-      if(S.vertexNdof() != 999.){
-	sParticlesXEvent->push_back(std::move(S)); 
-//	std::cout << "S candidate mass prev event " << S.mass() << std::endl;
-      }
-    }//end loop over kshort
-  }//end loop over lambda
- 
-  //std::cout << "saving " << kshortKinFitted.size() << " Ks for use in the next event" << std::endl;
-
-  kshortKinFittedPrevEvent = kshortKinFitted; 
-  kshortKinFittedVertexPrevEvent = kshortKinFittedVertex;
-
+//cross-event S/Sbar reconstruction
+//      for (unsigned int l = 0; l < lambdaKinFitted.size(); ++l) {
+//        for(unsigned int k = 0; k < kshortKinFittedPrevEvent.size(); ++k){
+//    
+//          //std::cout << "l, k = " << l <<  ", " << k << std::endl;
+//          int cProton =  chargeProton[l];
+//          reco::VertexCompositeCandidate S = FitS(lambdaKinFitted.at(l),kshortKinFittedPrevEvent.at(k),lambdaKinFittedVertex.at(l),kshortKinFittedVertexPrevEvent.at(k),cProton);
+//    
+//           //adding Sparticles to the event
+//          if(S.vertexNdof() != 999.){
+//    	    sParticlesXEvent->push_back(std::move(S)); 
+//    //	std::cout << "S candidate mass prev event " << S.mass() << std::endl;
+//          }
+//        }//end loop over kshort
+//      }//end loop over lambda
+//     
+//      //std::cout << "saving " << kshortKinFitted.size() << " Ks for use in the next event" << std::endl;
+//    
+//      kshortKinFittedPrevEvent = kshortKinFitted; 
+//      kshortKinFittedVertexPrevEvent = kshortKinFittedVertex;
+//      iEvent.put(std::move(sParticlesXEvent),"sParticlesXEvent"); 
   
   int ns = sParticles->size();
   iEvent.put(std::move(sParticles),"sParticles"); 
-  iEvent.put(std::move(sParticlesXEvent),"sParticlesXEvent"); 
   return (ns > 0);
 
 }//end filter
