@@ -1,1 +1,0 @@
-root://cmsxrootd.hep.wisc.edu//store/user/wvetens/crmc_Sexaq/ParkingBPH2/crab_ParkingBPH2_Run2018B-20Jun2021_UL2018-v1_BLOCK_A_SkimmingSexaq_28032022_v2/220328_143103/0000/events_skimmed_1-11.root
