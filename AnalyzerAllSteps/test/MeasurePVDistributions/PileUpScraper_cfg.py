@@ -15,14 +15,15 @@ options.register(
 	'flag to indicate data or MC')
 
 options.register(
-	#'maxEvts',-1,VarParsing.multiplicity.singleton,VarParsing.varType.int,
-	'maxEvts',1000,VarParsing.multiplicity.singleton,VarParsing.varType.int,
+	'maxEvts',-1,VarParsing.multiplicity.singleton,VarParsing.varType.int,
+	#'maxEvts',1000,VarParsing.multiplicity.singleton,VarParsing.varType.int,
 	'flag to indicate max events to process')
 	
 options.isData==False
 
 process = cms.Process("SEXAQDATAANA")
 process.load("FWCore.MessageService.MessageLogger_cfi")
+process.load("FWCore.Modules.preScaler_cfi")
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load('Configuration/StandardSequences/MagneticField_38T_cff')
@@ -41,12 +42,13 @@ else:
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvts))
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
+process.preScaler.prescaleFactor = cms.int32(1)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
-inlist = open("test.txt", "r")
+#inlist = open("SbarSignal_NoSelection_NoReconstruction.txt", "r")
 process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring(*(inlist.readlines())),
-	#fileNames = cms.untracked.vstring(options.inputFiles),
+        #fileNames = cms.untracked.vstring(*(inlist.readlines())),
+	fileNames = cms.untracked.vstring(options.inputFiles),
   duplicateCheckMode = cms.untracked.string ("noDuplicateCheck")
 )
 

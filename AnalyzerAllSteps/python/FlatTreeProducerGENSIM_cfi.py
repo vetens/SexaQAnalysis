@@ -4,6 +4,7 @@ from SimTracker.TrackAssociation.LhcParametersDefinerForTP_cfi import *
 FlatTreeProducerGENSIM = cms.EDAnalyzer('FlatTreeProducerGENSIM',
     lookAtAntiS = cms.untracked.bool(False),
     runningOnData = cms.untracked.bool(False),
+    SingleSbarOnly = cms.untracked.bool(False),
     beamspot = cms.InputTag("offlineBeamSpot"),
     offlinePV = cms.InputTag("offlinePrimaryVertices"),
     genCollection_GEN =  cms.InputTag("genParticles","","GEN"),

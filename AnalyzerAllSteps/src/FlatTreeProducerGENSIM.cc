@@ -4,6 +4,7 @@
 FlatTreeProducerGENSIM::FlatTreeProducerGENSIM(edm::ParameterSet const& pset):
   m_lookAtAntiS(pset.getUntrackedParameter<bool>("lookAtAntiS")),
   m_runningOnData(pset.getUntrackedParameter<bool>("runningOnData")),
+  m_SingleSbarOnly(pset.getUntrackedParameter<bool>("SingleSbarOnly")),
   m_bsTag(pset.getParameter<edm::InputTag>("beamspot")),
   m_offlinePVTag(pset.getParameter<edm::InputTag>("offlinePV")),
   m_genParticlesTag_GEN(pset.getParameter<edm::InputTag>("genCollection_GEN")),
@@ -230,6 +231,9 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
   }
   else { std::cout << "offlinepv not valid!!!!!" << std::endl;}
 
+  //These two parameters will only be relevant if you choose the "Save only Single Sbar events" option in your config: "Single Sbar only" mode is needed for the multi-to-single reweighting to get more realistic signal sample kinematics. The bool is by default true and can only be flipped to false if you specify in the config
+  int nTotalUniqueGenSbar_PerEVT = 0;
+  bool SaveEvent = true;
   //loop over the gen particles, check for this antiS if there are any antiS with the same eta, so duplicates. These duplicates are the result of the looping mechanism.
   //save the number of duplicates in a vector of vectors. Each vector has  as a first element the eta of the antiS and 2nd element the # of antiS with this eta. 
   vector<vector<float>> v_antiS_momenta_and_itt; 
@@ -237,7 +241,6 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 	const reco::Candidate * genParticle = &h_genParticles->at(i);
 
   	if(genParticle->pdgId() != AnalyzerAllSteps::pdgIdAntiS) continue;
-   	nTotalGENS++;	
 
 	int duplicateIt = -1; 
 	for(unsigned int j = 0; j<v_antiS_momenta_and_itt.size();j++){//check if this antiS is already in the list.
@@ -251,6 +254,7 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 	}
 	else{//this is a new antiS
 		nTotalUniqueGenS++;
+                nTotalUniqueGenSbar_PerEVT++;
 		double weight_PU = 0.;
 		if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
                 std::vector<double> weight_M2S = AnalyzerAllSteps::MC_M2SReweighingFactor(genParticle->eta(), m_MultiToSingleReweighingMapIn);
@@ -260,129 +264,139 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 		dummyVec.push_back(1.);//encountered this antiS once
 		v_antiS_momenta_and_itt.push_back(dummyVec);
 	}
+        //If only Saving Single Sbar and found either 0 or multiple Sbar, flag that the event will not be saved
+        if (m_SingleSbarOnly && nTotalUniqueGenSbar_PerEVT != 1) {
+              std::cout << "Multiple Sbar found in this event! Skipping Event." << std::endl;
+              SaveEvent = false;
+        }
+        if(SaveEvent){
+        nTotalGENS++;	
+        }
   }
 
-  std::cout << "In this event found " << v_antiS_momenta_and_itt.size() << " unique AntiS, with following #duplicates: " << std::endl;
-  for(unsigned int j = 0; j<v_antiS_momenta_and_itt.size();j++){
-	std::cout << v_antiS_momenta_and_itt[j][1] << " with eta " << v_antiS_momenta_and_itt[j][0] << std::endl;
-  }
-
-  //first find the GEN particles which are proper (i.e. with the correct final state particles) antiS
-  if(!m_runningOnData && m_lookAtAntiS){
-	  if(h_genParticles.isValid()){
-	      std::vector<std::vector<double>> v_antiS_eta_reconstructable; 
-	      for(unsigned int i = 0; i < h_genParticles->size(); ++i){//loop all genparticlesPlusGEANT
-
-			const reco::Candidate * genParticle = &h_genParticles->at(i);
-			if(genParticle->pdgId() != AnalyzerAllSteps::pdgIdAntiS) continue;
-                        //only save Sbar which interact
-			if(genParticle->numberOfDaughters() < 2) continue;
-
-			//check if you already have an entry for this antiS in v_antiS_eta_reconstructable
-			bool newAntiS = true;
-			int antiS_it = -1;
-			//check for all the entries in v_antiS_eta_reconstructable if there is an eta match, if there is an eta match this antiS has already been encountered
-			for(unsigned int j = 0; j < v_antiS_eta_reconstructable.size(); j++){
-				if(v_antiS_eta_reconstructable[j][0] == genParticle->eta() ){ newAntiS = false;antiS_it = j;}
-			}
-			//if there was no eta match newAntiS is still true and I should make an new entry in the vector for this guy
-			if(newAntiS){
-
-				std::vector<double> newAntiSEntry; 
-				newAntiSEntry.push_back(genParticle->eta()); 
-				newAntiSEntry.push_back(0);//take it as not reconstructable at first 
-				newAntiSEntry.push_back(AnalyzerAllSteps::EventWeightingFactor(genParticle->theta()));
-				newAntiSEntry.push_back(genParticle->vz());//save where it got produced.
-				newAntiSEntry.push_back(genParticle->pt());
-				newAntiSEntry.push_back(genParticle->pz());
-
-				v_antiS_eta_reconstructable.push_back(newAntiSEntry);
-				antiS_it = v_antiS_eta_reconstructable.size()-1;
-			}
-			
-			
-
-			bool AntiSReconstructable = false;
-
-			double weight_PU = 0.;
-                	if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
-                        std::vector<double> weight_M2S = AnalyzerAllSteps::MC_M2SReweighingFactor(genParticle->eta(), m_MultiToSingleReweighingMapIn);
-			//check if this is a reconstructable antiS, so should have 2 daughters of correct type, each daughter should have 2 daughters with the correct type
-			//the below implicitely neglects the duplitcate antiS due to looping, because only 1 of the duplicates will interact and give daughters. The others do not have any daughters.
-			if(genParticle->numberOfDaughters()==2){
-
-				nTotalGiving2DaughtersGENS++;
-				nTotalGiving2DaughtersGENS_weighted = nTotalGiving2DaughtersGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
-
-				int daughterParticlesTypes = AnalyzerAllSteps::getDaughterParticlesTypes(genParticle);//returns 3 if daughters from antiS are Ks and AntiLambda
- 
-				if(genParticle->daughter(0)->numberOfDaughters()==2 && genParticle->daughter(1)->numberOfDaughters()==2 && daughterParticlesTypes == 3){
-
-					nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS++;
-					nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS_weighted = nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
-					int graddaughters0ParticlesTypes = AnalyzerAllSteps::getDaughterParticlesTypes(genParticle->daughter(0));
-					int graddaughters1ParticlesTypes = AnalyzerAllSteps::getDaughterParticlesTypes(genParticle->daughter(1));
-					if((graddaughters0ParticlesTypes == 1 && graddaughters1ParticlesTypes == 2) || (graddaughters1ParticlesTypes == 1 && graddaughters0ParticlesTypes == 2)){
-						std::cout << "AntiS with all CORRECT: correct types and numbers of daughters and granddaughters and eta " << genParticle->eta() << std::endl;
-						nTotalCorrectGENS++;
-						nTotalCorrectGENS_weighted = nTotalCorrectGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
-						if(genParticle->eta()>0) {nTotalGENSPosEta++; nTotalGENSPosEta_weighted = nTotalGENSPosEta_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];}
-						if(genParticle->eta()<0) {nTotalGENSNegEta++; nTotalGENSNegEta_weighted = nTotalGENSNegEta_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];}
-						//fill the tree with kinematics of Sbar events which go to all correct final state particles
-						AntiSReconstructable = FillBranchesGENAntiS(genParticle,beamspot, beamspotVariance, v_antiS_momenta_and_itt,  h_TP,nGoodPV);
-						if(AntiSReconstructable)nTotalCorrectGENS_Reconstructable_weighted = nTotalCorrectGENS_Reconstructable_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
-					}// if((graddaughters0ParticlesTypes == 1 && graddaughters1ParticlesTypes == 2) || (graddaughters1ParticlesTypes == 1 && graddaughters0ParticlesTypes == 2))
-			        }//if((genParticle->daughter(0)->numberOfDaughters()==2 && genParticle->daughter(1)->numberOfDaughters()==2 && daughterParticlesTypes == 3))
-	                }//if(genParticle->numberOfDaughters()==2)
-			//now save for this antiS in v_antiS_eta_reconstructable the or of the reconstructability flag which was already in this vector and the the current AntiSReconstructable, 
-			//like that you will check for any of the duplicates if it was reconstructable
-			v_antiS_eta_reconstructable[antiS_it][1] = (int)v_antiS_eta_reconstructable[antiS_it][1] | AntiSReconstructable;
-		
-	      }//for(unsigned int i = 0; i < h_genParticles->size(); ++i)
-            //else { std::cout << "Anti S Non reconstructable because it does not have two daughters, it has: " << genParticle->numberOfDaughters() << std::endl; }
-
-	     //now save this info to the _treeAllAntiS tree
-	    for(unsigned int j = 0; j < v_antiS_eta_reconstructable.size(); j++){
-		std::cout << "v_antiS_eta_reconstructable: " << v_antiS_eta_reconstructable[j][1] << ", " << v_antiS_eta_reconstructable[j][0] << std::endl;
-
-		_S_eta_all.push_back(v_antiS_eta_reconstructable[j][0]);
-		_S_reconstructable_all.push_back(v_antiS_eta_reconstructable[j][1]);
-		_S_event_weighting_factor_all.push_back(v_antiS_eta_reconstructable[j][2]);
-		if(nGoodPV < 60) _S_event_weighting_factor_PU_all.push_back(AnalyzerAllSteps::PUReweighingFactor(nGoodPV,v_antiS_eta_reconstructable[j][3], m_PUReweighingMapIn));
-        	else _S_event_weighting_factor_PU_all.push_back(0.);
-		_S_vz_creation_vertex_all.push_back(v_antiS_eta_reconstructable[j][3]);
-		_S_pt_all.push_back(v_antiS_eta_reconstructable[j][4]);
-		_S_pz_all.push_back(v_antiS_eta_reconstructable[j][5]);
-		_S_event_weighting_factor_M2S_all.push_back(AnalyzerAllSteps::MC_M2SReweighingFactor(v_antiS_eta_reconstructable[j][0], m_MultiToSingleReweighingMapIn)[0]);
-		_S_event_weighting_factor_ERR_all.push_back(AnalyzerAllSteps::MC_M2SReweighingFactor(v_antiS_eta_reconstructable[j][0], m_MultiToSingleReweighingMapIn)[1]);
-		_S_nGoodPV_all.push_back(nGoodPV);
-
-		_treeAllAntiS->Fill();
-
-		_S_eta_all.clear();
-		_S_reconstructable_all.clear();
-		_S_event_weighting_factor_all.clear();
-		_S_event_weighting_factor_PU_all.clear();
-		_S_event_weighting_factor_M2S_all.clear();
-		_S_event_weighting_factor_ERR_all.clear();
-		_S_vz_creation_vertex_all.clear();
-		_S_pt_all.clear();
-		_S_pz_all.clear();
-		_S_nGoodPV_all.clear();
-
-		if(v_antiS_eta_reconstructable[j][1]){
-			if(v_antiS_eta_reconstructable[j][0]>0)nTotalRecoconstructableGENS_posEta++;
-			if(v_antiS_eta_reconstructable[j][0]<0)nTotalRecoconstructableGENS_negEta++;
-		}
-
-	    }
-
-	  }//if(h_genParticles.isValid())
-	else{
-		std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!genparticle collection is not valid!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+  if(SaveEvent){
+        std::cout << "In this event found " << v_antiS_momenta_and_itt.size() << " unique AntiS, with following #duplicates: " << std::endl;
+        for(unsigned int j = 0; j<v_antiS_momenta_and_itt.size();j++){
+              std::cout << v_antiS_momenta_and_itt[j][1] << " with eta " << v_antiS_momenta_and_itt[j][0] << std::endl;
         }
 
-  }
+        //first find the GEN particles which are proper (i.e. with the correct final state particles) antiS
+        if(!m_runningOnData && m_lookAtAntiS){
+                if(h_genParticles.isValid()){
+                    std::vector<std::vector<double>> v_antiS_eta_reconstructable; 
+                    for(unsigned int i = 0; i < h_genParticles->size(); ++i){//loop all genparticlesPlusGEANT
+
+              		const reco::Candidate * genParticle = &h_genParticles->at(i);
+              		if(genParticle->pdgId() != AnalyzerAllSteps::pdgIdAntiS) continue;
+                              //only save Sbar which interact
+              		if(genParticle->numberOfDaughters() < 2) continue;
+
+              		//check if you already have an entry for this antiS in v_antiS_eta_reconstructable
+              		bool newAntiS = true;
+              		int antiS_it = -1;
+              		//check for all the entries in v_antiS_eta_reconstructable if there is an eta match, if there is an eta match this antiS has already been encountered
+              		for(unsigned int j = 0; j < v_antiS_eta_reconstructable.size(); j++){
+              			if(v_antiS_eta_reconstructable[j][0] == genParticle->eta() ){ newAntiS = false;antiS_it = j;}
+              		}
+              		//if there was no eta match newAntiS is still true and I should make an new entry in the vector for this guy
+              		if(newAntiS){
+
+              			std::vector<double> newAntiSEntry; 
+              			newAntiSEntry.push_back(genParticle->eta()); 
+              			newAntiSEntry.push_back(0);//take it as not reconstructable at first 
+              			newAntiSEntry.push_back(AnalyzerAllSteps::EventWeightingFactor(genParticle->theta()));
+              			newAntiSEntry.push_back(genParticle->vz());//save where it got produced.
+              			newAntiSEntry.push_back(genParticle->pt());
+              			newAntiSEntry.push_back(genParticle->pz());
+
+              			v_antiS_eta_reconstructable.push_back(newAntiSEntry);
+              			antiS_it = v_antiS_eta_reconstructable.size()-1;
+              		}
+              		
+              		
+
+              		bool AntiSReconstructable = false;
+
+              		double weight_PU = 0.;
+                      	if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
+                              std::vector<double> weight_M2S = AnalyzerAllSteps::MC_M2SReweighingFactor(genParticle->eta(), m_MultiToSingleReweighingMapIn);
+              		//check if this is a reconstructable antiS, so should have 2 daughters of correct type, each daughter should have 2 daughters with the correct type
+              		//the below implicitely neglects the duplitcate antiS due to looping, because only 1 of the duplicates will interact and give daughters. The others do not have any daughters.
+              		if(genParticle->numberOfDaughters()==2){
+
+              			nTotalGiving2DaughtersGENS++;
+              			nTotalGiving2DaughtersGENS_weighted = nTotalGiving2DaughtersGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
+
+              			int daughterParticlesTypes = AnalyzerAllSteps::getDaughterParticlesTypes(genParticle);//returns 3 if daughters from antiS are Ks and AntiLambda
+ 
+              			if(genParticle->daughter(0)->numberOfDaughters()==2 && genParticle->daughter(1)->numberOfDaughters()==2 && daughterParticlesTypes == 3){
+
+              				nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS++;
+              				nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS_weighted = nTotalGivingCorrectDaughtersAnd4GrandDaughtersGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
+              				int graddaughters0ParticlesTypes = AnalyzerAllSteps::getDaughterParticlesTypes(genParticle->daughter(0));
+              				int graddaughters1ParticlesTypes = AnalyzerAllSteps::getDaughterParticlesTypes(genParticle->daughter(1));
+              				if((graddaughters0ParticlesTypes == 1 && graddaughters1ParticlesTypes == 2) || (graddaughters1ParticlesTypes == 1 && graddaughters0ParticlesTypes == 2)){
+              					std::cout << "AntiS with all CORRECT: correct types and numbers of daughters and granddaughters and eta " << genParticle->eta() << std::endl;
+              					nTotalCorrectGENS++;
+              					nTotalCorrectGENS_weighted = nTotalCorrectGENS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
+              					if(genParticle->eta()>0) {nTotalGENSPosEta++; nTotalGENSPosEta_weighted = nTotalGENSPosEta_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];}
+              					if(genParticle->eta()<0) {nTotalGENSNegEta++; nTotalGENSNegEta_weighted = nTotalGENSNegEta_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];}
+              					//fill the tree with kinematics of Sbar events which go to all correct final state particles
+              					AntiSReconstructable = FillBranchesGENAntiS(genParticle,beamspot, beamspotVariance, v_antiS_momenta_and_itt,  h_TP,nGoodPV);
+              					if(AntiSReconstructable)nTotalCorrectGENS_Reconstructable_weighted = nTotalCorrectGENS_Reconstructable_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU*weight_M2S[0];
+              				}// if((graddaughters0ParticlesTypes == 1 && graddaughters1ParticlesTypes == 2) || (graddaughters1ParticlesTypes == 1 && graddaughters0ParticlesTypes == 2))
+              		        }//if((genParticle->daughter(0)->numberOfDaughters()==2 && genParticle->daughter(1)->numberOfDaughters()==2 && daughterParticlesTypes == 3))
+                              }//if(genParticle->numberOfDaughters()==2)
+              		//now save for this antiS in v_antiS_eta_reconstructable the or of the reconstructability flag which was already in this vector and the the current AntiSReconstructable, 
+              		//like that you will check for any of the duplicates if it was reconstructable
+              		v_antiS_eta_reconstructable[antiS_it][1] = (int)v_antiS_eta_reconstructable[antiS_it][1] | AntiSReconstructable;
+              	
+                    }//for(unsigned int i = 0; i < h_genParticles->size(); ++i)
+                  //else { std::cout << "Anti S Non reconstructable because it does not have two daughters, it has: " << genParticle->numberOfDaughters() << std::endl; }
+
+                   //now save this info to the _treeAllAntiS tree
+                  for(unsigned int j = 0; j < v_antiS_eta_reconstructable.size(); j++){
+              	std::cout << "v_antiS_eta_reconstructable: " << v_antiS_eta_reconstructable[j][1] << ", " << v_antiS_eta_reconstructable[j][0] << std::endl;
+
+              	_S_eta_all.push_back(v_antiS_eta_reconstructable[j][0]);
+              	_S_reconstructable_all.push_back(v_antiS_eta_reconstructable[j][1]);
+              	_S_event_weighting_factor_all.push_back(v_antiS_eta_reconstructable[j][2]);
+              	if(nGoodPV < 60) _S_event_weighting_factor_PU_all.push_back(AnalyzerAllSteps::PUReweighingFactor(nGoodPV,v_antiS_eta_reconstructable[j][3], m_PUReweighingMapIn));
+              	else _S_event_weighting_factor_PU_all.push_back(0.);
+              	_S_vz_creation_vertex_all.push_back(v_antiS_eta_reconstructable[j][3]);
+              	_S_pt_all.push_back(v_antiS_eta_reconstructable[j][4]);
+              	_S_pz_all.push_back(v_antiS_eta_reconstructable[j][5]);
+              	_S_event_weighting_factor_M2S_all.push_back(AnalyzerAllSteps::MC_M2SReweighingFactor(v_antiS_eta_reconstructable[j][0], m_MultiToSingleReweighingMapIn)[0]);
+              	_S_event_weighting_factor_ERR_all.push_back(AnalyzerAllSteps::MC_M2SReweighingFactor(v_antiS_eta_reconstructable[j][0], m_MultiToSingleReweighingMapIn)[1]);
+              	_S_nGoodPV_all.push_back(nGoodPV);
+
+              	_treeAllAntiS->Fill();
+
+              	_S_eta_all.clear();
+              	_S_reconstructable_all.clear();
+              	_S_event_weighting_factor_all.clear();
+              	_S_event_weighting_factor_PU_all.clear();
+              	_S_event_weighting_factor_M2S_all.clear();
+              	_S_event_weighting_factor_ERR_all.clear();
+              	_S_vz_creation_vertex_all.clear();
+              	_S_pt_all.clear();
+              	_S_pz_all.clear();
+              	_S_nGoodPV_all.clear();
+
+              	if(v_antiS_eta_reconstructable[j][1]){
+              		if(v_antiS_eta_reconstructable[j][0]>0)nTotalRecoconstructableGENS_posEta++;
+              		if(v_antiS_eta_reconstructable[j][0]<0)nTotalRecoconstructableGENS_negEta++;
+              	}
+
+                  }
+
+                }//if(h_genParticles.isValid())
+              else{
+              	std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!genparticle collection is not valid!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+              }
+
+           }//if(!m_runningOnData && m_lookAtAntiS)
+        }//if(SaveEvent)
 
 
  } //end of analyzer

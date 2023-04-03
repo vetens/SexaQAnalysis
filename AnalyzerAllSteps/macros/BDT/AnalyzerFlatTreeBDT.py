@@ -28,10 +28,11 @@ markerStyle = [20,21,22,23,33,34,35]
 #maxEvents = 1e5
 maxEvents = 1e9
 
-applyFiducial = True
-applyPreselection = True
+#applyFiducial = True
+applyFiducial = False
+#applyPreselection = True
 #apply_optional_Preselection = True
-#applyPreselection = False
+applyPreselection = False
 apply_optional_Preselection = False
 
 FiducialRegionptMin = 0.33
@@ -266,7 +267,8 @@ l_tree = [MC_S_Bkg_Tree,MC_Sbar_Bkg_Tree,MC_Sbar_Xevt_Bkg_Tree,Data_Sbar_Xevt_Bk
 
 #plots_output_dir = "plots_BackgroundVsSignal/"+configuration+"/"
 #plots_output_dir = "plots_BDTInputs_NoPresel/"
-plots_output_dir = "plots_BDTInputs_MinPresel/"
+#plots_output_dir = "plots_BDTInputs_MinPresel/"
+plots_output_dir = "plots_BDTInputs_NoCuts/"
 #plots_output_dir = "plots_BDTInputs/"
 #plots_output_dir = "plots_BDTInputs_Test/"
 
@@ -348,8 +350,8 @@ for tree in l_tree:
                             #print tree._S_deltaLInteractionVertexAntiSmin[0]
                             continue
                         if ('MC-Multi-to-Single-Reweighed-#bar{S}-Signal' in Legend[iTree]):
-			    reweighing_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factorPU[0]*tree._S_event_weighting_factorM2S[0]
-			    #reweighing_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factorM2S[0]
+			    #reweighing_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factorPU[0]*tree._S_event_weighting_factorM2S[0]
+			    reweighing_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factorM2S[0]
                         else:
 			    reweighing_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factorPU[0]
 			    #reweighing_factor = tree._S_event_weighting_factor[0]

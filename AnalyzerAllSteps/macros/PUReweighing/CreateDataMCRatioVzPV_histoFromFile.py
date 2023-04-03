@@ -44,14 +44,21 @@ fMC = TFile('file:/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQ
 h2_nPV_vzPV_MC = fMC.Get('PV/h2_nPV_vzPV_MC')
 
 #you first need to scale the data to the number of events in MC
-print "mean #PV in data: ", h2_nPV_vzPV_Data.GetMean(1)
-print "mean #PV in mc  : ", h2_nPV_vzPV_MC.GetMean(1)
-NEventsData = h2_nPV_vzPV_Data.GetEntries()/h2_nPV_vzPV_Data.GetMean(1)
-NEventsMC   = h2_nPV_vzPV_MC.GetEntries()/h2_nPV_vzPV_MC.GetMean(1)
-h2_nPV_vzPV_Data.Scale(NEventsMC/NEventsData)
+Data_mean_nPV = h2_nPV_vzPV_Data.GetMean(1)
+MC_mean_nPV = h2_nPV_vzPV_MC.GetMean(1)
+print "mean #PV in data: ", Data_mean_nPV
+print "mean #PV in mc  : ", MC_mean_nPV
+NEventsData = h2_nPV_vzPV_Data.GetEntries()
+NEventsMC = h2_nPV_vzPV_MC.GetEntries()
+print 'Events in the data: ', NEventsData
+print 'Events in the MC: ', NEventsMC
+h2_nPV_vzPV_Data.Sumw2(kTRUE)
+h2_nPV_vzPV_Data.Scale(1.0/NEventsData)
+h2_nPV_vzPV_MC.Sumw2(kTRUE)
+h2_nPV_vzPV_MC.Scale(1.0/NEventsMC)
 
-print 'PVs in the data: ', h2_nPV_vzPV_Data.GetEntries() 
-print 'PVs in the MC:   ', h2_nPV_vzPV_MC.GetEntries()
+print 'PVs in the data: ', NEventsData * Data_mean_nPV 
+print 'PVs in the MC:   ', NEventsMC * MC_mean_nPV
 
 h_nPV_Data = h2_nPV_vzPV_Data.ProjectionX()
 h_nPV_MC = h2_nPV_vzPV_MC.ProjectionX()
@@ -121,6 +128,7 @@ f.close()
 
 h2_nPV_vzPV_MC_reweighed_2D = h2_nPV_vzPV_MC.Clone()
 h2_nPV_vzPV_MC_reweighed_2D.SetName('h2_nPV_vzPV_MC_reweighed_2D')
+h2_nPV_vzPV_MC_reweighed_2D.Sumw2(kTRUE)
 h2_nPV_vzPV_MC_reweighed_2D.Multiply(h2_reweighingFactor_nPV_PVz)
 
 
@@ -146,9 +154,9 @@ h_nPV_MC_reweighed_2D.Write()
 h_vzPV_MC_reweighed_2D.Write()
 h2_nPV_vzPV_MC_reweighed_2D.Write()
 
-h_vzPV_Data.SetTitle(';absolute v_{z} valid PVs (cm);entries/5mm')
-h_vzPV_MC.SetTitle(';absolute v_{z} valid PVs (cm);entries/5mm')
-h_vzPV_MC_reweighed_2D.SetTitle(';absolute v_{z} valid PVs (cm);entries/5mm')
+h_vzPV_Data.SetTitle(';absolute v_{z} valid PVs (cm);Arbitrary Units')
+h_vzPV_MC.SetTitle(';absolute v_{z} valid PVs (cm);Arbitrary Units')
+h_vzPV_MC_reweighed_2D.SetTitle(';absolute v_{z} valid PVs (cm);Arbitrary Units')
 h_vzPV_Data.Rebin(5)
 h_vzPV_MC.Rebin(5)
 h_vzPV_MC_reweighed_2D.Rebin(5)
@@ -164,15 +172,17 @@ for j in [2,1,0]:
 	#if(h.GetSumw2N() == 0):
 	#	h.Sumw2(kTRUE)
 	if j == 0:
-		h.Draw("Csame")
+		h.Draw("C HIST same")
+	        h.SetLineWidth(2)
+	        h.SetLineColor(colours[j])
 	elif j == 1:
-		h.Draw("Csame")
+		h.Draw("C HIST same")
+	        h.SetLineWidth(2)
+	        h.SetLineColor(colours[j])
 	elif j == 2:
-		h.Draw("PCE")
-	h.SetLineColor(colours[j])
-	h.SetLineWidth(2)
-	h.SetMarkerStyle(22+j)
-	h.SetMarkerColor(colours[j])
+		h.Draw("P HIST")
+	        h.SetMarkerStyle(22+j)
+	        h.SetMarkerColor(colours[j])
 	h.SetStats(0)
 	legend.AddEntry(h,Legend_l[j],Legend_l_type[j])
 
@@ -185,9 +195,9 @@ c.Write()
 c_name = "c_nPV_2D_PUReweighing"
 c = TCanvas(c_name,"")
 legend = TLegend(0.8,0.85,0.99,0.99)
-h_nPV_Data.SetTitle(';# valid PVs;#entries')
-h_nPV_MC.SetTitle(';# valid PVs;#entries')
-h_nPV_MC_reweighed_2D.SetTitle(';# valid PVs;#entries')
+h_nPV_Data.SetTitle(';# valid PVs;#Arbitrary Units')
+h_nPV_MC.SetTitle(';# valid PVs;#Arbitrary Units')
+h_nPV_MC_reweighed_2D.SetTitle(';# valid PVs;#Arbitrary Units')
 TH1_l = [h_nPV_Data,h_nPV_MC,h_nPV_MC_reweighed_2D]
 
 for j in [2,1,0]:
@@ -195,15 +205,17 @@ for j in [2,1,0]:
 	#if(h.GetSumw2N() == 0):
 	#	h.Sumw2(kTRUE)
 	if j == 0:
-		h.Draw("Csame")
+		h.Draw("C HIST same")
+	        h.SetLineWidth(2)
+	        h.SetLineColor(colours[j])
 	elif j == 1:
-		h.Draw("Csame")
+		h.Draw("C HIST same")
+	        h.SetLineWidth(2)
+	        h.SetLineColor(colours[j])
 	elif j == 2:
-		h.Draw("PCE")
-	h.SetLineColor(colours[j])
-	h.SetLineWidth(2)
-	h.SetMarkerStyle(22+j)
-	h.SetMarkerColor(colours[j])
+		h.Draw("P HIST")
+	        h.SetMarkerStyle(22+j)
+	        h.SetMarkerColor(colours[j])
 	h.SetStats(0)
 	legend.AddEntry(h,Legend_l[j],Legend_l_type[j])
 

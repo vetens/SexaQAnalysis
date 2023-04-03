@@ -39,6 +39,7 @@ class FlatTreeProducerGENSIM : public edm::EDAnalyzer
 
     bool m_lookAtAntiS;
     bool m_runningOnData; 
+    bool m_SingleSbarOnly; 
 
     virtual void beginJob();
     virtual void analyze(edm::Event const& iEvent, edm::EventSetup const& iSetup);

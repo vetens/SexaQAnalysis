@@ -16,6 +16,7 @@ class FlatTreeProducerBDT : public edm::EDAnalyzer
     void FillBranches(const reco::VertexCompositeCandidate * antiS, TVector3 beamspot, TVector3 beamspotVariance, edm::Handle<vector<reco::Vertex>> h_offlinePV,  bool m_runningOnData, edm::Handle<vector<reco::GenParticle>> h_genParticles, edm::Handle<vector<reco::VertexCompositeCandidate> > h_V0Ks, edm::Handle<vector<reco::VertexCompositeCandidate> > h_V0L, unsigned int ngoodPVsPOG, double randomPVz, int NSCands);    
 
   private:
+    float GEN_S_MASS_DATA[5] = {1.7, 1.8, 1.85, 1.9, 2.0};
 
     //some counters
     int nTotalRECOS=0;
@@ -98,6 +99,8 @@ class FlatTreeProducerBDT : public edm::EDAnalyzer
     std::vector<float> _RECO_Ks_daughter0_charge,_RECO_Ks_daughter0_pt,_RECO_Ks_daughter0_pz,_RECO_Ks_daughter0_dxy_beamspot,_RECO_Ks_daughter0_dz_beamspot,_RECO_Ks_daughter0_dz_min_PV;   
     std::vector<float> _RECO_Ks_daughter1_charge,_RECO_Ks_daughter1_pt,_RECO_Ks_daughter1_pz,_RECO_Ks_daughter1_dxy_beamspot,_RECO_Ks_daughter1_dz_beamspot,_RECO_Ks_daughter1_dz_min_PV;   
 
+    // for data/BG, this will be filled with a random value from among 1.7, 1.8, 1.85, 1.9, and 2 GeV
+    std::vector<float> _GEN_S_mass;
     //definition of variables which should go to _tree_counter
     std::vector<float> _RECO_S_total_lxy_beampipeCenter, _RECO_S_saved_lxy_beampipeCenter;
 

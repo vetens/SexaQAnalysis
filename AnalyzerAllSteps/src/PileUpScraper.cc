@@ -20,8 +20,6 @@ void PileUpScraper::beginJob() {
         _tree_PV = fs->make <TTree>("FlatTreePV","tree_PV");
 
 	_tree_PV->Branch("_nGoodPVPOG",&_nGoodPVPOG);
-	_tree_PV->Branch("_goodPVxPOG",&_goodPVxPOG);
-	_tree_PV->Branch("_goodPVyPOG",&_goodPVyPOG);
 	_tree_PV->Branch("_goodPVzPOG",&_goodPVzPOG);
 
 
@@ -37,17 +35,18 @@ void PileUpScraper::analyze(edm::Event const& iEvent, edm::EventSetup const& iSe
   unsigned int ngoodPVsPOG = 0;
   Init_PV();
   if(h_offlinePV.isValid()){
+        std::vector<int> goodVertices;
 	for(unsigned int i = 0; i < h_offlinePV->size(); i++ ){
             double r = sqrt(h_offlinePV->at(i).x()*h_offlinePV->at(i).x()+h_offlinePV->at(i).y()*h_offlinePV->at(i).y());
             if(h_offlinePV->at(i).ndof() > 4 && abs(h_offlinePV->at(i).z()) < 24 && r < 2){//valid PV definition from POG (https://twiki.cern.ch/twiki/bin/view/CMSPublic/TrackingPOGPerformance2017MC#Vertex_Reconstruction_Performanc)
+                goodVertices.push_back(i);
 	        ngoodPVsPOG++;
-                _goodPVxPOG.push_back(h_offlinePV->at(i).x());
-                _goodPVyPOG.push_back(h_offlinePV->at(i).y());
-                _goodPVzPOG.push_back(h_offlinePV->at(i).z());
             }
 	}
+        int randomIndexPV = rand()%(ngoodPVsPOG);
+        _nGoodPVPOG.push_back(ngoodPVsPOG);
+        _goodPVzPOG.push_back(h_offlinePV->at(goodVertices.at(randomIndexPV)).z());
   }
-  _nGoodPVPOG.push_back(ngoodPVsPOG);
   _tree_PV->Fill();
  } //end of analyzer
 
@@ -97,8 +96,6 @@ PileUpScraper::~PileUpScraper()
 void PileUpScraper::Init_PV()
 {
         _nGoodPVPOG.clear();
-        _goodPVxPOG.clear();
-        _goodPVyPOG.clear();
         _goodPVzPOG.clear();
 }
 
