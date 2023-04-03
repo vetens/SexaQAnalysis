@@ -148,6 +148,8 @@ void FlatTreeProducerBDT::beginJob() {
 	_tree->Branch("_RECO_Ks_daughter1_dz_beamspot",&_RECO_Ks_daughter1_dz_beamspot);
 	_tree->Branch("_RECO_Ks_daughter1_dz_min_PV",&_RECO_Ks_daughter1_dz_min_PV);
 
+        // for data, this will be filled with a random value from among 1.7, 1.8, 1.85, 1.9, and 2 GeV
+	_tree->Branch("_GEN_S_mass",&_GEN_S_mass);
 	//to keep the ntuples small I do not save the S or Sbar candidates which have an lxy of the interaction vertex below AnalyzerAllSteps::MinLxyCut, these are for sure not signal, because there is no material there 
         _tree_counter = fs->make <TTree>("FlatTreeCounter","tree_counter");
 	_tree_counter->Branch("_RECO_S_total_lxy_beampipeCenter",&_RECO_S_total_lxy_beampipeCenter);
@@ -266,6 +268,13 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 
 	//lxy interaction vertex wrt to the beamspot instead of the bpc
 	double RECOLxy_interactionVertex = AnalyzerAllSteps::lxy(beamspot,RECOAntiSInteractionVertex);
+        
+        //For data, assign a random S gen mass as BDT Input so there is no correlation in BG
+        double GEN_S_mass = 0;
+        if(m_runningOnData) { 
+            int SMass_index = rand()%5;
+            GEN_S_mass=GEN_S_MASS_DATA[SMass_index];
+            }
 
 	//if running on MC and the RECO_S charge is negative and the RECO_S has an interaction vertex which is far enough in lxy, check if this is a real AntiS 
 	//by looking at the difference in lxyz between the RECO and the GEN antiS. Save this deltaLInteractionVertexAntiSmin in the tree, like this later I can 
@@ -297,12 +306,19 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	//you only need to calculate a reweighing parameter for the PU and z location if you are running on MC
         if(ngoodPVsPOG < AnalyzerAllSteps::v_mapPU.size() && bestMatchingAntiS > -1) {
 		event_weighting_factorPU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[ngoodPVsPOG],h_genParticles->at(bestMatchingAntiS).vz());
+                
+                // for signal, the mass is straightforward to get
+                GEN_S_mass = h_genParticles->at(bestMatchingAntiS).mass();
 	}
 	else if(!m_runningOnData && ngoodPVsPOG < AnalyzerAllSteps::v_mapPU.size()){ //but if the MC does not contain any antiS you have to reweigh on the 'event', so pick a random PVz location to reweigh on
 		event_weighting_factorPU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[ngoodPVsPOG],randomPVz);
 		event_weighting_factorPU = event_weighting_factorPU * ngoodPVsPOG;
                 //sthe 18.479 below seems to be an overall scale factor for viewing purposes. It is unclear why this is hardcoded here when it should just be in a plotting macro so I am commenting it out for now
 		//event_weighting_factorPU = event_weighting_factorPU * ngoodPVsPOG / 18.479;
+
+		//Also fill with random gen S Mass if there is no S in the event (i.e. MC background)
+                int SMass_index = rand()%5;
+                GEN_S_mass=GEN_S_MASS_DATA[SMass_index];
 	}
 
 	//some counter
@@ -564,6 +580,8 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	_RECO_Ks_daughter1_dxy_beamspot.push_back(RECO_Ks_daughter1_dxy_beamspot);
 	_RECO_Ks_daughter1_dz_beamspot.push_back(RECO_Ks_daughter1_dz_beamspot);
 	_RECO_Ks_daughter1_dz_min_PV.push_back(RECO_Ks_daughter1_dz_min_PV);
+
+        _GEN_S_mass.push_back(GEN_S_mass); 
 
   	_tree->Fill();
 

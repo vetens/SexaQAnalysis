@@ -42,7 +42,7 @@ class PileUpScraper : public edm::EDAnalyzer
 
     //definition of variables which should go to _tree_PV
     std::vector<int> _nGoodPVPOG;
-    std::vector<float> _goodPVxPOG,_goodPVyPOG,_goodPVzPOG;
+    std::vector<float> _goodPVzPOG;
 
     };
 

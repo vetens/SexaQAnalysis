@@ -112,6 +112,11 @@ process.lambdaKshortFilter.isData = True
 process.lambdaKshortFilter.minPtLambda = 0. 
 process.lambdaKshortFilter.minPtKshort = 0. 
 #Fiducial cuts:
+#process.FiducialCuts = cms.EDFilter("".
+#    src = cms.InputTag("lambdaKshortFilter"),
+#    cut = cms.string("")
+#  )
+#
 process.lambdaKshortFilter.doFiducialCuts = True
 process.lambdaKshortFilter.maxVzDecayLambda = 125.
 process.lambdaKshortFilter.maxVzDecayKshort = 125.
@@ -146,6 +151,11 @@ process.lambdaKshortVertexFilter.lambdaCollection = cms.InputTag("lambdaKshortFi
 process.lambdaKshortVertexFilter.kshortCollection = cms.InputTag("lambdaKshortFilter","kshort")
 process.lambdaKshortVertexFilter.maxchi2ndofVertexFit = 10.
 #Initial Preselection:
+#process.Preselection = cms.EDFilter("".
+#    src = cms.InputTag("lambdaKshortVertexFilter"),
+#    cut = cms.string("")
+#  )
+#
 process.lambdaKshortVertexFilter.doInitialPreselection = True
 process.lambdaKshortVertexFilter.minDeltaPhi_LambdaKshort = 0.4
 process.lambdaKshortVertexFilter.minLxy_SInteractionToBPC = 2.02
@@ -153,6 +163,11 @@ process.lambdaKshortVertexFilter.maxLxy_SInteractionToBPC = 2.4
 process.lambdaKshortVertexFilter.minDxyOverLxy_SInteractionToBeamspot = 0.
 process.lambdaKshortVertexFilter.maxDxyOverLxy_SInteractionToBeamspot = 0.5
 #Additional Preselection:
+#process.AdditionalPreselection = cms.EDFilter("".
+#    src = cms.InputTag("Preselection"),
+#    cut = cms.string("")
+#  )
+#
 process.lambdaKshortVertexFilter.doAdditionalPreselection = True
 process.lambdaKshortVertexFilter.maxVzInteraction_S = 28.
 process.lambdaKshortVertexFilter.maxDeltaEta_LambdaKs = 2.

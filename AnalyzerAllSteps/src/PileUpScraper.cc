@@ -20,8 +20,6 @@ void PileUpScraper::beginJob() {
         _tree_PV = fs->make <TTree>("FlatTreePV","tree_PV");
 
 	_tree_PV->Branch("_nGoodPVPOG",&_nGoodPVPOG);
-	_tree_PV->Branch("_goodPVxPOG",&_goodPVxPOG);
-	_tree_PV->Branch("_goodPVyPOG",&_goodPVyPOG);
 	_tree_PV->Branch("_goodPVzPOG",&_goodPVzPOG);
 
 
@@ -34,18 +32,13 @@ void PileUpScraper::analyze(edm::Event const& iEvent, edm::EventSetup const& iSe
   iEvent.getByToken(m_offlinePVToken, h_offlinePV);
 
   //first store some info on the PV
-  unsigned int ngoodPVsPOG = 0;
   Init_PV();
   if(h_offlinePV.isValid()){
-	for(unsigned int i = 0; i < h_offlinePV->size(); i++ ){
-	    ngoodPVsPOG++;
-            _goodPVxPOG.push_back(h_offlinePV->at(i).x());
-            _goodPVyPOG.push_back(h_offlinePV->at(i).y());
-            _goodPVzPOG.push_back(h_offlinePV->at(i).z());
+        int randomIndexPV = rand()%(h_offlinePV->size());
+        _nGoodPVPOG.push_back(h_offlinePV->size());
+        _goodPVzPOG.push_back(h_offlinePV->at(randomIndexPV).z());
+        _tree_PV->Fill();
 	}
-  }
-  _nGoodPVPOG.push_back(ngoodPVsPOG);
-  _tree_PV->Fill();
  } //end of analyzer
 
 void PileUpScraper::endJob()
@@ -94,8 +87,6 @@ PileUpScraper::~PileUpScraper()
 void PileUpScraper::Init_PV()
 {
         _nGoodPVPOG.clear();
-        _goodPVxPOG.clear();
-        _goodPVyPOG.clear();
         _goodPVzPOG.clear();
 }
 
