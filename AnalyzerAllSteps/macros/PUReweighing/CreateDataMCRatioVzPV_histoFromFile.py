@@ -38,10 +38,12 @@ h_reweighingFactor_nPV = TH1F('h_reweighingFactor_nPV','; #PV; Events',n_PVn,min
 h2_reweighingFactor_nPV_PVz = TH2F('h2_reweighingFactor_nPV_PVz','; #PV; absolute v_{z} PV (cm);  Events',n_PVn,min_PVn,max_PVn,n_PVZ,min_PVZ,max_PVZ)
 
 #Get the 2D histograms containing data and MC nPV versus PV_vz
-fData = TFile.Open('file:/afs/cern.ch/work/w/wvetens/Sexaquarks/data/CMSSW_10_6_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/PUReweighing/plots_data/data_BlockA_Full_With1D.root')
-h2_nPV_vzPV_Data = fData.Get('PV/h2_nPV_vzPV_Data') 
-fMC = TFile('file:/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/PUReweighing/plots_MC/Trial4_Full.root')
-h2_nPV_vzPV_MC = fMC.Get('PV/h2_nPV_vzPV_MC')
+fData = TFile.Open('file:/afs/cern.ch/work/w/wvetens/Sexaquarks/data/CMSSW_10_6_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/PUReweighing/plots_data/PVInfo_BPH_FULL.root')
+h2_nPV_vzPV_Data = fData.Get('PV/h2_nPV_vzPV') 
+h2_nPV_vzPV_Data.SetName('h2_nPV_vzPV_Data')
+fMC = TFile('file:/afs/cern.ch/work/w/wvetens/Sexaquarks/data/CMSSW_10_6_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/PUReweighing/plots_MC/PVInfo_SbarSignal_PU.root')
+h2_nPV_vzPV_MC = fMC.Get('PV/h2_nPV_vzPV')
+h2_nPV_vzPV_MC.SetName('h2_nPV_vzPV_MC')
 
 #you first need to scale the data to the number of events in MC
 Data_mean_nPV = h2_nPV_vzPV_Data.GetMean(1)
@@ -61,10 +63,21 @@ print 'PVs in the data: ', NEventsData * Data_mean_nPV
 print 'PVs in the MC:   ', NEventsMC * MC_mean_nPV
 
 h_nPV_Data = h2_nPV_vzPV_Data.ProjectionX()
+h_nPV_Data.SetName('h_nPV_Data')
+h_nPV_Data.Scale(1.0/h_nPV_Data.Integral())
 h_nPV_MC = h2_nPV_vzPV_MC.ProjectionX()
+h_nPV_MC.SetName('h_nPV_MC')
+h_nPV_MC.Scale(1.0/h_nPV_MC.Integral())
+
+#print 'normalized Data integral: ', h_nPV_Data.Integral()
+#print 'normalized MC integral: ', h_nPV_MC.Integral()
 
 h_vzPV_Data = h2_nPV_vzPV_Data.ProjectionY()
+h_vzPV_Data.SetName('h_vzPV_Data')
+h_vzPV_Data.Scale(1.0/h_vzPV_Data.Integral())
 h_vzPV_MC = h2_nPV_vzPV_MC.ProjectionY()
+h_vzPV_MC.SetName('h_vzPV_MC')
+h_vzPV_MC.Scale(1.0/h_vzPV_MC.Integral())
 
 if(h2_nPV_vzPV_Data.GetNbinsX() != h2_nPV_vzPV_MC.GetNbinsX()):
 	print 'Data and MC plot have different number of bins in X'
@@ -73,7 +86,7 @@ if(h2_nPV_vzPV_Data.GetNbinsY() != h2_nPV_vzPV_MC.GetNbinsY()):
 
 
 
-f = open(plots_output_dir+'PUReweigh_SignalToDataBPH2018_BLOCK_A.txt', "w")
+f = open(plots_output_dir+'PUReweigh_SignalToDataBPH2018_FULL.txt', "w")
 
 #fill the plots with the reweighing parameter
 for i in range(1,h_vzPV_Data.GetNbinsX()+1):
@@ -133,7 +146,9 @@ h2_nPV_vzPV_MC_reweighed_2D.Multiply(h2_reweighingFactor_nPV_PVz)
 
 
 h_nPV_MC_reweighed_2D  = h2_nPV_vzPV_MC_reweighed_2D.ProjectionX()
+h_nPV_MC_reweighed_2D.SetName('h_nPV_MC_reweighed_2D')
 h_vzPV_MC_reweighed_2D = h2_nPV_vzPV_MC_reweighed_2D.ProjectionY()
+h_vzPV_MC_reweighed_2D.SetName('h_vzPV_MC_reweighed_2D')
 
 
 fOut = TFile(plots_output_dir+'PUReweighing.root','RECREATE')
@@ -160,9 +175,10 @@ h_vzPV_MC_reweighed_2D.SetTitle(';absolute v_{z} valid PVs (cm);Arbitrary Units'
 h_vzPV_Data.Rebin(5)
 h_vzPV_MC.Rebin(5)
 h_vzPV_MC_reweighed_2D.Rebin(5)
-TH1_l = [h_vzPV_Data,h_vzPV_MC,h_vzPV_MC_reweighed_2D]
-Legend_l = ["Data","MC","MC reweighted"]
-Legend_l_type = ["l","l","lep"]
+#Flipping around the ordering so that the THistPainter scales to the plot with the greatest Y value. In our current situation this is the MC
+TH1_l = [h_vzPV_Data,h_vzPV_MC_reweighed_2D,h_vzPV_MC]
+Legend_l = ["Data","MC reweighted","MC"]
+Legend_l_type = ["l","p","l"]
 c_name = "c_PVz_2D_PUReweighing"
 c = TCanvas(c_name,"")
 legend = TLegend(0.8,0.85,0.99,0.99)
@@ -176,13 +192,13 @@ for j in [2,1,0]:
 	        h.SetLineWidth(2)
 	        h.SetLineColor(colours[j])
 	elif j == 1:
-		h.Draw("C HIST same")
-	        h.SetLineWidth(2)
-	        h.SetLineColor(colours[j])
+		h.Draw("P HIST same")
+	        h.SetMarkerStyle(23+j)
+	        h.SetMarkerColor(colours[j+1])
 	elif j == 2:
-		h.Draw("P HIST")
-	        h.SetMarkerStyle(22+j)
-	        h.SetMarkerColor(colours[j])
+		h.Draw("C HIST")
+	        h.SetLineWidth(2)
+	        h.SetLineColor(colours[j-1])
 	h.SetStats(0)
 	legend.AddEntry(h,Legend_l[j],Legend_l_type[j])
 
@@ -195,10 +211,11 @@ c.Write()
 c_name = "c_nPV_2D_PUReweighing"
 c = TCanvas(c_name,"")
 legend = TLegend(0.8,0.85,0.99,0.99)
-h_nPV_Data.SetTitle(';# valid PVs;#Arbitrary Units')
-h_nPV_MC.SetTitle(';# valid PVs;#Arbitrary Units')
-h_nPV_MC_reweighed_2D.SetTitle(';# valid PVs;#Arbitrary Units')
-TH1_l = [h_nPV_Data,h_nPV_MC,h_nPV_MC_reweighed_2D]
+h_nPV_Data.SetTitle(';# valid PVs;Arbitrary Units')
+h_nPV_MC.SetTitle(';# valid PVs;Arbitrary Units')
+h_nPV_MC_reweighed_2D.SetTitle(';# valid PVs;Arbitrary Units')
+
+TH1_l = [h_nPV_Data,h_nPV_MC_reweighed_2D,h_nPV_MC]
 
 for j in [2,1,0]:
 	h = TH1_l[j]
@@ -209,13 +226,13 @@ for j in [2,1,0]:
 	        h.SetLineWidth(2)
 	        h.SetLineColor(colours[j])
 	elif j == 1:
-		h.Draw("C HIST same")
-	        h.SetLineWidth(2)
-	        h.SetLineColor(colours[j])
+		h.Draw("P HIST same")
+	        h.SetMarkerStyle(23+j)
+	        h.SetMarkerColor(colours[j+1])
 	elif j == 2:
-		h.Draw("P HIST")
-	        h.SetMarkerStyle(22+j)
-	        h.SetMarkerColor(colours[j])
+		h.Draw("C HIST")
+	        h.SetLineWidth(2)
+	        h.SetLineColor(colours[j-1])
 	h.SetStats(0)
 	legend.AddEntry(h,Legend_l[j],Legend_l_type[j])
 
