@@ -9,6 +9,7 @@ FlatTreeProducerGENSIM::FlatTreeProducerGENSIM(edm::ParameterSet const& pset):
   m_genParticlesTag_GEN(pset.getParameter<edm::InputTag>("genCollection_GEN")),
   m_genParticlesTag_SIM_GEANT(pset.getParameter<edm::InputTag>("genCollection_SIM_GEANT")),
   m_TPTag(pset.getParameter<edm::InputTag>("TrackingParticles")),
+  m_PUReweighingMapIn(pset.getParameter<edm::FileInPath>("PUReweighting")),
 
   m_bsToken    (consumes<reco::BeamSpot>(m_bsTag)),
   m_offlinePVToken    (consumes<vector<reco::Vertex>>(m_offlinePVTag)),
@@ -246,7 +247,7 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 	else{//this is a new antiS
 		nTotalUniqueGenS++;
 		double weight_PU = 0.;
-		if(nGoodPV < AnalyzerAllSteps::v_mapPU.size()) weight_PU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[nGoodPV],genParticle->vz());
+		if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
 		nTotalUniqueGenS_weighted = nTotalUniqueGenS_weighted + AnalyzerAllSteps::EventWeightingFactor(genParticle->theta())*weight_PU;
 		vector<float> dummyVec; 
 		dummyVec.push_back(genParticle->eta());
@@ -296,7 +297,7 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 			bool AntiSReconstructable = false;
 
 			double weight_PU = 0.;
-                	if(nGoodPV < AnalyzerAllSteps::v_mapPU.size()) weight_PU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[nGoodPV],genParticle->vz());
+                	if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
 			//check if this is a reconstructable antiS, so should have 2 daughters of correct type, each daughter should have 2 daughters with the correct type
 			//the below implicitely neglects the duplitcate antiS due to looping, because only 1 of the duplicates will interact and give daughters. The others do not have any daughters.
 			if(genParticle->numberOfDaughters()==2){
@@ -341,7 +342,7 @@ void FlatTreeProducerGENSIM::analyze(edm::Event const& iEvent, edm::EventSetup c
 		_S_eta_all.push_back(v_antiS_eta_reconstructable[j][0]);
 		_S_reconstructable_all.push_back(v_antiS_eta_reconstructable[j][1]);
 		_S_event_weighting_factor_all.push_back(v_antiS_eta_reconstructable[j][2]);
-		if(nGoodPV < AnalyzerAllSteps::v_mapPU.size()) _S_event_weighting_factor_PU_all.push_back(AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[nGoodPV],v_antiS_eta_reconstructable[j][3]));
+		if(nGoodPV < 60) _S_event_weighting_factor_PU_all.push_back(AnalyzerAllSteps::PUReweighingFactor(nGoodPV,v_antiS_eta_reconstructable[j][3], m_PUReweighingMapIn));
         	else _S_event_weighting_factor_PU_all.push_back(0.);
 		_S_vz_creation_vertex_all.push_back(v_antiS_eta_reconstructable[j][3]);
 		_S_pt_all.push_back(v_antiS_eta_reconstructable[j][4]);
@@ -408,7 +409,7 @@ bool FlatTreeProducerGENSIM::FillBranchesGENAntiS(const reco::Candidate  * genPa
 	double GENDeltaRDaughters = pow(GENDeltaPhiDaughters*GENDeltaPhiDaughters+GENDeltaEtaDaughters*GENDeltaEtaDaughters,0.5);
 
 	double weight_PU = 0.;
-	if(nGoodPV < AnalyzerAllSteps::v_mapPU.size()) weight_PU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[nGoodPV],genParticle->vz());
+	if(nGoodPV < 60) weight_PU = AnalyzerAllSteps::PUReweighingFactor(nGoodPV,genParticle->vz(), m_PUReweighingMapIn);
 	//count the number of AntiS going to fully correct granddaughters and which interact in the beampipe 
 	if(GENLxy_interactionVertex < 2.26){ 
 		nTotalCorrectGENSInteractingInBeampipe++; 

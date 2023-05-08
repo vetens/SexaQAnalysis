@@ -50,6 +50,7 @@ process.source = cms.Source("PoolSource",
 
 process.load("SexaQAnalysis.AnalyzerAllSteps.FlatTreeProducerBDT_cfi")
 process.FlatTreeProducerBDT.runningOnData = runningOnData
+process.FlatTreeProducerBDT.PUReweighting = cms.FileInPath("/afs/cern.ch/work/w/wvetens/Sexaquarks/data/CMSSW_10_6_26/src/SexaQAnalysis/AnalyzerAllSteps/src/PUReweigh_QCDBGToDataBPH2018_FULL.txt")
 #process.FlatTreeProducerBDT.lookAtAntiS = lookAtAntiS
 process.flattreeproducer = cms.Path(process.FlatTreeProducerBDT)
 

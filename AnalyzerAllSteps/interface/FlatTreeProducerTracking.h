@@ -77,6 +77,8 @@ class FlatTreeProducerTracking : public edm::EDAnalyzer
     edm::InputTag m_V0LTag;
     edm::InputTag m_trackAssociatorTag;
     edm::InputTag m_TPTag;
+
+    edm::FileInPath m_PUReweighingMapIn;
 //    edm::InputTag m_PileupInfoTag;
 
 

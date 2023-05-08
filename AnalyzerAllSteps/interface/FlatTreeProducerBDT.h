@@ -54,6 +54,8 @@ class FlatTreeProducerBDT : public edm::EDAnalyzer
     edm::InputTag m_V0KsTag;
     edm::InputTag m_V0LTag;
 
+    edm::FileInPath m_PUReweighingMapIn;
+
     edm::EDGetTokenT<reco::BeamSpot> m_bsToken;
     edm::EDGetTokenT<vector<reco::Vertex>> m_offlinePVToken;
     edm::EDGetTokenT<vector<reco::GenParticle>> m_genParticlesToken_GEN; 

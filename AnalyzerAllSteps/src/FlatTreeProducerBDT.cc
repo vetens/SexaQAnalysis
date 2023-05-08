@@ -12,6 +12,7 @@ FlatTreeProducerBDT::FlatTreeProducerBDT(edm::ParameterSet const& pset):
   m_sCandsTag(pset.getParameter<edm::InputTag>("sexaqCandidates")),
   m_V0KsTag(pset.getParameter<edm::InputTag>("V0KsCollection")),
   m_V0LTag(pset.getParameter<edm::InputTag>("V0LCollection")),
+  m_PUReweighingMapIn(pset.getParameter<edm::FileInPath>("PUReweighting")),
 
   m_bsToken    (consumes<reco::BeamSpot>(m_bsTag)),
   m_offlinePVToken    (consumes<vector<reco::Vertex>>(m_offlinePVTag)),
@@ -304,14 +305,14 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
 	double event_weighting_factor = AnalyzerAllSteps::EventWeightingFactor(RECO_S->theta()); 
 	double event_weighting_factorPU = 1.; 
 	//you only need to calculate a reweighing parameter for the PU and z location if you are running on MC
-        if(ngoodPVsPOG < AnalyzerAllSteps::v_mapPU.size() && bestMatchingAntiS > -1) {
-		event_weighting_factorPU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[ngoodPVsPOG],h_genParticles->at(bestMatchingAntiS).vz());
+        if(ngoodPVsPOG < 60 && bestMatchingAntiS > -1) {
+		event_weighting_factorPU = AnalyzerAllSteps::PUReweighingFactor(ngoodPVsPOG,h_genParticles->at(bestMatchingAntiS).vz(), m_PUReweighingMapIn);
                 
                 // for signal, the mass is straightforward to get
                 GEN_S_mass = h_genParticles->at(bestMatchingAntiS).mass();
 	}
-	else if(!m_runningOnData && ngoodPVsPOG < AnalyzerAllSteps::v_mapPU.size()){ //but if the MC does not contain any antiS you have to reweigh on the 'event', so pick a random PVz location to reweigh on
-		event_weighting_factorPU = AnalyzerAllSteps::PUReweighingFactor(AnalyzerAllSteps::v_mapPU[ngoodPVsPOG],randomPVz);
+	else if(!m_runningOnData && ngoodPVsPOG < 60 ){ //but if the MC does not contain any antiS you have to reweigh on the 'event', so pick a random PVz location to reweigh on
+		event_weighting_factorPU = AnalyzerAllSteps::PUReweighingFactor(ngoodPVsPOG,randomPVz,m_PUReweighingMapIn);
 		event_weighting_factorPU = event_weighting_factorPU * ngoodPVsPOG;
                 //sthe 18.479 below seems to be an overall scale factor for viewing purposes. It is unclear why this is hardcoded here when it should just be in a plotting macro so I am commenting it out for now
 		//event_weighting_factorPU = event_weighting_factorPU * ngoodPVsPOG / 18.479;

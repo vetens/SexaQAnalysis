@@ -12,4 +12,5 @@ FlatTreeProducerBDT = cms.EDAnalyzer('FlatTreeProducerBDT',
     sexaqCandidates = cms.InputTag("lambdaKshortVertexFilter", "sParticles",""),
     V0KsCollection = cms.InputTag("generalV0Candidates","Kshort",""),
     V0LCollection = cms.InputTag("generalV0Candidates","Lambda",""),
+    PUReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/PU_NoReweigh.txt"),
 )

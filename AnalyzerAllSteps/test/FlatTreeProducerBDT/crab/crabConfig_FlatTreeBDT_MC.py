@@ -1,16 +1,15 @@
 from WMCore.Configuration import Configuration
 
-day = "23012023"
+day = "08052023"
 version = "v3"
 trial = "1"
-mass = "1p8GeV"
 
 
 config = Configuration()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.requestName = 'FlatTreeProducerBDT_'+'SQRECO_In_QCDSIM_'+'trial'+trial+'_'+mass+'_'+day+'_'+version
+config.General.requestName = 'FlatTreeProducerBDT_'+'SQRECO_In_QCDSIM_'+'trial'+trial+'_'+day+'_'+version
 
 config.section_('JobType') 
 config.JobType.pluginName = 'Analysis' 

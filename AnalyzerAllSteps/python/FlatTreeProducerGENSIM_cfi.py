@@ -8,5 +8,6 @@ FlatTreeProducerGENSIM = cms.EDAnalyzer('FlatTreeProducerGENSIM',
     offlinePV = cms.InputTag("offlinePrimaryVertices"),
     genCollection_GEN =  cms.InputTag("genParticles","","GEN"),
     genCollection_SIM_GEANT =  cms.InputTag("genParticlesPlusGEANT","","SIM"),
-    TrackingParticles = cms.InputTag("mix","MergedTrackTruth")
+    TrackingParticles = cms.InputTag("mix","MergedTrackTruth"),
+    PUReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/PU_NoReweigh.txt")
 )
