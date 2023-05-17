@@ -273,6 +273,7 @@ void FlatTreeProducerBDT::FillBranches(const reco::VertexCompositeCandidate * RE
         //For data, assign a random S gen mass as BDT Input so there is no correlation in BG
         double GEN_S_mass = 0;
         if(m_runningOnData) { 
+            std::cout << "Filling GEN mass for data Sbar" << std::endl;
             int SMass_index = rand()%5;
             GEN_S_mass=GEN_S_MASS_DATA[SMass_index];
             }
@@ -757,6 +758,7 @@ void FlatTreeProducerBDT::Init()
 	_RECO_Ks_daughter1_dz_beamspot.clear();
 	_RECO_Ks_daughter1_dz_min_PV.clear();
 
+        _GEN_S_mass.clear(); 
 }
 
 DEFINE_FWK_MODULE(FlatTreeProducerBDT);
