@@ -778,6 +778,7 @@ void FlatTreeProducerBDT::Init()
 	_RECO_Ks_daughter1_dz_beamspot.clear();
 	_RECO_Ks_daughter1_dz_min_PV.clear();
 
+        _GEN_S_mass.clear(); 
 }
 
 DEFINE_FWK_MODULE(FlatTreeProducerBDT);
