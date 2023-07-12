@@ -64,20 +64,16 @@ class LambdaKshortVertexFilter : public edm::EDFilter {
     edm::InputTag lambdaCollectionTag_;
     edm::InputTag kshortCollectionTag_;
     edm::InputTag genCollectionTag_;
-    edm::InputTag bsCollectionTag_;
-    edm::InputTag PVCollectionTag_;
     
     edm::EDGetTokenT<reco::CandidatePtrVector> lambdaCollectionToken_;
     edm::EDGetTokenT<reco::CandidatePtrVector> kshortCollectionToken_;
     edm::EDGetTokenT<std::vector<reco::GenParticle>> genCollectionToken_;
-    edm::EDGetTokenT<reco::BeamSpot> bsCollectionToken_;
-    edm::EDGetTokenT<std::vector<reco::Vertex>> PVCollectionToken_;
 
     double maxchi2ndofVertexFit_;
     bool IncludeXevt_S_;
-    bool doInitialPresel_, doAdditionalPresel_;
-    double minDeltaPhi_LambdaKshort_, minLxy_SInteractionToBPC_, maxLxy_SInteractionToBPC_, minDxyOverLxy_SInteractionToBeamspot_, maxDxyOverLxy_SInteractionToBeamspot_;
-    double maxVzInteraction_S_, maxDeltaEta_LambdaKs_, minOpeningsAngle_LambdaKs_, maxOpeningsAngle_LambdaKs_, minOpeningsAngle_SKshort_, maxOpeningsAngle_SKshort_, minOpeningsAngle_SLambda_, maxOpeningsAngle_SLambda_, maxEta_S_, maxDzmin_S_, maxEta_Kshort_, minPT_Kshort_;
+//    bool doInitialPresel_, doAdditionalPresel_;
+ //   double minDeltaPhi_LambdaKshort_, minLxy_SInteractionToBPC_, maxLxy_SInteractionToBPC_, minDxyOverLxy_SInteractionToBeamspot_, maxDxyOverLxy_SInteractionToBeamspot_;
+ //   double maxVzInteraction_S_, maxDeltaEta_LambdaKs_, minOpeningsAngle_LambdaKs_, maxOpeningsAngle_LambdaKs_, minOpeningsAngle_SKshort_, maxOpeningsAngle_SKshort_, minOpeningsAngle_SLambda_, maxOpeningsAngle_SLambda_, maxEta_S_, maxDzmin_S_, maxEta_Kshort_, minPT_Kshort_;
 
     //functions 
     bool allCollectionValid(edm::Handle<reco::CandidatePtrVector> h_lambda,edm::Handle<reco::CandidatePtrVector> h_kshort);

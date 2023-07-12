@@ -51,7 +51,7 @@ def main():
     options = getOptions()
     if options.crabCmd == 'submit':
         from CRABClient.UserUtilities import config
-        trial = "A_partial"
+        trial = "B"
         config = config()
         
         pyCfgParams = ['isData=True']
@@ -68,52 +68,52 @@ def main():
         config.JobType.psetName = '../treeproducer_data_cfg.py'
         
         config.section_('Data') 
-        #config.Data.inputDataset = '/SingleMuon/Run2016G-23Sep2016-v1/AOD'
         config.Data.inputDBS = 'global'
         config.Data.partialDataset = True
         config.Data.unitsPerJob = 20
         #config.Data.lumiMask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
+        config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON_MuonPhys.txt'
         #config.Data.runRange = ''
         config.Data.outLFNDirBase = '/store/user/wvetens/data_Sexaq/trial'+trial
-        config.Data.publication = False
+        config.Data.publication = True
         config.Data.outputDatasetTag = 'allSlices_2018BPH_multicrab'
         config.Data.splitting = 'LumiBased'
         
         config.section_('Site') 
         config.Site.whitelist = ['T2*','T1*']
         config.Site.storageSite = 'T2_US_Wisconsin'
-        #inputDatasets = [
-        #                '/ParkingBPH1/Run2018A-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH2/Run2018A-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH3/Run2018A-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH4/Run2018A-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH5/Run2018A-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH6/Run2018A-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH1/Run2018B-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH2/Run2018B-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH3/Run2018B-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH4/Run2018B-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH5/Run2018B-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH6/Run2018B-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH1/Run2018C-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH2/Run2018C-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH3/Run2018C-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH4/Run2018C-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH5/Run2018C-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH1/Run2018D-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH2/Run2018D-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH3/Run2018D-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH4/Run2018D-20Jun2021_UL2018-v1/AOD',
-        #                '/ParkingBPH5/Run2018D-20Jun2021_UL2018-v1/AOD'
-        #                ]
         inputDatasets = [
+                        '/ParkingBPH1/Run2018A-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH2/Run2018A-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH3/Run2018A-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH4/Run2018A-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH5/Run2018A-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH6/Run2018A-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH1/Run2018B-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH2/Run2018B-20Jun2021_UL2018-v1/AOD',
                         '/ParkingBPH3/Run2018B-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH4/Run2018B-20Jun2021_UL2018-v1/AOD',
                         '/ParkingBPH5/Run2018B-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH6/Run2018B-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH1/Run2018C-20Jun2021_UL2018-v1/AOD',
                         '/ParkingBPH2/Run2018C-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH3/Run2018C-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH4/Run2018C-20Jun2021_UL2018-v1/AOD',
                         '/ParkingBPH5/Run2018C-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH1/Run2018D-20Jun2021_UL2018-v1/AOD',
                         '/ParkingBPH2/Run2018D-20Jun2021_UL2018-v1/AOD',
-                        '/ParkingBPH3/Run2018D-20Jun2021_UL2018-v1/AOD'
+                        '/ParkingBPH3/Run2018D-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH4/Run2018D-20Jun2021_UL2018-v1/AOD',
+                        '/ParkingBPH5/Run2018D-20Jun2021_UL2018-v1/AOD'
                         ]
+        #inputDatasets = [
+        #                '/ParkingBPH3/Run2018B-20Jun2021_UL2018-v1/AOD',
+        #                '/ParkingBPH5/Run2018B-20Jun2021_UL2018-v1/AOD',
+        #                '/ParkingBPH2/Run2018C-20Jun2021_UL2018-v1/AOD',
+        #                '/ParkingBPH5/Run2018C-20Jun2021_UL2018-v1/AOD',
+        #                '/ParkingBPH2/Run2018D-20Jun2021_UL2018-v1/AOD',
+        #                '/ParkingBPH3/Run2018D-20Jun2021_UL2018-v1/AOD'
+        #                ]
 
         for inDS in inputDatasets:
         

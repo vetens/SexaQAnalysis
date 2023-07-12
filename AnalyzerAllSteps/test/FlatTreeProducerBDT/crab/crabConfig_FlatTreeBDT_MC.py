@@ -1,7 +1,7 @@
 from WMCore.Configuration import Configuration
 
-day = "08052023"
-version = "v3"
+day = "17052023"
+version = "v4"
 trial = "1"
 
 

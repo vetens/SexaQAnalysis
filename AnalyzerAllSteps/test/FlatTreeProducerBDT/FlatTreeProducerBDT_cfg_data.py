@@ -39,9 +39,11 @@ process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 #inlist = open("crab/BPH2_Run2018B_BLOCK_A_Test.txt")
+#infile = 'root://cmsxrootd.hep.wisc.edu//store/user/wvetens/data_Sexaq/trialA/ParkingBPH5/crab_2018BPH_trialA_ParkingBPH5_Run2018D-20Jun2021_UL2018-v1_trialA/230209_130357/0005/output_5780.root'
 process.source = cms.Source("PoolSource",
 	fileNames = cms.untracked.vstring(options.inputFiles),
 	#fileNames = cms.untracked.vstring(*(inlist.readlines())),
+	#fileNames = cms.untracked.vstring(infile),
   duplicateCheckMode = cms.untracked.string ("noDuplicateCheck")
 )
 

@@ -16,6 +16,9 @@ collections_to_keep = cms.untracked.vstring(
     'keep recoVertexCompositePtrCandidates_rMassFilter_sVertexCompositePtrCandidate_*',
     'keep recoVertexCompositePtrCandidates_sMassFilter_sVertexCompositePtrCandidate_*',
     'keep *_*_*_SEXAQ',
+#dropping collections from intermediate filter steps
+    'drop *_*_sParticles_*',
+    'keep *_sMassFilter_sParticles_*',
 ##Following two kept in Signal MC, but not originally here, so I will add them for now
     'keep *_lambdaKshortVertexFilter_sParticles_*',
     'keep *_offlinePrimaryVertices_*_*',
@@ -85,10 +88,23 @@ process.source = cms.Source("PoolSource",
 )
 
 
-process.nEvTotal        = cms.EDProducer("EventCountProducer")
-process.nEvLambdaKshort = cms.EDProducer("EventCountProducer")
-process.nEvLambdaKshortVertex = cms.EDProducer("EventCountProducer")
-process.nEvSMass        = cms.EDProducer("EventCountProducer")
+process.nEvTotal                = cms.EDProducer("EventCountProducer")
+process.nEvLambdaKshort         = cms.EDProducer("EventCountProducer")
+process.nEvLambdaKshortVertex   = cms.EDProducer("EventCountProducer")
+process.nEvFiducial             = cms.EDProducer("EventCountProducer")
+process.nEvSdauDeltaPhi         = cms.EDProducer("EventCountProducer")
+process.nEvlxy                  = cms.EDProducer("EventCountProducer")
+process.nEvPointing             = cms.EDProducer("EventCountProducer")
+process.nEvVz                   = cms.EDProducer("EventCountProducer")
+process.nEvSdauDeltaEta         = cms.EDProducer("EventCountProducer")
+process.nEvSdauDeltaOpe         = cms.EDProducer("EventCountProducer")
+process.nEvSKsDeltaOpe          = cms.EDProducer("EventCountProducer")
+process.nEvSLambdaDeltaOpe      = cms.EDProducer("EventCountProducer")
+process.nEvEta                  = cms.EDProducer("EventCountProducer")
+process.nEvMinDz                = cms.EDProducer("EventCountProducer")
+process.nEvKsEta                = cms.EDProducer("EventCountProducer")
+process.nEvKsPt                 = cms.EDProducer("EventCountProducer")
+process.nEvSMass                = cms.EDProducer("EventCountProducer")
 
 process.genParticlePlusGEANT = cms.EDProducer("GenPlusSimParticleProducer",
   src           = cms.InputTag("g4SimHits"),
@@ -104,86 +120,95 @@ process.generalV0Candidates.cosThetaXYCut = -1
 process.generalV0Candidates.kShortMassCut = 0.03
 process.generalV0Candidates.lambdaMassCut = 0.015
 
-
-
 process.load("SexaQAnalysis.Skimming.LambdaKshortFilter_cfi")
 process.lambdaKshortFilter.genCollection = cms.InputTag("genParticlePlusGEANT")
 process.lambdaKshortFilter.isData = True
 process.lambdaKshortFilter.minPtLambda = 0. 
 process.lambdaKshortFilter.minPtKshort = 0. 
-#Fiducial cuts:
-#process.FiducialCuts = cms.EDFilter("".
-#    src = cms.InputTag("lambdaKshortFilter"),
-#    cut = cms.string("")
-#  )
-#
-process.lambdaKshortFilter.doFiducialCuts = True
-process.lambdaKshortFilter.maxVzDecayLambda = 125.
-process.lambdaKshortFilter.maxVzDecayKshort = 125.
-process.lambdaKshortFilter.maxLxyDecayLambda = 44.5
-process.lambdaKshortFilter.maxLxyDecayKshort = 44.5
-process.lambdaKshortFilter.minPTLambdaDau0 = 0.33
-process.lambdaKshortFilter.minPTLambdaDau1 = 0.33
-process.lambdaKshortFilter.minPTKshortDau0 = 0.33
-process.lambdaKshortFilter.minPTKshortDau1 = 0.33
-process.lambdaKshortFilter.maxPzLambdaDau0 = 22.
-process.lambdaKshortFilter.maxPzLambdaDau1 = 22.
-process.lambdaKshortFilter.maxPzKshortDau0 = 22.
-process.lambdaKshortFilter.maxPzKshortDau1 = 22.
-process.lambdaKshortFilter.minD0xyBeamspotLambdaDau0 = 0.
-process.lambdaKshortFilter.minD0xyBeamspotLambdaDau1 = 0.
-process.lambdaKshortFilter.minD0xyBeamspotKshortDau0 = 0.
-process.lambdaKshortFilter.minD0xyBeamspotKshortDau1 = 0.
-process.lambdaKshortFilter.maxD0xyBeamspotLambdaDau0 = 9.5
-process.lambdaKshortFilter.maxD0xyBeamspotLambdaDau1 = 9.5
-process.lambdaKshortFilter.maxD0xyBeamspotKshortDau0 = 9.5
-process.lambdaKshortFilter.maxD0xyBeamspotKshortDau1 = 9.5
-process.lambdaKshortFilter.maxDzMinPVLambdaDau0 = 27.
-process.lambdaKshortFilter.maxDzMinPVLambdaDau1 = 27.
-process.lambdaKshortFilter.maxDzMinPVKshortDau0 = 27.
-process.lambdaKshortFilter.maxDzMinPVKshortDau1 = 27.
-
 process.lambdaKshortFilter.checkLambdaDaughters = True
 process.lambdaKshortFilter.prescaleFalse = 0
 
+#Fiducial Cuts:
+process.load("SexaQAnalysis.Skimming.FiducialCuts_cfi")
+process.FiducialCuts.lambdaCollection = cms.InputTag("generalV0Candidates","Lambda")
+process.FiducialCuts.kshortCollection = cms.InputTag("generalV0Candidates","Kshort")
+process.FiducialCuts.maxVzDecayLambda = 125.
+process.FiducialCuts.maxVzDecayKshort = 125.
+process.FiducialCuts.maxLxyDecayLambda = 44.5
+process.FiducialCuts.maxLxyDecayKshort = 44.5
+process.FiducialCuts.minPTLambdaDau0 = 0.33
+process.FiducialCuts.minPTLambdaDau1 = 0.33
+process.FiducialCuts.minPTKshortDau0 = 0.33
+process.FiducialCuts.minPTKshortDau1 = 0.33
+process.FiducialCuts.maxPzLambdaDau0 = 22.
+process.FiducialCuts.maxPzLambdaDau1 = 22.
+process.FiducialCuts.maxPzKshortDau0 = 22.
+process.FiducialCuts.maxPzKshortDau1 = 22.
+process.FiducialCuts.minD0xyBeamspotLambdaDau0 = 0.
+process.FiducialCuts.minD0xyBeamspotLambdaDau1 = 0.
+process.FiducialCuts.minD0xyBeamspotKshortDau0 = 0.
+process.FiducialCuts.minD0xyBeamspotKshortDau1 = 0.
+process.FiducialCuts.maxD0xyBeamspotLambdaDau0 = 9.5
+process.FiducialCuts.maxD0xyBeamspotLambdaDau1 = 9.5
+process.FiducialCuts.maxD0xyBeamspotKshortDau0 = 9.5
+process.FiducialCuts.maxD0xyBeamspotKshortDau1 = 9.5
+process.FiducialCuts.maxDzMinPVLambdaDau0 = 27.
+process.FiducialCuts.maxDzMinPVLambdaDau1 = 27.
+process.FiducialCuts.maxDzMinPVKshortDau0 = 27.
+process.FiducialCuts.maxDzMinPVKshortDau1 = 27.
+
+#Sbar Vertexing
 process.load("SexaQAnalysis.Skimming.LambdaKshortVertexFilter_cfi")
-process.lambdaKshortVertexFilter.lambdaCollection = cms.InputTag("lambdaKshortFilter","lambda")
-process.lambdaKshortVertexFilter.kshortCollection = cms.InputTag("lambdaKshortFilter","kshort")
+process.lambdaKshortVertexFilter.lambdaCollection = cms.InputTag("FiducialCuts","lambda")
+process.lambdaKshortVertexFilter.kshortCollection = cms.InputTag("FiducialCuts","kshort")
 process.lambdaKshortVertexFilter.maxchi2ndofVertexFit = 10.
+
 #Initial Preselection:
-#process.Preselection = cms.EDFilter("".
-#    src = cms.InputTag("lambdaKshortVertexFilter"),
-#    cut = cms.string("")
-#  )
-#
-process.lambdaKshortVertexFilter.doInitialPreselection = True
-process.lambdaKshortVertexFilter.minDeltaPhi_LambdaKshort = 0.4
-process.lambdaKshortVertexFilter.minLxy_SInteractionToBPC = 2.02
-process.lambdaKshortVertexFilter.maxLxy_SInteractionToBPC = 2.4
-process.lambdaKshortVertexFilter.minDxyOverLxy_SInteractionToBeamspot = 0.
-process.lambdaKshortVertexFilter.maxDxyOverLxy_SInteractionToBeamspot = 0.5
+process.load("SexaQAnalysis.Skimming.daughtersDeltaPhiFilter_cfi")
+process.daughtersDeltaPhiFilter.sexaqCandidates = cms.InputTag("lambdaKshortVertexFilter","sParticles", "")
+process.daughtersDeltaPhiFilter.minDeltaPhi_LambdaKshort = 0.4
+process.load("SexaQAnalysis.Skimming.lxyFilter_cfi")
+process.lxyFilter.sexaqCandidates = cms.InputTag("daughtersDeltaPhiFilter","sParticles", "")
+process.lxyFilter.minLxy_SInteractionToBPC = 2.02
+process.lxyFilter.maxLxy_SInteractionToBPC = 2.4
+process.load("SexaQAnalysis.Skimming.PointingFilter_cfi")
+process.PointingFilter.sexaqCandidates = cms.InputTag("lxyFilter","sParticles", "")
+process.PointingFilter.minDxyOverLxy_SInteractionToBeamspot = 0.
+process.PointingFilter.maxDxyOverLxy_SInteractionToBeamspot = 0.5
 #Additional Preselection:
-#process.AdditionalPreselection = cms.EDFilter("".
-#    src = cms.InputTag("Preselection"),
-#    cut = cms.string("")
-#  )
-#
-process.lambdaKshortVertexFilter.doAdditionalPreselection = True
-process.lambdaKshortVertexFilter.maxVzInteraction_S = 28.
-process.lambdaKshortVertexFilter.maxDeltaEta_LambdaKs = 2.
-process.lambdaKshortVertexFilter.minOpeningsAngle_LambdaKs = 0.4
-process.lambdaKshortVertexFilter.maxOpeningsAngle_LambdaKs = 2.
-process.lambdaKshortVertexFilter.minOpeningsAngle_SKshort = 0.1
-process.lambdaKshortVertexFilter.maxOpeningsAngle_SKshort = 1.8
-process.lambdaKshortVertexFilter.minOpeningsAngle_SLambda = 0.05
-process.lambdaKshortVertexFilter.maxOpeningsAngle_SLambda = 1.0
-process.lambdaKshortVertexFilter.maxEta_S = 3.5
-process.lambdaKshortVertexFilter.maxDzmin_S = 6.
-process.lambdaKshortVertexFilter.maxEta_Kshort = 2.5
-process.lambdaKshortVertexFilter.minPT_Kshort = 0.8
+process.load("SexaQAnalysis.Skimming.vzFilter_cfi")
+process.vzFilter.sexaqCandidates = cms.InputTag("PointingFilter","sParticles", "")
+process.vzFilter.maxVzInteraction_S = 28.
+process.load("SexaQAnalysis.Skimming.daughtersDeltaEtaFilter_cfi")
+process.daughtersDeltaEtaFilter.sexaqCandidates = cms.InputTag("vzFilter","sParticles", "")
+process.daughtersDeltaEtaFilter.maxDeltaEta_LambdaKs = 2.
+process.load("SexaQAnalysis.Skimming.daughtersDeltaOpeningsAngleFilter_cfi")
+process.daughtersDeltaOpeningsAngleFilter.sexaqCandidates = cms.InputTag("daughtersDeltaEtaFilter","sParticles", "")
+process.daughtersDeltaOpeningsAngleFilter.minOpeningsAngle_LambdaKs = 0.4
+process.daughtersDeltaOpeningsAngleFilter.maxOpeningsAngle_LambdaKs = 2.
+process.load("SexaQAnalysis.Skimming.SKsDeltaOpeningsAngleFilter_cfi")
+process.SKsDeltaOpeningsAngleFilter.sexaqCandidates = cms.InputTag("daughtersDeltaOpeningsAngleFilter","sParticles", "")
+process.SKsDeltaOpeningsAngleFilter.minOpeningsAngle_SKshort = 0.1
+process.SKsDeltaOpeningsAngleFilter.maxOpeningsAngle_SKshort = 1.8
+process.load("SexaQAnalysis.Skimming.SLambdaDeltaOpeningsAngleFilter_cfi")
+process.SLambdaDeltaOpeningsAngleFilter.sexaqCandidates = cms.InputTag("SKsDeltaOpeningsAngleFilter","sParticles", "")
+process.SLambdaDeltaOpeningsAngleFilter.minOpeningsAngle_SLambda = 0.05
+process.SLambdaDeltaOpeningsAngleFilter.maxOpeningsAngle_SLambda = 1.0
+process.load("SexaQAnalysis.Skimming.EtaFilter_cfi")
+process.EtaFilter.sexaqCandidates = cms.InputTag("SLambdaDeltaOpeningsAngleFilter","sParticles", "")
+process.EtaFilter.maxEta_S = 3.5
+process.load("SexaQAnalysis.Skimming.mindzFilter_cfi")
+process.mindzFilter.sexaqCandidates = cms.InputTag("EtaFilter","sParticles", "")
+process.mindzFilter.maxDzmin_S = 6.
+process.load("SexaQAnalysis.Skimming.KsEtaFilter_cfi")
+process.KsEtaFilter.sexaqCandidates = cms.InputTag("mindzFilter","sParticles", "")
+process.KsEtaFilter.maxEta_Kshort = 2.5
+process.load("SexaQAnalysis.Skimming.KsPtFilter_cfi")
+process.KsPtFilter.sexaqCandidates = cms.InputTag("KsEtaFilter","sParticles", "")
+process.KsPtFilter.minPT_Kshort = 0.8
 
 from SexaQAnalysis.Skimming.MassFilter_cfi import massFilter
-massFilter.lambdakshortCollection = cms.InputTag("lambdaKshortVertexFilter","sParticles")
+massFilter.lambdakshortCollection = cms.InputTag("KsPtFilter","sParticles", "")
 massFilter.minMass = -10000 # effectively no filter
 massFilter.maxMass = 10000  # effectively no filter
 process.rMassFilter = massFilter.clone()
@@ -202,8 +227,34 @@ process.p = cms.Path(
   process.InitialProducer * 
   process.lambdaKshortFilter *
   process.nEvLambdaKshort *
+  process.FiducialCuts *
+  process.nEvFiducial *
   process.lambdaKshortVertexFilter *
   process.nEvLambdaKshortVertex *
+  process.daughtersDeltaPhiFilter *
+  process.nEvSdauDeltaPhi *
+  process.lxyFilter *
+  process.nEvlxy *
+  process.PointingFilter *
+  process.nEvPointing *
+  process.vzFilter *
+  process.nEvVz *
+  process.daughtersDeltaEtaFilter *
+  process.nEvSdauDeltaEta *
+  process.daughtersDeltaOpeningsAngleFilter *
+  process.nEvSdauDeltaOpe *
+  process.SKsDeltaOpeningsAngleFilter *
+  process.nEvSKsDeltaOpe *
+  process.SLambdaDeltaOpeningsAngleFilter *
+  process.nEvSLambdaDeltaOpe *
+  process.EtaFilter *
+  process.nEvEta *
+  process.mindzFilter *
+  process.nEvMinDz *
+  process.KsEtaFilter *
+  process.nEvKsEta *
+  process.KsPtFilter *
+  process.nEvKsPt *
   process.rMassFilter *
   process.sMassFilter *
   process.nEvSMass 

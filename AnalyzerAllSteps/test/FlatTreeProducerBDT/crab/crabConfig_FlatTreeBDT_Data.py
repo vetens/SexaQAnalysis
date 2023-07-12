@@ -1,8 +1,8 @@
 from WMCore.Configuration import Configuration
 
-day = "08052023"
-version = "v3"
-trial = "A"
+day = "28062023"
+version = "v4"
+trial = "B"
 
 
 config = Configuration()
@@ -25,6 +25,7 @@ config.Data.outLFNDirBase = '/store/user/wvetens/data_Sexaq/FlatTree_BDT'
 config.Data.userInputFiles = open('/afs/cern.ch/work/w/wvetens/Sexaquarks/data/CMSSW_10_6_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerBDT/crab/BPH_FULL.txt').readlines() 
 #config.Data.userInputFiles = open('/afs/cern.ch/work/w/wvetens/Sexaquarks/data/CMSSW_10_6_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerBDT/crab/BPH2_Run2018B_BLOCK_A_Full.txt').readlines() 
 #config.Data.inputDataset = '/CRAB_SimSexaq_trial21/lowette-crab_Step1_Step2_Skimming_FlatTree_trial21_1p8GeV_23102019_v1-8925145305413877174dac643a893255/USER'
+#config.Data.lumiMask = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/Legacy_2018/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON_MuonPhys.txt'
 config.Data.inputDBS = 'phys03'
 #config.Data.outputPrimaryDataset = "FlatTreeProducerBDT_BPH2_Run2018B_BLOCK_A_"+day+'_'+version
 config.Data.outputPrimaryDataset = "FlatTreeProducerBDT_BPH_FULL_trial"+trial+'_'+day+'_'+version
