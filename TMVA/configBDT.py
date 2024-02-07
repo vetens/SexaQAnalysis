@@ -78,30 +78,41 @@ fiducial_region_cuts = "Alt$(_Lambda_vz_decay_vertex,0) >= "+str(FiducialRegionv
 +" && Alt$(_RECO_Ks_daughter1_dz_min_PV,0) <= "+str(FiducialRegiondzMax)
 
 ##additional preselection cuts:
-##TODO: Edit to the same format as above cuts and input into config_dict
-#Opt_VzMax = 28.0
-#Opt_DeltaEtaMax = 2
-#Opt_DeltaAlpha_daughters_Max = 2
-#Opt_DeltaAlpha_daughters_Min = 0.4
-#Opt_DeltaAlpha_S_Kshort_Max = 1.8
-#Opt_DeltaAlpha_S_Kshort_Min = 0.1
-#Opt_DeltaAlpha_S_Lambda_Max = 1.0
-#Opt_DeltaAlpha_S_Lambda_Min = 0.05
-#Opt_EtaSMax = 3.5
-#Opt_EtaKshortMax = 2.5
-#Opt_SdzminMax = 6
-#Opt_pTKshortMin = 0.8
-#
-#"S v_z interaction vertex":"abs(tree._S_vz_interaction_vertex[0]) <= Opt_VzMax",
-#"Delta eta of S daughters":"abs(tree._S_daughters_deltaeta[0]) <= Opt_DeltaEtaMax",
-#"3D Openingsangle of S daughters":"tree._S_daughters_openingsangle[0] <= Opt_DeltaAlpha_daughters_Max and tree._S_daughters_openingsangle[0] >= Opt_DeltaAlpha_daughters_Min",
-#"3D Openingsangle of S and Ks":"tree._S_Ks_openingsangle[0] <= Opt_DeltaAlpha_S_Kshort_Max and tree._S_Ks_openingsangle[0] >= Opt_DeltaAlpha_S_Kshort_Min",
-#"3D Openingsangle of S and Lambda":"tree._S_Lambda_openingsangle[0] <= Opt_DeltaAlpha_S_Lambda_Max and tree._S_Lambda_openingsangle[0] >= Opt_DeltaAlpha_S_Lambda_Min",
-#"S eta":"abs(tree._S_eta[0]) <= Opt_EtaSMax",
-#"K_s eta":"abs(tree._Ks_eta[0]) <= Opt_EtaKshortMax",
-#"minimum impact parameter of S":"abs(tree._S_dz_min[0]) <= Opt_SdzminMax",
-#"K_s p_T":"tree._Ks_pt[0] >= Opt_pTKshortMin"
+Opt_VzMax = 28.0
+Opt_VzMin = -28.0
+Opt_DeltaEtaMax = 2
+Opt_DeltaEtaMin = -2
+Opt_DeltaAlpha_daughters_Max = 2
+Opt_DeltaAlpha_daughters_Min = 0.4
+Opt_DeltaAlpha_S_Kshort_Max = 1.8
+Opt_DeltaAlpha_S_Kshort_Min = 0.1
+Opt_DeltaAlpha_S_Lambda_Max = 1.0
+Opt_DeltaAlpha_S_Lambda_Min = 0.05
+Opt_EtaSMax = 3.5
+Opt_EtaSMin = -3.5
+Opt_EtaKshortMax = 2.5
+Opt_EtaKshortMin = -2.5
+Opt_SdzminMax = 6
+Opt_SdzminMin = -6
+Opt_pTKshortMin = 0.8
 
+additional_preselection = "Alt$(_S_vz_interaction_vertex,0) <= " + str(Opt_VzMax)\
++" && Alt$(_S_vz_interaction_vertex,0) >= " + str(Opt_VzMin)\
++" && Alt$(_S_daughters_deltaeta,0) <= " + str(Opt_DeltaEtaMax)\
++" && Alt$(_S_daughters_deltaeta,0) >= " + str(Opt_DeltaEtaMin)\
++" && Alt$(_S_daughters_openingsangle,0) <= " + str(Opt_DeltaAlpha_daughters_Max)\
++" && Alt$(_S_daughters_openingsangle,0) >= " + str(Opt_DeltaAlpha_daughters_Min)\
++" && Alt$(_S_Ks_openingsangle,0) <= " + str(Opt_DeltaAlpha_S_Kshort_Max)\
++" && Alt$(_S_Ks_openingsangle,0) >= " + str(Opt_DeltaAlpha_S_Kshort_Min)\
++" && Alt$(_S_Lambda_openingsangle,0) <= " + str(Opt_DeltaAlpha_S_Lambda_Max)\
++" && Alt$(_S_Lambda_openingsangle,0) >= " + str(Opt_DeltaAlpha_S_Lambda_Min)\
++" && Alt$(_S_eta,0) <= " + str(Opt_EtaSMax)\
++" && Alt$(_S_eta,0) >= " + str(Opt_EtaSMin)\
++" && Alt$(_Ks_eta,0) <= " + str(Opt_EtaKshortMax)\
++" && Alt$(_Ks_eta,0) >= " + str(Opt_EtaKshortMin)\
++" && Alt$(_S_dz_min,0) <= " + str(Opt_SdzminMax)\
++" && Alt$(_S_dz_min,0) >= " + str(Opt_SdzminMin)\
++" && Alt$(_Ks_pt,0) >= " + str(Opt_pTKshortMin)
 
 #dictionary to load in several macros
 config_dict = {
@@ -116,11 +127,16 @@ config_dict = {
 "pre_BDT_cut1":pre_BDT_cut1,
 "pre_BDT_cut3":pre_BDT_cut3,
 "pre_BDT_cut4":pre_BDT_cut4,
-"config_pre_BDT_cuts":fiducial_region_cuts + " && "+pre_BDT_cut4 + " && "+pre_BDT_cut1 + " && " + pre_BDT_cut3,
+"additional_preselection":additional_preselection,
+"config_pre_BDT_cuts":fiducial_region_cuts + " && "+pre_BDT_cut4 + " && "+pre_BDT_cut1 + " && " + pre_BDT_cut3 + " && " + additional_preselection,
+#"config_pre_BDT_cuts":"",
 "BDT_classifier_cut":BDT_classifier_cut ,
-"config_SignalFile":"/pnfs/iihe/cms/store/user/jdeclerc/crmc_Sexaq/Final/1p8GeV/FlatTreeBDTMCSignal/combined_FlatTreeBDT_trial17AND21_1p8GeV_02112019_v1.root",
-"config_BkgFileData":"/pnfs/iihe/cms/store/user/jdeclerc/data_Sexaq/trialR/ALL/ALL_v6/FlatTreeBDT_SingleMuon_Run2016H-07Aug17-v1_trialR.root",
-"config_BkgFileMC":"/pnfs/iihe/cms/store/user/jdeclerc/crmc_Sexaq/Final/1p8GeV/FlatTreeBDTMCBackground/FlatTreeBDT_DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8__31102019_v1.root",
+"config_SignalFile":"/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/SignalSbar_FULL.root",
+#"config_SignalFile":"root://cmsxrootd.hep.wisc.edu//store/user/wvetens/crmc_Sexaq/FlatTree_BDT/SbarSignalMC_FlatTreeProducerBDT_trial6_1p8GeV_06052023_v3/crab_FlatTreeProducerBDT_trial6_1p8GeV_06052023_v3/230506_140659/0000/output_3.root",
+"config_BkgFileData":"/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Data_BPH_Full.root",
+#"config_BkgFileData":"root://cmsxrootd.hep.wisc.edu//store/user/wvetens/data_Sexaq/FlatTree_BDT/FlatTreeProducerBDT_BPH_FULL_trialA_08052023_v3/crab_FlatTreeProducerBDT_BPH_FULL_trialA_08052023_v3/230508_101423/0000/output_9.root",
+"config_BkgFileMC":"/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/QCD_MC_BG.root",
+#"config_BkgFileMC":"root://cmsxrootd.hep.wisc.edu//store/user/wvetens/crmc_Sexaq/FlatTree_BDT/FlatTreeProducerBDT_SQ_In_QCD_Pt-170to300_MuEnrichedPt5_TuneCP5_13TeV_pythia8_08052023_v4/crab_FlatTreeProducerBDT_SQRECO_In_QCDSIM_trial1_08052023_v4/230508_162203/0000/output_24.root",
 "config_SelectionSignalAntiS":"Alt$(_S_charge,0) == -1 && Alt$(_S_deltaLInteractionVertexAntiSmin,0) < "+str(GENRECO_matcher_AntiS_deltaL)+" && Alt$(_S_deltaRAntiSmin,0) <"+str(GENRECO_matcher_AntiS_deltaR),
 "config_SelectionBkgS":"Alt$(_S_charge,0) == 1",
 "config_SelectionBkgAntiS":"Alt$(_S_charge,0) == -1 && Alt$(_S_deltaLInteractionVertexAntiSmin,0) > 10",
@@ -138,6 +154,28 @@ config_dict = {
 "config_fidRegion_FiducialRegionvzMax":FiducialRegionvzMax
 }
 
+variablelist = ["_S_vz_interaction_vertex", 
+                "_S_lxy_interaction_vertex_beampipeCenter", 
+                "_S_daughters_deltaphi",
+                "_S_daughters_deltaeta", 
+                "_S_daughters_openingsangle",
+                "_S_daughters_DeltaR", 
+                "_S_Ks_openingsangle", 
+                "_S_Lambda_openingsangle", 
+                "_S_eta", 
+                "_Ks_eta", 
+                "_S_dxy_over_lxy", 
+                "_Ks_dxy_over_lxy", 
+                "_Lambda_dxy_over_lxy", 
+                "_S_dz_min",
+                "_Ks_dz_min", 
+                "_Lambda_dz_min", 
+                "_Ks_pt",
+                "_Lambda_lxy_decay_vertex",
+                "_GEN_S_mass",
+                "_S_mass",
+                "_S_nGoodPVs",
+                "_S_chi2_ndof"]
 
 #to calculate the reweighing factor for the pathlength through the beampipe (normally not needed any more as this weigh factor is now also stored in the ntuple):
 def calc_reweighing_factor(eta_S,isMCSignal):

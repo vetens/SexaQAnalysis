@@ -74,6 +74,7 @@ class AnalyzerAllSteps : public edm::EDAnalyzer
    // static constexpr double center_beampipe_y = 0.27; //cm
 
     //the 2018 location of the center of the beampipe in x and y, from https://github.com/DisplacedVertices/cmssw-usercode/blob/88b6cd4859a8c1c6eb4aa900f19e4352ac52bb59/MFVNeutralino/test/beampipe.py#L14-L15
+    // originally from these slides: https://indico.cern.ch/event/750054/contributions/3181607/attachments/1740361/2816115/2018.10.17_2018Data_kropiv.pdf
     //thanks to the displaced vertices group
     static constexpr double center_beampipe_x = 0.171; //cm
     static constexpr double center_beampipe_y = -0.175; //cm

@@ -45,10 +45,10 @@ process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
 process.preScaler.prescaleFactor = cms.int32(1)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
-#inlist = open("SbarSignal_NoSelection_NoReconstruction.txt", "r")
+inlist = open("SbarSignal_NoSelection_NoReconstruction.txt", "r")
 process.source = cms.Source("PoolSource",
-        #fileNames = cms.untracked.vstring(*(inlist.readlines())),
-	fileNames = cms.untracked.vstring(options.inputFiles),
+        fileNames = cms.untracked.vstring(*(inlist.readlines())),
+	#fileNames = cms.untracked.vstring(options.inputFiles),
   duplicateCheckMode = cms.untracked.string ("noDuplicateCheck")
 )
 

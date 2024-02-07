@@ -14,6 +14,7 @@ options.register(
 
 options.register(
 	'maxEvts',-1,VarParsing.multiplicity.singleton,VarParsing.varType.int,
+#  	'maxEvts',10000,VarParsing.multiplicity.singleton,VarParsing.varType.int,
 	'flag to indicate max events to process')
 	
 options.isData==True
@@ -38,12 +39,20 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxE
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
-#inlist = open("inputFiles_trial4_1p8GeV.txt", "r")
-#inlist = open("TrackNtupleTrial4.txt", "r")
-#inlist = open("inputFiles_trial4_MultiSQEV_1p8GeV.txt", "r")
+#inlist = open("EDM_MCSbar_Trial1_1p7GeV.txt", "r")
+#inlist = open("EDM_MCSbar_Trial6_1p8GeV.txt", "r")
+#inlist = open("EDM_MCSbar_Trial1_1p85GeV.txt", "r")
+#inlist = open("EDM_MCSbar_Trial1_1p9GeV.txt", "r")
+#inlist = open("EDM_MCSbar_Trial1_2GeV.txt", "r")
+
+#inlist = open("GetEtaCutEffs_1p7.txt", "r")
+#inlist = open("GetEtaCutEffs_1p8.txt", "r")
+#inlist = open("GetEtaCutEffs_1p85.txt", "r")
+#inlist = open("GetEtaCutEffs_1p9.txt", "r")
+inlist = open("GetEtaCutEffs_2.txt", "r")
 process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring(options.inputFiles),
-	#fileNames = cms.untracked.vstring(inlist.readlines()),
+	#fileNames = cms.untracked.vstring(options.inputFiles),
+	fileNames = cms.untracked.vstring(inlist.readlines()),
   duplicateCheckMode = cms.untracked.string ("noDuplicateCheck")
 )
 
@@ -62,7 +71,18 @@ process.p = cms.Schedule(
 
 # Output
 process.TFileService = cms.Service('TFileService',
-    fileName = cms.string(options.outputFile)
+#    fileName = cms.string(options.outputFile)
+#    fileName = cms.string('MCSbar_Trial1_1p7GeV.root')
+#    fileName = cms.string('MCSbar_Trial6_1p8GeV.root')
+#    fileName = cms.string('MCSbar_Trial1_1p85GeV.root')
+#    fileName = cms.string('MCSbar_Trial1_1p9GeV.root')
+#    fileName = cms.string('MCSbar_Trial1_2GeV.root')
+
+#    fileName = cms.string('NoEtaCut_1p7GeV.root')
+#    fileName = cms.string('NoEtaCut_1p8GeV.root')
+#    fileName = cms.string('NoEtaCut_1p85GeV.root')
+#    fileName = cms.string('NoEtaCut_1p9GeV.root')
+    fileName = cms.string('NoEtaCut_2GeV.root')
 )
 
 

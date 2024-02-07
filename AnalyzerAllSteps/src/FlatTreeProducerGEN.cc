@@ -85,10 +85,17 @@ void FlatTreeProducerGEN::analyze(edm::Event const& iEvent, edm::EventSetup cons
 			nTotalGENS++;	
 			if(genParticle->eta()>0)nTotalGENSPosEta++;	
 			if(genParticle->eta()<0)nTotalGENSNegEta++;
+			//	
+			//FillBranchesGENAntiS(genParticle,beamspot, beamspotVariance, nSbar);
+
+
+	      }//for(unsigned int i = 0; i < h_genParticles->size(); ++i)
+              //now fill for Sbar
+	      for(unsigned int i = 0; i < h_genParticles->size(); ++i){//loop all genparticlesPlusGEANT
+			const reco::Candidate * genParticle = &h_genParticles->at(i);
+			if(genParticle->pdgId() != AnalyzerAllSteps::pdgIdAntiS) continue;
 				
 			FillBranchesGENAntiS(genParticle,beamspot, beamspotVariance, nSbar);
-
-
 	      }//for(unsigned int i = 0; i < h_genParticles->size(); ++i)
 	      _tree_pi->Fill();
 	      nPions = nPions + nPionsThisEvent;
@@ -108,7 +115,8 @@ void FlatTreeProducerGEN::FillBranchesGENAntiS(const reco::Candidate  * genParti
 	
 	Init(); 
 
-	_S_charge.push_back(genParticle->charge());
+        //Positive if pdgId > 0, negative if pdgId < 0
+	_S_charge.push_back((genParticle->pdgId() > 0) - (genParticle->pdgId() < 0));
         cout << "N Sbar: " << nSbar <<endl;
 	_N_Sbar.push_back(nSbar);
 	_S_mass.push_back(genParticle->mass());

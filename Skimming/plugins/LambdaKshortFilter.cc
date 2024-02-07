@@ -103,6 +103,7 @@ bool LambdaKshortFilter::filter(edm::Event & iEvent, edm::EventSetup const & iSe
     }
 
     // find lambdas and kshorts
+    // Mass cut doesn't matter because gen mass will always pass
     for (unsigned int p = 0; p < h_genparts->size(); ++p) {
       if (fabs(h_genparts->at(p).pdgId()) == 3122 &&
           fabs(h_genparts->at(p).eta()) < maxEtaLambda_ &&

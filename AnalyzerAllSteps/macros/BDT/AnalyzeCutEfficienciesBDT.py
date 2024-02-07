@@ -5,6 +5,7 @@
 import ROOT
 from ROOT import *
 import numpy as np
+from collections import OrderedDict
 maxEvents = 1e99
 
 applyFiducial = True
@@ -19,39 +20,37 @@ FiducialRegiondxyMax = 9.5
 FiducialRegiondzMax = 27.
 FiducialRegionlxyMax = 44.5
 FiducialRegionvzMax = 125.
-fiducialCuts = {
-"Lambda v_z decay vertex":"abs(tree._Lambda_vz_decay_vertex[0]) <= FiducialRegionvzMax",
-"Lambda l_xy decay vertex":"tree._Lambda_lxy_decay_vertex[0] <= FiducialRegionlxyMax",
-"Lambda Daughter 0 p_T":"tree._RECO_Lambda_daughter0_pt[0] <= FiducialRegionptMax and tree._RECO_Lambda_daughter0_pt[0] >= FiducialRegionptMin",
-"Lambda Daughter 1 p_T":"tree._RECO_Lambda_daughter1_pt[0] <= FiducialRegionptMax and tree._RECO_Lambda_daughter1_pt[0] >= FiducialRegionptMin",
-"Lambda Daughter 0 p_z":"abs(tree._RECO_Lambda_daughter0_pt[0]) <= FiducialRegionpzMax",
-"Lambda Daughter 1 p_z":"abs(tree._RECO_Lambda_daughter1_pt[0]) <= FiducialRegionpzMax",
-"Lambda Daughter 0 d_xy beamspot":"tree._RECO_Lambda_daughter0_dxy_beamspot[0] <= FiducialRegiondxyMax and tree._RECO_Lambda_daughter0_dxy_beamspot[0] >= FiducialRegiondxyMin",
-"Lambda Daughter 1 d_xy beamspot":"tree._RECO_Lambda_daughter1_dxy_beamspot[0] <= FiducialRegiondxyMax and tree._RECO_Lambda_daughter1_dxy_beamspot[0] >= FiducialRegiondxyMin",
-"Lambda Daughter 0 d_z Best PV":"abs(tree._RECO_Lambda_daughter0_dz_min_PV[0]) <= FiducialRegiondzMax",
-"Lambda Daughter 1 d_z Best PV":"abs(tree._RECO_Lambda_daughter1_dz_min_PV[0]) <= FiducialRegiondzMax",
-"K_s v_z decay vertex":"abs(tree._Ks_vz_decay_vertex[0]) <= FiducialRegionvzMax",
-"K_s l_xy decay vertex":"tree._Ks_lxy_decay_vertex[0] <= FiducialRegionlxyMax",
-"K_s Daughter 0 p_T":"tree._RECO_Ks_daughter0_pt[0] <= FiducialRegionptMax and tree._RECO_Ks_daughter0_pt[0] >= FiducialRegionptMin",
-"K_s Daughter 1 p_T":"tree._RECO_Ks_daughter1_pt[0] <= FiducialRegionptMax and tree._RECO_Ks_daughter1_pt[0] >= FiducialRegionptMin",
-"K_s Daughter 0 p_z":"abs(tree._RECO_Ks_daughter0_pt[0]) <= FiducialRegionpzMax",
-"K_s Daughter 1 p_z":"abs(tree._RECO_Ks_daughter1_pt[0]) <= FiducialRegionpzMax",
-"K_s Daughter 0 d_xy beamspot":"tree._RECO_Ks_daughter0_dxy_beamspot[0] <= FiducialRegiondxyMax and tree._RECO_Ks_daughter0_dxy_beamspot[0] >= FiducialRegiondxyMin",
-"K_s Daughter 1 d_xy beamspot":"tree._RECO_Ks_daughter1_dxy_beamspot[0] <= FiducialRegiondxyMax and tree._RECO_Ks_daughter1_dxy_beamspot[0] >= FiducialRegiondxyMin",
-"K_s Daughter 0 d_z Best PV":"abs(tree._RECO_Ks_daughter0_dz_min_PV[0]) <= FiducialRegiondzMax",
-"K_s Daughter 1 d_z Best PV":"abs(tree._RECO_Ks_daughter1_dz_min_PV[0]) <= FiducialRegiondzMax"
-}
+fiducialCuts = OrderedDict()
+fiducialCuts["Lambda v_z decay vertex"] = "abs(tree._Lambda_vz_decay_vertex[0]) <= FiducialRegionvzMax"
+fiducialCuts["Lambda l_xy decay vertex"] = "tree._Lambda_lxy_decay_vertex[0] <= FiducialRegionlxyMax"
+fiducialCuts["Lambda Daughter 0 p_T"] = "tree._RECO_Lambda_daughter0_pt[0] <= FiducialRegionptMax and tree._RECO_Lambda_daughter0_pt[0] >= FiducialRegionptMin"
+fiducialCuts["Lambda Daughter 1 p_T"] = "tree._RECO_Lambda_daughter1_pt[0] <= FiducialRegionptMax and tree._RECO_Lambda_daughter1_pt[0] >= FiducialRegionptMin"
+fiducialCuts["Lambda Daughter 0 p_z"] = "abs(tree._RECO_Lambda_daughter0_pt[0]) <= FiducialRegionpzMax"
+fiducialCuts["Lambda Daughter 1 p_z"] = "abs(tree._RECO_Lambda_daughter1_pt[0]) <= FiducialRegionpzMax"
+fiducialCuts["Lambda Daughter 0 d_xy beamspot"] = "tree._RECO_Lambda_daughter0_dxy_beamspot[0] <= FiducialRegiondxyMax and tree._RECO_Lambda_daughter0_dxy_beamspot[0] >= FiducialRegiondxyMin"
+fiducialCuts["Lambda Daughter 1 d_xy beamspot"] = "tree._RECO_Lambda_daughter1_dxy_beamspot[0] <= FiducialRegiondxyMax and tree._RECO_Lambda_daughter1_dxy_beamspot[0] >= FiducialRegiondxyMin"
+fiducialCuts["Lambda Daughter 0 d_z Best PV"] = "abs(tree._RECO_Lambda_daughter0_dz_min_PV[0]) <= FiducialRegiondzMax"
+fiducialCuts["Lambda Daughter 1 d_z Best PV"] = "abs(tree._RECO_Lambda_daughter1_dz_min_PV[0]) <= FiducialRegiondzMax"
+fiducialCuts["K_s v_z decay vertex"] = "abs(tree._Ks_vz_decay_vertex[0]) <= FiducialRegionvzMax"
+fiducialCuts["K_s l_xy decay vertex"] = "tree._Ks_lxy_decay_vertex[0] <= FiducialRegionlxyMax"
+fiducialCuts["K_s Daughter 0 p_T"] = "tree._RECO_Ks_daughter0_pt[0] <= FiducialRegionptMax and tree._RECO_Ks_daughter0_pt[0] >= FiducialRegionptMin"
+fiducialCuts["K_s Daughter 1 p_T"] = "tree._RECO_Ks_daughter1_pt[0] <= FiducialRegionptMax and tree._RECO_Ks_daughter1_pt[0] >= FiducialRegionptMin"
+fiducialCuts["K_s Daughter 0 p_z"] = "abs(tree._RECO_Ks_daughter0_pt[0]) <= FiducialRegionpzMax"
+fiducialCuts["K_s Daughter 1 p_z"] = "abs(tree._RECO_Ks_daughter1_pt[0]) <= FiducialRegionpzMax"
+fiducialCuts["K_s Daughter 0 d_xy beamspot"] = "tree._RECO_Ks_daughter0_dxy_beamspot[0] <= FiducialRegiondxyMax and tree._RECO_Ks_daughter0_dxy_beamspot[0] >= FiducialRegiondxyMin"
+fiducialCuts["K_s Daughter 1 d_xy beamspot"] = "tree._RECO_Ks_daughter1_dxy_beamspot[0] <= FiducialRegiondxyMax and tree._RECO_Ks_daughter1_dxy_beamspot[0] >= FiducialRegiondxyMin"
+fiducialCuts["K_s Daughter 0 d_z Best PV"] = "abs(tree._RECO_Ks_daughter0_dz_min_PV[0]) <= FiducialRegiondzMax"
+fiducialCuts["K_s Daughter 1 d_z Best PV"] = "abs(tree._RECO_Ks_daughter1_dz_min_PV[0]) <= FiducialRegiondzMax"
 
 Presel_DeltaPhiMin = 0.4
 Presel_LxyInteractionVertexMin = 2.02
 Presel_LxyInteractionVertexMax = 2.40
 Presel_dxyOverLxyMin = 0
 Presel_dxyOverLxyMax = 0.5
-preselectionCuts = {
-"S Daughters delta phi":"abs(tree._S_daughters_deltaphi[0]) >= Presel_DeltaPhiMin",
-"S l_xy interaction vertex to beampipe center":"tree._S_lxy_interaction_vertex_beampipeCenter[0] >= Presel_LxyInteractionVertexMin and tree._S_lxy_interaction_vertex_beampipeCenter[0] <= Presel_LxyInteractionVertexMax",
-"S d_xy/l_xy":"tree._S_dxy_over_lxy[0] >= Presel_dxyOverLxyMin and tree._S_dxy_over_lxy[0] <= Presel_dxyOverLxyMax"
-}
+preselectionCuts = OrderedDict()
+preselectionCuts["S Daughters delta phi"] = "abs(tree._S_daughters_deltaphi[0]) >= Presel_DeltaPhiMin"
+preselectionCuts["S l_xy interaction vertex to beampipe center"] = "tree._S_lxy_interaction_vertex_beampipeCenter[0] >= Presel_LxyInteractionVertexMin and tree._S_lxy_interaction_vertex_beampipeCenter[0] <= Presel_LxyInteractionVertexMax"
+preselectionCuts["S d_xy/l_xy"] = "tree._S_dxy_over_lxy[0] >= Presel_dxyOverLxyMin and tree._S_dxy_over_lxy[0] <= Presel_dxyOverLxyMax"
 
 Opt_VzMax = 28.0
 Opt_DeltaEtaMax = 2
@@ -65,70 +64,92 @@ Opt_EtaSMax = 3.5
 Opt_EtaKshortMax = 2.5
 Opt_SdzminMax = 6
 Opt_pTKshortMin = 0.8
-optionalPreselectionCuts = {
-"S v_z interaction vertex":"abs(tree._S_vz_interaction_vertex[0]) <= Opt_VzMax",
-"Delta eta of S daughters":"abs(tree._S_daughters_deltaeta[0]) <= Opt_DeltaEtaMax",
-"3D Openingsangle of S daughters":"tree._S_daughters_openingsangle[0] <= Opt_DeltaAlpha_daughters_Max and tree._S_daughters_openingsangle[0] >= Opt_DeltaAlpha_daughters_Min",
-"3D Openingsangle of S and Ks":"tree._S_Ks_openingsangle[0] <= Opt_DeltaAlpha_S_Kshort_Max and tree._S_Ks_openingsangle[0] >= Opt_DeltaAlpha_S_Kshort_Min",
-"3D Openingsangle of S and Lambda":"tree._S_Lambda_openingsangle[0] <= Opt_DeltaAlpha_S_Lambda_Max and tree._S_Lambda_openingsangle[0] >= Opt_DeltaAlpha_S_Lambda_Min",
-"S eta":"abs(tree._S_eta[0]) <= Opt_EtaSMax",
-"K_s eta":"abs(tree._Ks_eta[0]) <= Opt_EtaKshortMax",
-"minimum impact parameter of S":"abs(tree._S_dz_min[0]) <= Opt_SdzminMax",
-"K_s p_T":"tree._Ks_pt[0] >= Opt_pTKshortMin"
-}
+optionalPreselectionCuts = OrderedDict()
+optionalPreselectionCuts["S v_z interaction vertex"] = "abs(tree._S_vz_interaction_vertex[0]) <= Opt_VzMax"
+optionalPreselectionCuts["Delta eta of S daughters"] = "abs(tree._S_daughters_deltaeta[0]) <= Opt_DeltaEtaMax"
+optionalPreselectionCuts["3D Openingsangle of S daughters"] = "tree._S_daughters_openingsangle[0] <= Opt_DeltaAlpha_daughters_Max and tree._S_daughters_openingsangle[0] >= Opt_DeltaAlpha_daughters_Min"
+optionalPreselectionCuts["3D Openingsangle of S and Ks"] = "tree._S_Ks_openingsangle[0] <= Opt_DeltaAlpha_S_Kshort_Max and tree._S_Ks_openingsangle[0] >= Opt_DeltaAlpha_S_Kshort_Min"
+optionalPreselectionCuts["3D Openingsangle of S and Lambda"] = "tree._S_Lambda_openingsangle[0] <= Opt_DeltaAlpha_S_Lambda_Max and tree._S_Lambda_openingsangle[0] >= Opt_DeltaAlpha_S_Lambda_Min"
+optionalPreselectionCuts["S eta"] = "abs(tree._S_eta[0]) <= Opt_EtaSMax"
+optionalPreselectionCuts["minimum impact parameter of S"] = "abs(tree._S_dz_min[0]) <= Opt_SdzminMax"
+optionalPreselectionCuts["K_s eta"] = "abs(tree._Ks_eta[0]) <= Opt_EtaKshortMax"
+optionalPreselectionCuts["K_s p_T"] = "tree._Ks_pt[0] >= Opt_pTKshortMin"
+
 fOut = open("Efficiencies.txt", "w")
 
 class efficiencyTracker:
-    def __init__(self, cutstring, title, samplename):
+    def __init__(self, cutstring, cutstringSequential, title, samplename):
         self.cutstring = cutstring
+        self.cutstringSequential = cutstringSequential
         self.title = title
         if('MC' in samplename):
             self.isMC = True
             self.nPassed = 0.
+            self.nPassed_Seq = 0.
             self.nPassed_weighted = 0.
+            self.nPassed_Seq_weighted = 0.
         else:
             self.isMC = False
             self.nPassed = 0.
+            self.nPassed_Seq = 0.
     def TrackCut(self, PassedAllCuts, weight = 1.0):
         eventPassed = eval(self.cutstring)
+        eventPassed_Seq = eval(self.cutstringSequential)
         if eventPassed:
             self.nPassed += 1.0
             if self.isMC:
                 self.nPassed_weighted += weight
+        if eventPassed_Seq:
+            self.nPassed_Seq += 1.0
+            if self.isMC:
+                self.nPassed_Seq_weighted += weight
             return PassedAllCuts
         else:
             return False
         
-    def EfficiencyPrintout(self, outputFile, denom, denom_weighted):
+    def EfficiencyPrintout(self, outputFile, denom, denom_weighted, denomTot, denomTot_weighted):
         outputFile.write("\t" + self.title + ":\n")
-        outputFile.write("\t\t" + str(self.nPassed) + "/" + str(denom) + " = " + str(self.nPassed / float(denom)) + "\n")
+        outputFile.write("\t\t INDIVIDUAL EFF: " + str(self.nPassed) + "/" + str(denom) + " = " + str(self.nPassed / float(denom)) + "\n")
+        outputFile.write("\t\t TOTAL EFF: " + str(self.nPassed_Seq) + "/" + str(denomTot) + " = " + str(self.nPassed_Seq / float(denomTot)) + "\n")
         if self.isMC:
             outputFile.write("\t weighted:\n")
-            outputFile.write("\t\t" + str(self.nPassed_weighted) + "/" + str(denom_weighted) + " = " + str(self.nPassed_weighted / float(denom_weighted)) + "\n")
+            outputFile.write("\t\t INDIVIDUAL EFF:" + str(self.nPassed_weighted) + "/" + str(denom_weighted) + " = " + str(self.nPassed_weighted / float(denom_weighted)) + "\n")
+            outputFile.write("\t\t TOTAL EFF:" + str(self.nPassed_Seq_weighted) + "/" + str(denomTot_weighted) + " = " + str(self.nPassed_Seq_weighted / float(denomTot_weighted)) + "\n")
 
 #Open Files
-MC_S_Bkg_File = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/MC_AntiS_Bkg_QCD.root")
-MC_S_Bkg_Tree = MC_S_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
+#MC_S_Bkg_File = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/QCD_MC_BG.root")
+#MC_S_Bkg_Tree = MC_S_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
 
 #MC Sbar BKG from QCD MuEnriched sample (Same file, just look at sbar instead of s)
-MC_Sbar_Bkg_File = MC_S_Bkg_File
-MC_Sbar_Bkg_Tree = MC_Sbar_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
+#MC_Sbar_Bkg_File = MC_S_Bkg_File
+#MC_Sbar_Bkg_Tree = MC_Sbar_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
 
 #MC Xevt Sbar BKG from QCD MuEnriched sample
-MC_Sbar_Xevt_Bkg_File = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/MC_Xevt_Bkg_QCD.root")
-MC_Sbar_Xevt_Bkg_Tree = MC_Sbar_Xevt_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
+#MC_Sbar_Xevt_Bkg_File = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/MC_Xevt_Bkg_QCD.root")
+#MC_Sbar_Xevt_Bkg_Tree = MC_Sbar_Xevt_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
 
 #Data S Bkg from Bparking UL 2018
-Data_S_Bkg_File = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Data_S_Bkg.root")
-Data_S_Bkg_Tree = Data_S_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
-
+#Data_S_Bkg_File = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Data_BPH_Full.root")
+#Data_S_Bkg_File = ROOT.TFile.Open("root://cmsxrootd.hep.wisc.edu//store/user/wvetens/data_Sexaq/FlatTree_BDT/Data_BPH_NoPresel_Fragment.root")
+#Data_S_Bkg_Tree = Data_S_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
+#Data_AntiS_Tree = Data_S_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
 #Data Xevt Sbar Bkg from Bparking UL 2018
-Data_Sbar_Xevt_Bkg_File = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Data_Xevt_Bkg.root")
-Data_Sbar_Xevt_Bkg_Tree = Data_Sbar_Xevt_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
+#Data_Sbar_Xevt_Bkg_File = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Data_Xevt_Bkg.root")
+#Data_Sbar_Xevt_Bkg_Tree = Data_Sbar_Xevt_Bkg_File.Get("FlatTreeProducerBDT/FlatTree")
 
 #The signal MC
-MC_AntiS_Sgn_File_M2SReweigh = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/MC_AntiS_Sgn_Trial5_M2SReweigh.root")
-MC_AntiS_Sgn_Tree_M2SReweigh = MC_AntiS_Sgn_File_M2SReweigh.Get("FlatTreeProducerBDT/FlatTree")
+MC_AntiS_Sgn_File_M2SReweigh_1p7GeV = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Signal_1p7GeV.root")
+MC_AntiS_Sgn_Tree_M2SReweigh_1p7GeV = MC_AntiS_Sgn_File_M2SReweigh_1p7GeV.Get("FlatTreeProducerBDT/FlatTree")
+MC_AntiS_Sgn_File_M2SReweigh_1p8GeV = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Signal_1p8GeV.root")
+MC_AntiS_Sgn_Tree_M2SReweigh_1p8GeV = MC_AntiS_Sgn_File_M2SReweigh_1p8GeV.Get("FlatTreeProducerBDT/FlatTree")
+MC_AntiS_Sgn_File_M2SReweigh_1p9GeV = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Signal_1p9GeV.root")
+MC_AntiS_Sgn_Tree_M2SReweigh_1p9GeV = MC_AntiS_Sgn_File_M2SReweigh_1p9GeV.Get("FlatTreeProducerBDT/FlatTree")
+MC_AntiS_Sgn_File_M2SReweigh_1p85GeV = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Signal_1p85GeV.root")
+MC_AntiS_Sgn_Tree_M2SReweigh_1p85GeV = MC_AntiS_Sgn_File_M2SReweigh_1p85GeV.Get("FlatTreeProducerBDT/FlatTree")
+MC_AntiS_Sgn_File_M2SReweigh_2GeV = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Signal_2GeV.root")
+MC_AntiS_Sgn_Tree_M2SReweigh_2GeV = MC_AntiS_Sgn_File_M2SReweigh_2GeV.Get("FlatTreeProducerBDT/FlatTree")
+MC_AntiS_Sgn_File_M2SReweigh_AllMasses = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/SignalSbar_FULL.root")
+MC_AntiS_Sgn_Tree_M2SReweigh_AllMasses = MC_AntiS_Sgn_File_M2SReweigh_AllMasses.Get("FlatTreeProducerBDT/FlatTree")
 #MC_AntiS_Sgn_File_SingleSQEV = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/MC_AntiS_Sgn_Trial4.root")
 #MC_AntiS_Sgn_Tree_SingleSQEV = MC_AntiS_Sgn_File_SingleSQEV.Get("FlatTreeProducerBDT/FlatTree")
 #MC_AntiS_Sgn_File_MultiSQEV = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/MC_AntiS_Sgn_Trial4_MultiSQEV.root")
@@ -147,8 +168,14 @@ MC_Signal_Truth_cutoff = 0.5
 #l_tree = [Data_S_Bkg_Tree, MC_AntiS_Sgn_Tree, MC_AntiS_Sgn_Tree_MultiSQEV]
 #Legend = ["MC-S-BKG"   ,"MC-#bar{S}-BKG","MC-#bar{S}-Xevt-BKG","Data-#bar{S}-Xevt-BKG","Data-S-BKG"   ,"MC-Single-#bar{S}-Signal"    ,"MC-Multi-#bar{S}-Signal"  ,"MC-Multi-to-Single-Reweighed-#bar{S}-Signal"]
 #l_tree = [MC_S_Bkg_Tree,MC_Sbar_Bkg_Tree,MC_Sbar_Xevt_Bkg_Tree,Data_Sbar_Xevt_Bkg_Tree,Data_S_Bkg_Tree,MC_AntiS_Sgn_Tree_SingleSQEV  ,MC_AntiS_Sgn_Tree_MultiSQEV, MC_AntiS_Sgn_Tree_M2SReweigh                ]
-Legend = ["MC-S-BKG"   ,"MC-#bar{S}-BKG","MC-#bar{S}-Xevt-BKG","Data-#bar{S}-Xevt-BKG","Data-S-BKG"   ,"MC-Multi-to-Single-Reweighed-#bar{S}-Signal"]
-l_tree = [MC_S_Bkg_Tree,MC_Sbar_Bkg_Tree,MC_Sbar_Xevt_Bkg_Tree,Data_Sbar_Xevt_Bkg_Tree,Data_S_Bkg_Tree,MC_AntiS_Sgn_Tree_M2SReweigh                 ]
+#Legend = ["MC-S-BKG"   ,"MC-#bar{S}-BKG","MC-#bar{S}-Xevt-BKG","Data-#bar{S}-Xevt-BKG","Data-S-BKG"   ,"MC-Multi-to-Single-Reweighed-#bar{S}-Signal"]
+#l_tree = [MC_S_Bkg_Tree,MC_Sbar_Bkg_Tree,MC_Sbar_Xevt_Bkg_Tree,Data_Sbar_Xevt_Bkg_Tree,Data_S_Bkg_Tree,MC_AntiS_Sgn_Tree_M2SReweigh                 ]
+#Legend = ["Data-#bar{S}" ,"Data-S-BKG"   ,"MC-1.8GeV-#bar{S}-Signal"         ,"MC-1.7GeV-#bar{S}-Signal"         ,"MC-1.85GeV-#bar{S}-Signal"         ,"MC-1.9GeV-#bar{S}-Signal"         ,"MC-2GeV-#bar{S}-Signal"         ,"MC-AllMass-#bar{S}-Signal"           ]
+#l_tree = [Data_AntiS_Tree,Data_S_Bkg_Tree,MC_AntiS_Sgn_Tree_M2SReweigh_1p8GeV,MC_AntiS_Sgn_Tree_M2SReweigh_1p7GeV,MC_AntiS_Sgn_Tree_M2SReweigh_1p85GeV,MC_AntiS_Sgn_Tree_M2SReweigh_1p9GeV,MC_AntiS_Sgn_Tree_M2SReweigh_2GeV,MC_AntiS_Sgn_Tree_M2SReweigh_AllMasses]
+#Legend = ["Data-S-BKG"   ,"MC-1.8GeV-#bar{S}-Signal"         ,"MC-1.7GeV-#bar{S}-Signal"         ,"MC-1.85GeV-#bar{S}-Signal"         ,"MC-1.9GeV-#bar{S}-Signal"         ,"MC-2GeV-#bar{S}-Signal"         ,"MC-AllMass-#bar{S}-Signal"           ]
+#l_tree = [Data_S_Bkg_Tree,MC_AntiS_Sgn_Tree_M2SReweigh_1p8GeV,MC_AntiS_Sgn_Tree_M2SReweigh_1p7GeV,MC_AntiS_Sgn_Tree_M2SReweigh_1p85GeV,MC_AntiS_Sgn_Tree_M2SReweigh_1p9GeV,MC_AntiS_Sgn_Tree_M2SReweigh_2GeV,MC_AntiS_Sgn_Tree_M2SReweigh_AllMasses]
+Legend = ["MC-1.8GeV-#bar{S}-Signal"         ,"MC-1.7GeV-#bar{S}-Signal"         ,"MC-1.85GeV-#bar{S}-Signal"         ,"MC-1.9GeV-#bar{S}-Signal"         ,"MC-2GeV-#bar{S}-Signal"         ,"MC-AllMass-#bar{S}-Signal"           ]
+l_tree = [MC_AntiS_Sgn_Tree_M2SReweigh_1p8GeV,MC_AntiS_Sgn_Tree_M2SReweigh_1p7GeV,MC_AntiS_Sgn_Tree_M2SReweigh_1p85GeV,MC_AntiS_Sgn_Tree_M2SReweigh_1p9GeV,MC_AntiS_Sgn_Tree_M2SReweigh_2GeV,MC_AntiS_Sgn_Tree_M2SReweigh_AllMasses]
 #Legend = ["Data-S-BKG"   ,"MC-Multi-#bar{S}-Signal"]
 #l_tree = [Data_S_Bkg_Tree, MC_AntiS_Sgn_Tree_MultiSQEV]
 
@@ -163,26 +190,34 @@ for tree in l_tree:
             nFiducialPass = 0.
             #Weighed counters
             nPreFiducial_w = 0.
+            nFiducialPass = 0.
             nFiducialPass_w = 0.
             efficiencyTrackers_fiducial = []
+            CutFlow = ""
+            i=0
             for title, cut in fiducialCuts.items():
-                efficiencyTrackers_fiducial += [efficiencyTracker(cut, title, Legend[iTree])]
-
+                if i==0:
+                    CutFlow += cut
+                else:
+                    CutFlow += " and " + cut
+                i += 1
+                efficiencyTrackers_fiducial += [efficiencyTracker(cut, CutFlow, title, Legend[iTree])]
             if(applyPreselection):
                 nPreselectionPass = 0.
                 #Weighed counters
                 nPreselectionPass_w = 0.
                 efficiencyTrackers_presel = []
                 for title, cut in preselectionCuts.items():
-                    efficiencyTrackers_presel += [efficiencyTracker(cut, title, Legend[iTree])]
-
+                    CutFlow += " and " + cut
+                    efficiencyTrackers_presel += [efficiencyTracker(cut, CutFlow, title, Legend[iTree])]
                 if(test_optional_Preselection):
                     nAllOptionalPass = 0.
                     #Weighed counters
                     nAllOptionalPass_w = 0.
                     efficiencyTrackers_opt = []
                     for title, cut in optionalPreselectionCuts.items():
-                        efficiencyTrackers_opt += [efficiencyTracker(cut, title, Legend[iTree])]
+                        CutFlow += " and " + cut
+                        efficiencyTrackers_opt += [efficiencyTracker(cut, CutFlow, title, Legend[iTree])]
 
 	fOut.write("---------------------------------------------------\n")
 	fOut.write("running for " + Legend[iTree] + "\n")
@@ -250,7 +285,7 @@ for tree in l_tree:
                 fOut.write("Number of valid Sbar (weighed) before fiducial cuts in " + Legend[iTree] + ":" + str(nPreFiducial_w) + "\n")
             fOut.write("Individual efficiencies of fiducial cuts in " + Legend[iTree] + ":" + "\n")
             for efficiency in efficiencyTrackers_fiducial:
-                efficiency.EfficiencyPrintout(fOut, nPreFiducial, nPreFiducial_w)
+                efficiency.EfficiencyPrintout(fOut, nPreFiducial, nPreFiducial_w, nPreFiducial, nPreFiducial_w)
             fOut.write("Total efficiency of all fiducial cuts in " + Legend[iTree] + ":" + str(nFiducialPass) + "/" + str(nPreFiducial) + "=" + str(nFiducialPass/float(nPreFiducial)) + "\n")
             if "MC" in Legend[iTree]:
                 fOut.write("Total efficiency (weighed) of all fiducial cuts in " + Legend[iTree] + ":" + str(nFiducialPass_w) + "/" + str(nPreFiducial_w) + "=" + str(nFiducialPass_w/float(nPreFiducial_w)) + "\n")
@@ -259,7 +294,7 @@ for tree in l_tree:
             if(applyPreselection):
                 fOut.write("Individual efficiencies of initial preselection in " + Legend[iTree] + ":" + "\n")
                 for efficiency in efficiencyTrackers_presel:
-                    efficiency.EfficiencyPrintout(fOut, nFiducialPass, nFiducialPass_w)
+                    efficiency.EfficiencyPrintout(fOut, nFiducialPass, nFiducialPass_w, nPreFiducial, nPreFiducial_w)
                 fOut.write("Total efficiency of initial preselection in " + Legend[iTree] + ":" + str(nPreselectionPass) + "/" + str(nFiducialPass) + "=" + str(nPreselectionPass/float(nFiducialPass)) + "\n")
                 if "MC" in Legend[iTree]:
                     fOut.write("Total efficiency (weighed) of initial preselection in " + Legend[iTree] + ":" + str(nPreselectionPass_w) + "/" + str(nFiducialPass_w) + "=" + str(nPreselectionPass_w/float(nFiducialPass_w)) + "\n")
@@ -272,8 +307,7 @@ for tree in l_tree:
                 if(test_optional_Preselection):
                     fOut.write("Individual efficiencies of optional preselection in " + Legend[iTree] + ":" + "\n")
                     for efficiency in efficiencyTrackers_opt:
-                        efficiency.EfficiencyPrintout(fOut, nPreselectionPass, nPreselectionPass_w)
-                    
+                        efficiency.EfficiencyPrintout(fOut, nPreselectionPass, nPreselectionPass_w, nPreFiducial, nPreFiducial_w)
                     fOut.write("Total efficiency of optional preselection in " + Legend[iTree] + ":" + str(nAllOptionalPass) + "/" + str(nPreselectionPass) + "=" + str(nAllOptionalPass/float(nPreselectionPass)) + "\n")
                     if "MC" in Legend[iTree]:
                         fOut.write("Total efficiency (weighed) of optional preselection in " + Legend[iTree] + ":" + str(nAllOptionalPass_w) + "/" + str(nPreselectionPass_w) + "=" + str(nAllOptionalPass_w/float(nPreselectionPass_w)) + "\n")

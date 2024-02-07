@@ -6,32 +6,11 @@ import numpy as np
 import sys
 #sys.path.append('/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
 sys.path.append('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
-import  CMS_lumi, tdrstyle
-
-gROOT.SetBatch(kTRUE)
-gStyle.SetLegendTextSize(0.08)
-
-CMS_lumi.writeExtraText = 1
-CMS_lumi.extraText = "Simulation"
-tdrstyle.setTDRStyle()
-
-colours = [1,2,4,35,38,41]
-
-# Set TDR styles
-#gROOT.LoadMacro("../tdrStyle/tdrstyle.C")
-#gROOT.ProcessLine("setTDRStyle();")
-
-# Add CMS text
-#gROOT.LoadMacro("../tdrStyle/CMS_lumi.C")
-
-#fIn = TFile('/user/jdeclerc/Analysis/SexaQuark/CMSSW_9_4_7/src/SexaQAnalysis/AnalyzerAllSteps/test/wihtMatchingOnHits/test_TrackMatchingOnHits.root', 'read')
 fIn = [
 TFile('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGEN/output.root', 'read')
 ]
 
 mass = ["1.8"]
-
-plots_output_dir = "plots_GEN_pion/"
 
 maxEvents = 1e4
 

@@ -1,18 +1,18 @@
 from WMCore.Configuration import Configuration
 
-day = "23012023"
-version = "v3"
+day = "17052023"
+version = "v4"
 #trial = "4"
 #trial = "4_MultiSQEV"
-trial = "5_MultiToSingleReweighed"
-mass = "1p8GeV"
+trial = "1"
+mass = "1p7GeV"
 
 
 config = Configuration()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.requestName = 'FlatTreeProducerBDT_BlockAPUReweigh_trial'+trial+'_'+mass+'_'+day+'_'+version 
+config.General.requestName = 'FlatTreeProducerBDT_trial'+trial+'_'+mass+'_'+day+'_'+version 
 
 config.section_('JobType') 
 config.JobType.pluginName = 'Analysis' 
@@ -27,10 +27,10 @@ config.Data.publication = True
 config.Data.splitting = 'FileBased' 
 config.Data.outLFNDirBase = '/store/user/wvetens/crmc_Sexaq/FlatTree_BDT' 
 #config.Data.userInputFiles = open('MCSbar_MultiSQEV_Trial4.txt').readlines() 
-config.Data.userInputFiles = open('EDM_RECOSKIM_Trial5_M2SReweigh.txt').readlines() 
+config.Data.userInputFiles = open('EDM_MCSbar_Trial'+trial+'_'+mass+'.txt').readlines() 
 #config.Data.inputDataset = '/CRAB_SimSexaq_trial21/lowette-crab_Step1_Step2_Skimming_FlatTree_trial21_1p8GeV_23102019_v1-8925145305413877174dac643a893255/USER'
 config.Data.inputDBS = 'phys03'
-config.Data.outputPrimaryDataset = "SbarSignalMC_FlatTreeProducerBDT_BlockAPUReweigh_trial"+trial+"_"+mass+"_"+day+'_'+version
+config.Data.outputPrimaryDataset = "SbarSignalMC_FlatTreeProducerBDT_trial"+trial+"_"+mass+"_"+day+'_'+version
 
 config.section_('User') 
 #config.User.voGroup = 'becms'

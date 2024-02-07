@@ -4,7 +4,7 @@ import numpy as np
 import sys
 #sys.path.append('/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
 sys.path.append('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
-import  CMS_lumi, tdrstyle
+import  CMSStyle
 
 sys.path.insert(1, '../../../TMVA')
 import configBDT as config
@@ -13,14 +13,33 @@ config_dict = config.config_dict
 gROOT.SetBatch(kTRUE)
 gStyle.SetLegendTextSize(0.08)
 
-CMS_lumi.writeExtraText = 0
-CMS_lumi.extraText = "Simulation"
-tdrstyle.setTDRStyle()
+CMSStyle.extraText = "(CMS Simulation)"
+CMSStyle.cmsText = "Private Work"
+CMSStyle.cmsTextFont = 42
+CMSStyle.extraTextFont = 42
+CMSStyle.lumiTextSize = 0.74
+CMSStyle.cmsTextSize = 0.74
+CMSStyle.relPosX = 2.36*0.045
+CMSStyle.outOfFrame = False
+
+CMSStyle.setTDRStyle()
 
 colours = [1,2,4,35,38,41]
 
 MaxEvents = 1e7
 
+def ReadyCanvas(name, W=700, H=900):
+    c = TCanvas(name, "", W, H)
+    c.Draw()
+    c.SetFillColor(0)
+    c.SetRightMargin(0.05)
+    c.SetBorderMode(0)
+    c.SetFrameFillStyle(0)
+    c.SetFrameBorderMode(0)
+#    c.SetTickx(0)
+#    c.SetTicky(0)
+    c.cd()
+    return c
 
 plots_output_dir = "Results/"
 
@@ -156,7 +175,7 @@ TH1_l = [h_vzPV_Data,h_vzPV_MC,h_vzPV_MC_reweighed_2D]
 Legend_l = ["Data","MC","MC reweighted"]
 Legend_l_type = ["l","l","lep"]
 c_name = "c_PVz_2D_PUReweighing"
-c = TCanvas(c_name,"")
+c = ReadyCanvas(c_name)
 legend = TLegend(0.8,0.85,0.99,0.99)
 
 for j in [2,1,0]:
@@ -177,13 +196,13 @@ for j in [2,1,0]:
 	legend.AddEntry(h,Legend_l[j],Legend_l_type[j])
 
 legend.Draw()
-CMS_lumi.CMS_lumi(c, 0, 11)
+CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
 c.SaveAs(plots_output_dir+c_name.replace(".", "p")+".pdf")
 c.Write()
 
 
 c_name = "c_nPV_2D_PUReweighing"
-c = TCanvas(c_name,"")
+c = ReadyCanvas(c_name)
 legend = TLegend(0.8,0.85,0.99,0.99)
 h_nPV_Data.SetTitle(';# valid PVs;#entries')
 h_nPV_MC.SetTitle(';# valid PVs;#entries')
@@ -209,7 +228,7 @@ for j in [2,1,0]:
 
 
 legend.Draw()
-CMS_lumi.CMS_lumi(c, 0, 11)
+CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
 c.SaveAs(plots_output_dir+c_name.replace(".", "p")+".pdf")
 c.Write()
 

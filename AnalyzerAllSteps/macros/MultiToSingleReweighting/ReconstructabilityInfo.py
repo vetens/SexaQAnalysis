@@ -7,38 +7,62 @@ import random
 import math
 import sys
 import array
+import argparse
 #sys.path.append('/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
 sys.path.append('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
-import  CMS_lumi, tdrstyle 
+import  CMSStyle
 import collections
+parser = argparse.ArgumentParser()
+parser.add_argument('--mass', dest='mass', action='store', default='1p7')
+args = parser.parse_args()
 
 gROOT.SetBatch(kTRUE)
 gStyle.SetLegendTextSize(0.08)
 gStyle.SetOptFit(1111)
 gStyle.SetOptStat(1)
 
-CMS_lumi.writeExtraText = 1
-CMS_lumi.extraText = "Simulation"
-tdrstyle.setTDRStyle()
+CMSStyle.extraText = "(CMS Simulation) "
+CMSStyle.cmsText = " Private Work"
+CMSStyle.cmsTextFont = 42
+CMSStyle.extraTextFont = 42
+CMSStyle.lumiTextSize = 0.74
+CMSStyle.cmsTextSize = 0.74
+CMSStyle.relPosX = 2.36*0.045
+CMSStyle.outOfFrame = False 
 
+CMSStyle.setTDRStyle()
+
+def ReadyCanvas(name, W=700, H=900):
+    c = TCanvas(name, "", W, H)
+    c.Draw()
+    c.SetFillColor(0)
+    c.SetRightMargin(0.05)
+    c.SetBorderMode(0)
+    c.SetFrameFillStyle(0)
+    c.SetFrameBorderMode(0)
+#    c.SetTickx(0)
+#    c.SetTicky(0)
+    c.cd()
+    return c
 maxEvents1 = 1e4
 maxEvents2 = 1e99
 
 
 plots_output_dir = "../GENSIM/"
+ReweighMap = "MultiToSingleSbar_"+args.mass+"GeV_EtaReweigh"
 
-fSingleIn = TFile(plots_output_dir+'MacroOut_hadd_Trial4_SingleSbar_v4.root','read')
+fSingleIn = TFile(plots_output_dir+'MacroOut_SingleSbar_'+args.mass+'.root','read')
 SingleSbar_EtaReco = fSingleIn.Get('all_antiS/teff_h_nom_eta_antiS_reconstructable')
 SingleSbar_EtaReco.SetMarkerColor(kBlack)
 SingleSbar_EtaReco.SetLineColor(kBlack)
-fMultiIn = TFile(plots_output_dir+'MacroOut_hadd_Trial5_MultiSQEV_v4.root','read')
+fMultiIn = TFile(plots_output_dir+'MacroOut_MultiSbar_'+args.mass+'.root','read')
 MultiSbar_EtaReco = fMultiIn.Get('all_antiS/teff_h_nom_eta_antiS_reconstructable')
 SingleSbar_EtaReco.SetMarkerColor(kRed)
 SingleSbar_EtaReco.SetLineColor(kRed)
 SingleReco_Integral = SingleSbar_EtaReco.CreateGraph().Integral()
 
 print SingleReco_Integral
-fOut = TFile("FitResult.root", "RECREATE")
+fOut = TFile("FitResult_"+args.mass+".root", "RECREATE")
 fOut.cd()
 #fit eta reconstructability for the single sbar to a sum of 3 gaussians with left and right gaussians having equal standard deviations and opposite means, the middle gaussian fixed at mean of zero. 
 #arguments as follows: TMath::Gaus(x, mean, SD, Norm)
@@ -104,8 +128,8 @@ h_reweighingFactor_eta_NoFit = TH1F('h_reweighingFactor_eta_NoFit', ';#eta_{#bar
 h_reweighingFactor_eta_NoFit.SetMarkerColor(kBlack)
 h_reweighingFactor_eta_NoFit.SetLineColor(kBlack)
 
-f1 = open("MultiToSingleSbar_EtaReweigh.txt", "w")
-f2 = open("MultiToSingleSbar_EtaReweigh_NoFit.txt", "w")
+f1 = open(ReweighMap + ".txt", "w")
+f2 = open(ReweighMap + "_NoFit.txt", "w")
 
 f1.write('# eta         Weight        Error\n')
 f2.write('# eta         Weight        Error\n')
@@ -141,27 +165,44 @@ for i in range(1, nPoints+1):
 f1.close()
 f2.close()
 
-c1 = TCanvas("c_fit","")
-legend_fit = TLegend(0.6,0.8,0.99,0.99)
-SingleSbar_EtaReco.CreateGraph().Draw("")
+c1 = ReadyCanvas("c_fit_"+args.mass)
+legend_fit = TLegend(0.5,0.7,0.95,0.95)
+legend_fit.SetTextSize(0.02)
+legend_fit.SetFillStyle(0)
+legend_fit.SetBorderSize(0)
+legend_fit.SetHeader("m_{#bar{S}}="+args.mass+"GeV/c^{2}", "C")
+highval = 0.15 #MultiSbar_EtaReco.CreateGraph().GetMaximum()*1.2
+SingleGraph = SingleSbar_EtaReco.CreateGraph()
+MultiGraph = MultiSbar_EtaReco.CreateGraph()
+SingleGraph.GetYaxis().SetRangeUser(0,highval)
+MultiGraph.GetYaxis().SetRangeUser(0,highval)
+SingleGraph.Draw("")
 gPad.SetLogy(0)
-legend_fit.AddEntry(SingleSbar_EtaReco, "Single-Sbar Reconstructability", "ep")
+legend_fit.AddEntry(SingleSbar_EtaReco, "Single-#bar{S} Reconstructability", "ep")
 SingleSbar_fit.Draw("same")
-legend_fit.AddEntry(SingleSbar_fit, "Double Crystal Ball with Constant offset fit", "l")
+legend_fit.AddEntry(SingleSbar_fit, "Fit to Single-#bar{S} Reconstructability", "l")
 MultiSbar_EtaReco.Draw("same")
-legend_fit.AddEntry(MultiSbar_EtaReco, "Multi-Sbar Reconstructable", "ep")
+legend_fit.AddEntry(MultiSbar_EtaReco, "Multi-#bar{S} Reconstructability", "ep")
 legend_fit.Draw("same")
+CMSStyle.setCMSLumiStyle(c1,11, lumiTextSize_=0.74)
 c1.Write()
+c1.SaveAs(c1.GetName()+".pdf")
 
-c2 = TCanvas("c_reweigh","")
-legend_reweigh = TLegend(0.6,0.7,0.99,0.99)
+c2 = ReadyCanvas("c_reweigh_"+args.mass)
+legend_reweigh = TLegend(0.5,0.7,0.95,0.95)
+legend_reweigh.SetTextSize(0.02)
+legend_reweigh.SetFillStyle(0)
+legend_reweigh.SetBorderSize(0)
+legend_reweigh.SetHeader("m_{#bar{S}}="+args.mass+"GeV/c^{2}", "C")
 h_reweighingFactor_eta.Draw("")
 gPad.SetLogy(1)
 legend_reweigh.AddEntry(h_reweighingFactor_eta, "reweighting factor with Fit", "p")
 h_reweighingFactor_eta_NoFit.Draw("same")
 legend_reweigh.AddEntry(h_reweighingFactor_eta_NoFit, "reweighting factor without Fit", "p")
 legend_reweigh.Draw("same")
+CMSStyle.setCMSLumiStyle(c2,11, lumiTextSize_=0.74)
 c2.Write()
+c2.SaveAs(c2.GetName()+".pdf")
 
 fOut.Close()
 

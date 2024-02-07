@@ -2,40 +2,68 @@
 
 import numpy as np
 from ROOT import *
+import argparse
 
 import sys
 #sys.path.append('/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
 sys.path.append('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
-import  CMS_lumi, tdrstyle
+import CMSStyle
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--mass', dest='mass', action='store', default='1p7')
+args = parser.parse_args()
 
 gROOT.SetBatch(kTRUE)
 gStyle.SetLegendTextSize(0.08)
 
-CMS_lumi.writeExtraText = 1
-CMS_lumi.extraText = "Simulation"
-tdrstyle.setTDRStyle()
+CMSStyle.cmsText = "Private Work "
+CMSStyle.extraText = "(CMS Simulation)"
+CMSStyle.cmsTextFont = 42
+CMSStyle.extraTextFont = 42
+CMSStyle.lumiTextSize = 0.74
+CMSStyle.cmsTextSize = 0.74
+CMSStyle.relPosX = 2.36*0.045
+CMSStyle.outOfFrame = True
+CMSStyle.setTDRStyle()
 
 colours = [1,2,4,35,38,41]
 
+def ReadyCanvas(name):
+    c = TCanvas(name, "")
+    c.Draw()
+    c.SetFillColor(0)
+    c.SetRightMargin(0.05)
+    c.SetBorderMode(0)
+    c.SetFrameFillStyle(0)
+    c.SetFrameBorderMode(0)
+#    c.SetTickx(0)
+#    c.SetTicky(0)
+    c.cd()
+    return c
+#maxNEntries0 = 1e4
 #maxNEntries = 1e4
+maxNEntries0 = 1e12
 maxNEntries = 1e12
 
-plots_output_dir = "plots_GENSIM_Multi/"
+mass = args.mass
+plots_output_dir = "plots_GENSIM_Multi/Mass_"+mass+"/"
 #plots_output_dir = "plots_GENSIM_test/"
 
 #loading input
 #inputFile = '/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/test_FlatTreeGENSIM_Skimmed_trial17_1p8GeV_17102019_v1.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/output_Trial4.root'
-inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/hadd_Trial5_MultiSQEV_v4.root'
+#inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/hadd_Trial5_MultiSQEV_v4.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/output_Trial5_MultiSQEV.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/Skimmed_Final_out.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/Test_Ntuple_Trial4.root'
-fIn = TFile(inputFile,'read')
+inputFile = 'root://cmsxrootd.hep.wisc.edu//store/user/wvetens/crmc_Sexaq/FlatTree_GENSIM/MultiSbar/MultiSbar_'+mass+'.root'
+fIn = TFile.Open(inputFile,'read')
 tree = fIn.Get('FlatTreeProducerGENSIM/FlatTreeGENLevel') 
 treeAllAntiS = fIn.Get('FlatTreeProducerGENSIM/FlatTreeGENLevelAllAntiS') 
 
 #define where output should go
-fOut = TFile('MacroOut_'+inputFile.rsplit('/', 1)[-1],'RECREATE')
+#fOut = TFile('MacroOut_'+inputFile.rsplit('/', 1)[-1],'RECREATE')
+fOut = TFile('MacroOut_MultiSbar_'+mass+'.root','RECREATE')
 
 #defining histograms
 all_antiS_dir = fOut.mkdir("all_antiS")
@@ -54,16 +82,17 @@ h_pz_all_AntiS = TH1F('h_pz_all_AntiS','; |p_{z}| #bar{S} (GeV/c); #Entries/1GeV
 h_vz_creation_vertex_all_AntiS = TH1F('h_vz_creation_vertex_all_AntiS','; v_{z} creation vertex #bar{S}; #Entries/cm',60,-30,30)
 h_nPV_all_AntiS = TH1F('h_nPV_all_AntiS','; #PV; #Entries',60,0,60)
 
-#investigate the reconstructability: have to use histograms for nominator and denominator, because teff does not support weights and using tprofile the bins with y = 0 are not displayed
-h_nom_vz_antiS_reconstructable = TH1F('h_nom_vz_antiS_reconstructable','; absolute v_{z} #bar{S} interaction vertex (cm); Reconstructability',60,-150,150)
-h_nom_eta_antiS_reconstructable = TH1F('h_nom_eta_antiS_reconstructable','; #eta #bar{S}; Reconstructability',160,-8,8)
-h_nom_pt_antiS_reconstructable = TH1F('h_nom_pt_antiS_reconstructable','; p_{T} #bar{S} (GeV/c); Reconstructability',50,0,10)
-h_nom_pz_antiS_reconstructable = TH1F('h_nom_pz_antiS_reconstructable','; |p_{z}| #bar{S} (GeV/c); Reconstructability',80,0,80)
-
 h_denom_vz_antiS_reconstructable = TH1F('h_denom_vz_antiS_reconstructable','; absolute v_{z} #bar{S} interaction vertex (cm); Reconstructability',60,-150,150)
 h_denom_eta_antiS_reconstructable = TH1F('h_denom_eta_antiS_reconstructable','; #eta #bar{S}; Reconstructability',160,-8,8)
 h_denom_pt_antiS_reconstructable = TH1F('h_denom_pt_antiS_reconstructable','; p_{T} #bar{S} (GeV/c); Reconstructability',50,0,10)
 h_denom_pz_antiS_reconstructable = TH1F('h_denom_pz_antiS_reconstructable','; |p_{z}| #bar{S} (GeV/c); Reconstructability',80,0,80)
+
+#investigate the reconstructability: have to use histograms for nominator and denominator, because teff does not support weights and using tprofile the bins with y = 0 are not displayed
+#these are created here but filled later because they require info on the tracker hits (accceptance)
+h_nom_vz_antiS_reconstructable = TH1F('h_nom_vz_antiS_reconstructable','; absolute v_{z} #bar{S} interaction vertex (cm); Reconstructability',60,-150,150)
+h_nom_eta_antiS_reconstructable = TH1F('h_nom_eta_antiS_reconstructable','; #eta #bar{S}; Reconstructability',160,-8,8)
+h_nom_pt_antiS_reconstructable = TH1F('h_nom_pt_antiS_reconstructable','; p_{T} #bar{S} (GeV/c); Reconstructability',50,0,10)
+h_nom_pz_antiS_reconstructable = TH1F('h_nom_pz_antiS_reconstructable','; |p_{z}| #bar{S} (GeV/c); Reconstructability',80,0,80)
 
 #first do this small loop which runs over the tree containing all the antiS (i.e. also the ones which do not go the correct granddaughters)
 nAntiSReconstructable = 0.
@@ -71,6 +100,8 @@ nAntiSTotal = 0.
 nAntiSReconstructableUnweighted = 0.
 nAntiSTotalUnweighted = 0.
 for i in range(0,treeAllAntiS.GetEntries()):
+        if i > maxNEntries0:
+            break
 	treeAllAntiS.GetEntry(i)
 	#the AntiS does not necessarily have two daughters, so I cannot get the vz through that for all antiS, so have to calculate the vz from eta assuming the beampipe is infinitely thin and at a radius of 2.21cm 
 	vz_interaction_antiS = 2.21/np.tan( 2*np.arctan( np.exp(-treeAllAntiS._S_eta_all[0]) ) ) 
@@ -96,13 +127,13 @@ for i in range(0,treeAllAntiS.GetEntries()):
 	h_vz_creation_vertex_all_AntiS.Fill(treeAllAntiS._S_vz_creation_vertex_all[0],weight_factor)
 	h_nPV_all_AntiS.Fill(treeAllAntiS._S_nGoodPV_all[0],weight_factor)
 
-	if(treeAllAntiS._S_reconstructable_all[0] == 1):
-		nAntiSReconstructable += weight_factor
-		nAntiSReconstructableUnweighted += 1
-		h_nom_vz_antiS_reconstructable.Fill(vz_interaction_antiS,weight_factor)
-		h_nom_eta_antiS_reconstructable.Fill(treeAllAntiS._S_eta_all[0],weight_factor)
-		h_nom_pt_antiS_reconstructable.Fill(treeAllAntiS._S_pt_all[0],weight_factor)
-		h_nom_pz_antiS_reconstructable.Fill(treeAllAntiS._S_pz_all[0],weight_factor)
+	#if(treeAllAntiS._S_reconstructable_all[0] == 1):
+	#	nAntiSReconstructable += weight_factor
+	#	nAntiSReconstructableUnweighted += 1
+	#	h_nom_vz_antiS_reconstructable.Fill(vz_interaction_antiS,weight_factor)
+	#	h_nom_eta_antiS_reconstructable.Fill(treeAllAntiS._S_eta_all[0],weight_factor)
+	#	h_nom_pt_antiS_reconstructable.Fill(treeAllAntiS._S_pt_all[0],weight_factor)
+	#	h_nom_pz_antiS_reconstructable.Fill(treeAllAntiS._S_pz_all[0],weight_factor)
 
 	h_denom_vz_antiS_reconstructable.Fill(vz_interaction_antiS,weight_factor)
 	h_denom_eta_antiS_reconstructable.Fill(treeAllAntiS._S_eta_all[0],weight_factor)
@@ -111,44 +142,18 @@ for i in range(0,treeAllAntiS.GetEntries()):
 	nAntiSTotal += weight_factor
 	nAntiSTotalUnweighted += 1
 
-print 'the unweighted antiS reconstructability: ', nAntiSReconstructableUnweighted, '/', nAntiSTotalUnweighted, '=', float(nAntiSReconstructableUnweighted)/float(nAntiSTotalUnweighted)
-print 'the overall antiS reconstructability: ', nAntiSReconstructable, '/', nAntiSTotal, '=', float(nAntiSReconstructable)/float(nAntiSTotal)
-
-l_nom = [h_nom_vz_antiS_reconstructable,h_nom_eta_antiS_reconstructable,h_nom_pt_antiS_reconstructable,h_nom_pz_antiS_reconstructable]
-l_denom = [h_denom_vz_antiS_reconstructable,h_denom_eta_antiS_reconstructable,h_denom_pt_antiS_reconstructable,h_denom_pz_antiS_reconstructable]
-l_recobility_y_axis_range = [0.12,0.13, 0.14, 0.12]
-for i in range(0,len(l_nom)):
-	teff = TEfficiency(l_nom[i],l_denom[i])
-	teff.SetName('teff_'+l_nom[i].GetName())
-	c = TCanvas("c_"+teff.GetName(),"");
-	teff.Draw("")
-        gPad.Update()
-        graph = teff.GetPaintedGraph()
-        graph.SetMinimum(0)
-        graph.SetMaximum(l_recobility_y_axis_range[i])
-	CMS_lumi.CMS_lumi(c, 0, 11)
-	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
-	c.Write()
-	teff.Write()
-        l_nom[i].GetYaxis().SetTitle("#Entries")
-        c2 = TCanvas("c_"+l_nom[i].GetName())
-        l_nom[i].Draw("")
-	CMS_lumi.CMS_lumi(c2, 0, 11)
-	c2.SaveAs(plots_output_dir+c2.GetName()+".pdf")
-	c2.Write()
-	
-l_tprof  = [h_eta_all_AntiS,h_vz_interaction_all_AntiS,h_vz_interaction_all_AntiS_zoom,h_pt_all_AntiS,h_pz_all_AntiS,tprof_eta_weighting_factor,tprof_vz_weighting_factor,tprof_vz_weighting_factor_zoom]
-for h in l_tprof:
-        c = TCanvas("c_"+h.GetName(),"");
-        h.Draw("PCE1")
-        h.SetLineColor(colours[0])
-        h.SetMarkerStyle(22)
-        h.SetMarkerColor(colours[0])
-        h.SetStats(0)
-        CMS_lumi.CMS_lumi(c, 0, 11)
-        #c_h_antiS_sumDaughters_openingsangle.SetLogy()
-        c.SaveAs(plots_output_dir+c.GetName()+".pdf")
-        c.Write()	
+#l_tprof  = [h_eta_all_AntiS,h_vz_interaction_all_AntiS,h_vz_interaction_all_AntiS_zoom,h_pt_all_AntiS,h_pz_all_AntiS,tprof_eta_weighting_factor,tprof_vz_weighting_factor,tprof_vz_weighting_factor_zoom]
+#for h in l_tprof:
+#        c = TCanvas("c_"+h.GetName(),"");
+#        h.Draw("PCE1")
+#        h.SetLineColor(colours[0])
+#        h.SetMarkerStyle(22)
+#        h.SetMarkerColor(colours[0])
+#        h.SetStats(0)
+#        CMS_lumi.CMS_lumi(c, 0, 11)
+#        #c_h_antiS_sumDaughters_openingsangle.SetLogy()
+#        c.SaveAs(plots_output_dir+c.GetName()+".pdf")
+#        c.Write()	
 
 #now make some plots which validate the looping mechanism for the antiS
 
@@ -211,26 +216,27 @@ for h in l_h_lxy_n_loops:
 	h.Write()
 
 #overlap the first five of l_h_lxy_n_loops
-c_lxy_n_loops = TCanvas("lxy_n_loops","");
+c_lxy_n_loops = ReadyCanvas("lxy_n_loops")
 legend_c_lxy_n_loops = TLegend(0.6,0.85,0.99,0.99)
 legend_c_lxy_n_loops_text = ["#bar{S} doing [0,100[ loops","#bar{S} doing [100,200[ loops","#bar{S} doing [200,300[ loops","#bar{S} doing [300,400[ loops"]
 for i in range(0,4):
-	h = l_h_lxy_n_loops[i]
-	#if(h.GetSumw2N() == 0):
-	#	h.Sumw2(kTRUE)
-	#h.Scale(1./h.Integral(), "width");
-	if i == 0:
-		h.Draw("")
-	else:
-		h.Draw("same")
-	h.SetLineColor(colours[i])
-	h.SetFillColorAlpha(colours[i],0.9)
-	#h.SetMarkerStyle(22+i)
-	h.SetMarkerColor(colours[i])
-	legend_c_lxy_n_loops.AddEntry(h,legend_c_lxy_n_loops_text[i],"f")
-	h.SetStats(0)
+    h = l_h_lxy_n_loops[i]
+    #if(h.GetSumw2N() == 0):
+    #	h.Sumw2(kTRUE)
+    #h.Scale(1./h.Integral(), "width");
+    if i == 0:
+        h.Draw("")
+    else:
+        h.Draw("same")
+    h.SetLineColor(colours[i])
+    h.SetFillColorAlpha(colours[i],0.9)
+    h.GetXaxis().SetLabelSize(0.03)
+    h.GetYaxis().SetLabelSize(0.03)
+    h.SetMarkerColor(colours[i])
+    legend_c_lxy_n_loops.AddEntry(h,legend_c_lxy_n_loops_text[i],"f")
+    h.SetStats(0)
 legend_c_lxy_n_loops.Draw()
-CMS_lumi.CMS_lumi(c_lxy_n_loops, 0, 11)
+CMSStyle.setCMSLumiStyle(c_lxy_n_loops,11, lumiTextSize_=0.74)
 c_lxy_n_loops.SaveAs(plots_output_dir+c_lxy_n_loops.GetName()+".pdf")
 c_lxy_n_loops.Write()
 	
@@ -285,31 +291,33 @@ for i in range(0,tree.GetEntries()):
 
 l_TH1F = [h_n_interactions_vs_n_loops,h_n_interactions_vs_n_loops_barrel,h_n_interactions_vs_n_loops_endcap,h_n_interactions_vs_n_loops_endcap_more_forward_than_endcap]
 for h in l_TH1F:
-        h.SetDirectory(0)
+    h.SetDirectory(0)
 
-c_n_interactions_vs_n_loops = TCanvas("c_n_interactions_vs_n_loops","");
+c_n_interactions_vs_n_loops = ReadyCanvas("c_n_interactions_vs_n_loops")
 legend_c_n_interactions_vs_n_loops = TLegend(0.7,0.85,0.99,0.99)
 legend_text_c_n_interactions_vs_n_loops = ["All #bar{S}","#bar{S} in the barrel","#bar{S} in the endcap","#bar{S} |#eta| > 2.5"]
 i_l_TH1F = 0
 for h in l_TH1F:
-	if(i_l_TH1F==0):
-		h.Draw("L")
-	else:	
-		h.Draw("sameL")
-	h.SetLineColor(colours[i_l_TH1F])
-	h.SetMarkerStyle(22+i_l_TH1F)
-	h.SetMarkerColor(colours[i_l_TH1F])
-	h.SetStats(0)
-	legend_c_n_interactions_vs_n_loops.AddEntry(h,legend_text_c_n_interactions_vs_n_loops[i_l_TH1F],"lep")
-	i_l_TH1F+=1
+    if(i_l_TH1F==0):
+        h.Draw("L")
+    else:	
+        h.Draw("sameL")
+    h.SetLineColor(colours[i_l_TH1F])
+    h.SetMarkerStyle(22+i_l_TH1F)
+    h.SetMarkerColor(colours[i_l_TH1F])
+    h.GetXaxis().SetLabelSize(0.03)
+    h.GetYaxis().SetLabelSize(0.03)
+    h.SetStats(0)
+    legend_c_n_interactions_vs_n_loops.AddEntry(h,legend_text_c_n_interactions_vs_n_loops[i_l_TH1F],"lep")
+    i_l_TH1F+=1
 
 legend_c_n_interactions_vs_n_loops.Draw()
 c_n_interactions_vs_n_loops.SetLogy()
-CMS_lumi.CMS_lumi(c_n_interactions_vs_n_loops, 0, 11)
+CMSStyle.setCMSLumiStyle(c_n_interactions_vs_n_loops,11, lumiTextSize_=0.74)
 c_n_interactions_vs_n_loops.SaveAs(plots_output_dir+c_n_interactions_vs_n_loops.GetName()+".pdf")
 c_n_interactions_vs_n_loops.Write()
 
-c_interaction_vertex_lxy_unweighted = TCanvas("c_interaction_vertex_lxy_absolute_unweighted","");
+c_interaction_vertex_lxy_unweighted = ReadyCanvas("c_interaction_vertex_lxy_absolute_unweighted")
 h_interaction_vertex_lxy_absolute_unweighted.SetLineColor(colours[0])
 h_interaction_vertex_lxy_absolute_unweighted.SetMarkerStyle(22)
 h_interaction_vertex_lxy_absolute_unweighted.SetMarkerColor(colours[0])
@@ -322,17 +330,19 @@ l_TH2F = [h2_interaction_vertex_vz_lxy_unweighted,h2_interaction_vertex_vz_lxy_z
 for h in l_TH2F:
 	h.SetDirectory(0)
 for h in l_TH2F:
-	c= TCanvas(h.GetName(),"");
-	c.SetRightMargin(0.2) #make room for the tile of the z scale
-	if(h.GetSumw2N() == 0):
-		h.Sumw2(kTRUE)
-	#h.Scale(1./h.Integral(), "width");
-	h.Draw("colz")
-	h.SetStats(0)
-	CMS_lumi.CMS_lumi(c, 0, 11)
-	#c.SetLogz()
-	c.SaveAs(plots_output_dir+h.GetName()+".pdf")
-	c.Write()
+    c= ReadyCanvas(h.GetName())
+    c.SetRightMargin(0.25) #make room for the tile of the z scale
+    if(h.GetSumw2N() == 0):
+        h.Sumw2(kTRUE)
+    #h.Scale(1./h.Integral(), "width");
+    h.Draw("colz")
+    h.SetStats(0)
+    h.GetXaxis().SetLabelSize(0.03)
+    h.GetYaxis().SetLabelSize(0.03)
+    CMSStyle.setCMSLumiStyle(c,0, lumiTextSize_=0.74)
+    #c.SetLogz()
+    c.SaveAs(plots_output_dir+h.GetName()+".pdf")
+    c.Write()
 
 #enough looping validation, now do the actual parameters of the S and antiS. So these should all be weighted.
 antiS_properties_dir = fOut.mkdir("antiS_properties")
@@ -399,6 +409,8 @@ h2_eta_pz_AntiLambda_AntiProton = TH2F("h2_eta_pz_AntiLambda_AntiProton",";#eta 
 h2_eta_pz_AntiLambda_Pion = TH2F("h2_eta_pz_AntiLambda_Pion",";#eta #bar{#Lambda}^{0}-#pi^{+};|p_{z}| #bar{#Lambda}^{0}-#pi^{+} (GeV/c); Events/(0.1#eta*0.1GeV/c)",80,-4,4,60,0,6)
 h2_eta_p_AntiLambda_AntiProton = TH2F("h2_eta_p_AntiLambda_AntiProton",";#eta #bar{#Lambda}^{0}-#bar{p};p #bar{#Lambda}^{0}-#bar{p} (GeV/c); Events/(0.1#eta*0.1GeV/c)",100,-5,5,600,0,60)
 h2_eta_p_AntiLambda_Pion = TH2F("h2_eta_p_AntiLambda_Pion",";#eta #bar{#Lambda}^{0}-#pi^{+};p #bar{#Lambda}^{0}-#pi^{+} (GeV/c); Events/(0.1#eta*0.1GeV/c)",80,-4,4,60,0,6)
+h2_pt_AntiLambda_Pion_AntiProton = TH2F("h2_pt_AntiLambda_Pion_AntiProton",";p_{T} (GeV/c) #bar{#Lambda}^{0}-#pi^{+};p_{T} (GeV/c) #bar{#Lambda}^{0}-#bar{p}; Events/(0.1GeV/c*0.1GeV/c)",60,0,6,60,0,6)
+h2_eta_AntiLambda_Pion_AntiProton = TH2F("h2_eta_AntiLambda_Pion_AntiProton",";#eta #bar{#Lambda}^{0}-#pi^{+};#eta #bar{#Lambda}^{0}-#bar{p}; Events/(0.1#eta*0.1#eta)",100, -5, 5, 100, -5, 5)
 
 #the 3D angle(displacement, momentum) of the Ks, Lambda and 4 granddaugthers. This learns what is the the fraction that is actually pointing backwards
 h_Ks_openings_angle_displacement_momentum = TH1F("h_Ks_openings_angle_displacement_momentum",";openings angle (#vec{p},#vec{l}_{bs,cv}) (rad);Events/0.1rad ",70,-3.5,3.5)
@@ -443,128 +455,167 @@ h2_vz_lxy_creation_vertex_AntiLambda_daughters = TH2F("h2_vz_lxy_creation_vertex
 
 
 for i in range(0,tree.GetEntries()):
+    
+    if i > maxNEntries:
+        break
+    
+    tree.GetEntry(i)
+    
+    #only make these plots for reconstructable antiS which means that all their granddaughters should have 7 hits
+    if(tree._GEN_Ks_daughter0_numberOfTrackerHits[0] < 7 or tree._GEN_Ks_daughter1_numberOfTrackerHits[0] < 7 or tree._GEN_AntiLambda_AntiProton_numberOfTrackerHits[0] < 7 or tree._GEN_AntiLambda_Pion_numberOfTrackerHits[0] < 7 ):
+        continue
+    #weight_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factor_PU[0]*tree._S_event_weighting_factor_M2S[0]
+    weight_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factor_PU[0]
+    
+    nAntiSReconstructable += weight_factor
+    nAntiSReconstructableUnweighted += 1
+    
+    h2_interaction_vertex_vx_vy.Fill(tree._S_vx_interaction_vertex[0],tree._S_vy_interaction_vertex[0],weight_factor)
+    h2_interaction_vertex_vx_vy_zoom.Fill(tree._S_vx_interaction_vertex[0],tree._S_vy_interaction_vertex[0],weight_factor)
+    h2_interaction_vertex_vz_lxy.Fill(tree._S_vz_interaction_vertex[0],tree._S_lxy_interaction_vertex[0],weight_factor)
+    h2_interaction_vertex_vz_lxy_zoom.Fill(tree._S_vz_interaction_vertex[0],tree._S_lxy_interaction_vertex[0],weight_factor)
+    
+    h_antiS_eta.Fill( tree._S_eta[0] )	
+    h_nom_eta_antiS_reconstructable.Fill( tree._S_eta[0], weight_factor )	
+    h_nom_pt_antiS_reconstructable.Fill( tree._S_pt[0], weight_factor )	
+    h_nom_pz_antiS_reconstructable.Fill( tree._S_pz[0], weight_factor )	
+    h_antiS_lxy_creation_vertex.Fill( np.sqrt( np.power(tree._S_vx[0],2) + np.power(tree._S_vy[0],2) ),weight_factor )	
+    h_antiS_lxy_creation_vertex_unreweighted.Fill( np.sqrt( np.power(tree._S_vx[0],2) + np.power(tree._S_vy[0],2) ), tree._S_event_weighting_factor[0])	
+    h_antiS_vz_creation_vertex.Fill(tree._S_vz[0],weight_factor)	
+    h_antiS_vz_creation_vertex_unreweighted.Fill(tree._S_vz[0], tree._S_event_weighting_factor[0])	
+    h_antiS_lxy_interaction_vertex.Fill(tree._S_lxy_interaction_vertex[0],weight_factor)
+    h_antiS_vz_interaction_vertex.Fill(tree._S_vz_interaction_vertex[0],weight_factor)
+    h_nom_vz_antiS_reconstructable.Fill(tree._S_vz_interaction_vertex[0],weight_factor)
+    h_neutron_momentum.Fill(abs(tree._n_p[0]),weight_factor)
+    h_antiS_sumDaughters_openingsangle.Fill(tree._S_sumDaughters_openingsangle[0],weight_factor)	
+    h_antiS_sumDaughters_deltaPhi.Fill(tree._S_sumDaughters_deltaPhi[0],weight_factor)	
+    h_antiS_sumDaughters_deltaEta.Fill(tree._S_sumDaughters_deltaEta[0],weight_factor)	
+    h_antiS_sumDaughters_deltaR.Fill(tree._S_sumDaughters_deltaR[0],weight_factor)	
+    h2_antiS_inv_mass_p.Fill(tree._S_mass[0], np.sqrt( tree._S_pz[0]*tree._S_pz[0] + tree._S_pt[0]*tree._S_pt[0] ) ,weight_factor)
+    h2_antiS_inv_mass_p_Ks_plus_Lambda.Fill(tree._S_mass[0], np.sqrt( pow(tree._Ks_pz[0] + tree._Lambda_pz[0] , 2) + pow(tree._Ks_pt[0] + tree._Lambda_pt[0] , 2) ) ,weight_factor)
+    
+    h_pt_Ks.Fill(tree._Ks_pt[0],weight_factor)
+    h_p_Ks.Fill( np.sqrt( tree._Ks_pt[0]*tree._Ks_pt[0] + tree._Ks_pz[0]*tree._Ks_pz[0] ) ,weight_factor)
+    h_pt_Ks_daug0.Fill(tree._GEN_Ks_daughter0_pt[0],weight_factor)
+    h_pt_Ks_daug1.Fill(tree._GEN_Ks_daughter1_pt[0],weight_factor)
+    h_p_Ks_daug0.Fill(np.sqrt( np.power(tree._GEN_Ks_daughter0_pt[0],2) + np.power(tree._GEN_Ks_daughter0_pz[0],2) ) ,weight_factor)
+    h_p_Ks_daug1.Fill(np.sqrt( np.power(tree._GEN_Ks_daughter1_pt[0],2) + np.power(tree._GEN_Ks_daughter1_pz[0],2) ) ,weight_factor)
+    h_pz_Ks.Fill(abs(tree._Ks_pz[0]),weight_factor)
+    h_pz_Ks_daug0.Fill(abs(tree._GEN_Ks_daughter0_pz[0]),weight_factor)
+    h_pz_Ks_daug1.Fill(abs(tree._GEN_Ks_daughter1_pz[0]),weight_factor)
+    h2_pt_pz_Ks_daug0.Fill(tree._GEN_Ks_daughter0_pt[0], abs(tree._GEN_Ks_daughter0_pz[0]),weight_factor)
+    h2_pt_pz_Ks_daug1.Fill(tree._GEN_Ks_daughter1_pt[0], abs(tree._GEN_Ks_daughter1_pz[0]),weight_factor)
+    h2_eta_pt_Ks_daug0.Fill(tree._GEN_Ks_daughter0_eta[0],tree._GEN_Ks_daughter0_pt[0],weight_factor)
+    h2_eta_pt_Ks_daug1.Fill(tree._GEN_Ks_daughter1_eta[0],tree._GEN_Ks_daughter1_pt[0],weight_factor)
+    h2_eta_pz_Ks_daug0.Fill(tree._GEN_Ks_daughter0_eta[0],abs(tree._GEN_Ks_daughter0_pz[0]),weight_factor)
+    h2_eta_pz_Ks_daug1.Fill(tree._GEN_Ks_daughter1_eta[0],abs(tree._GEN_Ks_daughter1_pz[0]),weight_factor)
+    h2_eta_p_Ks_daug0.Fill(tree._GEN_Ks_daughter0_eta[0],np.sqrt(np.power(tree._GEN_Ks_daughter0_pt[0],2)+np.power(tree._GEN_Ks_daughter0_pz[0],2)),weight_factor)
+    h2_eta_p_Ks_daug1.Fill(tree._GEN_Ks_daughter1_eta[0],np.sqrt(np.power(tree._GEN_Ks_daughter1_pt[0],2)+np.power(tree._GEN_Ks_daughter1_pz[0],2)),weight_factor)
+    
+    h_dxy_Ks.Fill(tree._Ks_dxy[0],weight_factor)
+    h_dxy_AntiLambda.Fill(tree._Lambda_dxy[0],weight_factor)
+    h_dz_Ks.Fill(tree._Ks_dz[0],weight_factor)
+    h_dz_AntiLambda.Fill(tree._Lambda_dz[0],weight_factor)
+    
+    h_dxy_Ks_daug0.Fill(tree._GEN_Ks_daughter0_dxy[0],weight_factor)
+    h_dxy_Ks_daug1.Fill(tree._GEN_Ks_daughter1_dxy[0],weight_factor)
+    h_dz_Ks_daug0.Fill(tree._GEN_Ks_daughter0_dz[0],weight_factor)
+    h_dz_Ks_daug1.Fill(tree._GEN_Ks_daughter1_dz[0],weight_factor)
+    
+    
+    h_pt_AntiLambda.Fill(tree._Lambda_pt[0],weight_factor)
+    h_p_AntiLambda.Fill( np.sqrt( tree._Lambda_pt[0]*tree._Lambda_pt[0] + tree._Lambda_pz[0]*tree._Lambda_pz[0] ) ,weight_factor)
+    h_pt_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_pt[0],weight_factor)
+    h_pt_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_pt[0],weight_factor)
+    h_p_AntiLambda_AntiProton.Fill( np.sqrt( np.power(tree._GEN_AntiLambda_AntiProton_pt[0],2) + np.power(tree._GEN_AntiLambda_AntiProton_pz[0],2) ) ,weight_factor)
+    h_p_AntiLambda_Pion.Fill( np.sqrt( np.power(tree._GEN_AntiLambda_Pion_pt[0],2) +  np.power(tree._GEN_AntiLambda_Pion_pz[0],2) ) ,weight_factor)
+    h_pz_AntiLambda.Fill(abs(tree._Lambda_pz[0]),weight_factor)
+    h_pz_AntiLambda_AntiProton.Fill(abs(tree._GEN_AntiLambda_AntiProton_pz[0]),weight_factor)
+    h_pz_AntiLambda_Pion.Fill(abs(tree._GEN_AntiLambda_Pion_pz[0]),weight_factor)
+    h2_pt_pz_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_pt[0],abs(tree._GEN_AntiLambda_AntiProton_pz[0]),weight_factor)
+    h2_pt_pz_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_pt[0],abs(tree._GEN_AntiLambda_Pion_pz[0]),weight_factor)
+    h2_eta_pt_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_eta[0],tree._GEN_AntiLambda_AntiProton_pt[0],weight_factor)
+    h2_eta_pt_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_eta[0],tree._GEN_AntiLambda_Pion_pt[0],weight_factor)
+    h2_eta_pz_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_eta[0],abs(tree._GEN_AntiLambda_AntiProton_pz[0]),weight_factor)
+    h2_eta_pz_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_eta[0],abs(tree._GEN_AntiLambda_Pion_pz[0]),weight_factor)
+    h2_eta_p_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_eta[0],np.sqrt(np.power(tree._GEN_AntiLambda_AntiProton_pz[0],2)+np.power(tree._GEN_AntiLambda_AntiProton_pt[0],2)),weight_factor)
+    h2_eta_p_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_eta[0],np.sqrt(np.power(tree._GEN_AntiLambda_Pion_pz[0],2)+np.power(tree._GEN_AntiLambda_Pion_pt[0],2)),weight_factor)
+    h2_pt_AntiLambda_Pion_AntiProton.Fill(tree._GEN_AntiLambda_Pion_pt[0],tree._GEN_AntiLambda_AntiProton_pt[0],weight_factor)
+    h2_eta_AntiLambda_Pion_AntiProton.Fill(tree._GEN_AntiLambda_Pion_eta[0],tree._GEN_AntiLambda_AntiProton_eta[0],weight_factor)
+    
+    h_Ks_openings_angle_displacement_momentum.Fill(tree._Ks_openings_angle_displacement_momentum[0],weight_factor)
+    h_Lambda_openings_angle_displacement_momentum.Fill(tree._Lambda_openings_angle_displacement_momentum[0],weight_factor)
+    h_GEN_Ks_daughters_openings_angle_displacement_momentum.Fill(tree._GEN_Ks_daughter0_openings_angle_displacement_momentum[0],weight_factor)
+    h_GEN_Ks_daughters_openings_angle_displacement_momentum.Fill(tree._GEN_Ks_daughter1_openings_angle_displacement_momentum[0],weight_factor)
+    h_GEN_AntiLambda_AntiProton_openings_angle_displacement_momentum.Fill(tree._GEN_AntiLambda_AntiProton_openings_angle_displacement_momentum[0],weight_factor)
+    h_GEN_AntiLambda_Pion_openings_angle_displacement_momentum.Fill(tree._GEN_AntiLambda_Pion_openings_angle_displacement_momentum[0],weight_factor)
+    
+    h_dxy_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_dxy[0],weight_factor)
+    h_dxy_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_dxy[0],weight_factor)
+    h_dz_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_dz[0],weight_factor)
+    h_dz_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_dz[0],weight_factor)
+    
+    #need only one of the granddaughter of each V0, as their creation vertex is the same
+    h_lxy_creation_vertex_Ks_daughters.Fill(tree._GEN_Ks_daughter0_lxy_zero[0],weight_factor)
+    h_vz_creation_vertex_Ks_daughters.Fill(tree._GEN_Ks_daughter0_vz[0],weight_factor)
+    h_lxy_creation_vertex_AntiLambda_daughters.Fill(tree._GEN_AntiLambda_AntiProton_lxy_zero[0],weight_factor)
+    h_vz_creation_vertex_AntiLambda_daughters.Fill(tree._GEN_AntiLambda_AntiProton_vz[0],weight_factor)
+    
+    h2_vx_vy_creation_vertex_Ks_daughters.Fill(tree._GEN_Ks_daughter0_vx[0],tree._GEN_Ks_daughter0_vy[0],weight_factor)
+    h2_vz_lxy_creation_vertex_Ks_daughters.Fill(tree._GEN_Ks_daughter0_vz[0],tree._GEN_Ks_daughter0_lxy_zero[0],weight_factor)
+    h2_vx_vy_creation_vertex_AntiLambda_daughters.Fill(tree._GEN_AntiLambda_AntiProton_vx[0],tree._GEN_AntiLambda_AntiProton_vy[0],weight_factor)
+    h2_vz_lxy_creation_vertex_AntiLambda_daughters.Fill(tree._GEN_AntiLambda_AntiProton_vz[0],tree._GEN_AntiLambda_AntiProton_lxy_zero[0],weight_factor)
 
-	if i > maxNEntries:
-		break
+print 'the unweighted antiS reconstructability: ', nAntiSReconstructableUnweighted, '/', nAntiSTotalUnweighted, '=', float(nAntiSReconstructableUnweighted)/float(nAntiSTotalUnweighted)
+print 'the overall antiS reconstructability: ', nAntiSReconstructable, '/', nAntiSTotal, '=', float(nAntiSReconstructable)/float(nAntiSTotal)
 
-	tree.GetEntry(i)
-
-	#only make these plots for reconstructable antiS which means that all their granddaughters should have 7 hits
-	if(tree._GEN_Ks_daughter0_numberOfTrackerHits[0] < 7 or tree._GEN_Ks_daughter1_numberOfTrackerHits[0] < 7 or tree._GEN_AntiLambda_AntiProton_numberOfTrackerHits[0] < 7 or tree._GEN_AntiLambda_Pion_numberOfTrackerHits[0] < 7 ):
-		continue
-#	weight_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factor_PU[0]*tree._S_event_weighting_factor_M2S[0]
-	weight_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factor_PU[0]
-
-	h2_interaction_vertex_vx_vy.Fill(tree._S_vx_interaction_vertex[0],tree._S_vy_interaction_vertex[0],weight_factor)
-	h2_interaction_vertex_vx_vy_zoom.Fill(tree._S_vx_interaction_vertex[0],tree._S_vy_interaction_vertex[0],weight_factor)
-	h2_interaction_vertex_vz_lxy.Fill(tree._S_vz_interaction_vertex[0],tree._S_lxy_interaction_vertex[0],weight_factor)
-	h2_interaction_vertex_vz_lxy_zoom.Fill(tree._S_vz_interaction_vertex[0],tree._S_lxy_interaction_vertex[0],weight_factor)
-
-	h_antiS_eta.Fill( tree._S_eta[0] )	
-	h_antiS_lxy_creation_vertex.Fill( np.sqrt( np.power(tree._S_vx[0],2) + np.power(tree._S_vy[0],2) ),weight_factor )	
-	h_antiS_lxy_creation_vertex_unreweighted.Fill( np.sqrt( np.power(tree._S_vx[0],2) + np.power(tree._S_vy[0],2) ), tree._S_event_weighting_factor[0])	
-	h_antiS_vz_creation_vertex.Fill(tree._S_vz[0],weight_factor)	
-	h_antiS_vz_creation_vertex_unreweighted.Fill(tree._S_vz[0], tree._S_event_weighting_factor[0])	
-	h_antiS_lxy_interaction_vertex.Fill(tree._S_lxy_interaction_vertex[0],weight_factor)
-	h_antiS_vz_interaction_vertex.Fill(tree._S_vz_interaction_vertex[0],weight_factor)
-	h_neutron_momentum.Fill(abs(tree._n_p[0]),weight_factor)
-	h_antiS_sumDaughters_openingsangle.Fill(tree._S_sumDaughters_openingsangle[0],weight_factor)	
-	h_antiS_sumDaughters_deltaPhi.Fill(tree._S_sumDaughters_deltaPhi[0],weight_factor)	
-	h_antiS_sumDaughters_deltaEta.Fill(tree._S_sumDaughters_deltaEta[0],weight_factor)	
-	h_antiS_sumDaughters_deltaR.Fill(tree._S_sumDaughters_deltaR[0],weight_factor)	
-	h2_antiS_inv_mass_p.Fill(tree._S_mass[0], np.sqrt( tree._S_pz[0]*tree._S_pz[0] + tree._S_pt[0]*tree._S_pt[0] ) ,weight_factor)
-	h2_antiS_inv_mass_p_Ks_plus_Lambda.Fill(tree._S_mass[0], np.sqrt( pow(tree._Ks_pz[0] + tree._Lambda_pz[0] , 2) + pow(tree._Ks_pt[0] + tree._Lambda_pt[0] , 2) ) ,weight_factor)
-	
-	h_pt_Ks.Fill(tree._Ks_pt[0],weight_factor)
-	h_p_Ks.Fill( np.sqrt( tree._Ks_pt[0]*tree._Ks_pt[0] + tree._Ks_pz[0]*tree._Ks_pz[0] ) ,weight_factor)
-	h_pt_Ks_daug0.Fill(tree._GEN_Ks_daughter0_pt[0],weight_factor)
-	h_pt_Ks_daug1.Fill(tree._GEN_Ks_daughter1_pt[0],weight_factor)
-	h_p_Ks_daug0.Fill(np.sqrt( np.power(tree._GEN_Ks_daughter0_pt[0],2) + np.power(tree._GEN_Ks_daughter0_pz[0],2) ) ,weight_factor)
-	h_p_Ks_daug1.Fill(np.sqrt( np.power(tree._GEN_Ks_daughter1_pt[0],2) + np.power(tree._GEN_Ks_daughter1_pz[0],2) ) ,weight_factor)
-	h_pz_Ks.Fill(abs(tree._Ks_pz[0]),weight_factor)
-	h_pz_Ks_daug0.Fill(abs(tree._GEN_Ks_daughter0_pz[0]),weight_factor)
-	h_pz_Ks_daug1.Fill(abs(tree._GEN_Ks_daughter1_pz[0]),weight_factor)
-	h2_pt_pz_Ks_daug0.Fill(tree._GEN_Ks_daughter0_pt[0], abs(tree._GEN_Ks_daughter0_pz[0]),weight_factor)
-	h2_pt_pz_Ks_daug1.Fill(tree._GEN_Ks_daughter1_pt[0], abs(tree._GEN_Ks_daughter1_pz[0]),weight_factor)
-	h2_eta_pt_Ks_daug0.Fill(tree._GEN_Ks_daughter0_eta[0],tree._GEN_Ks_daughter0_pt[0],weight_factor)
-	h2_eta_pt_Ks_daug1.Fill(tree._GEN_Ks_daughter1_eta[0],tree._GEN_Ks_daughter1_pt[0],weight_factor)
-	h2_eta_pz_Ks_daug0.Fill(tree._GEN_Ks_daughter0_eta[0],abs(tree._GEN_Ks_daughter0_pz[0]),weight_factor)
-	h2_eta_pz_Ks_daug1.Fill(tree._GEN_Ks_daughter1_eta[0],abs(tree._GEN_Ks_daughter1_pz[0]),weight_factor)
-	h2_eta_p_Ks_daug0.Fill(tree._GEN_Ks_daughter0_eta[0],np.sqrt(np.power(tree._GEN_Ks_daughter0_pt[0],2)+np.power(tree._GEN_Ks_daughter0_pz[0],2)),weight_factor)
-	h2_eta_p_Ks_daug1.Fill(tree._GEN_Ks_daughter1_eta[0],np.sqrt(np.power(tree._GEN_Ks_daughter1_pt[0],2)+np.power(tree._GEN_Ks_daughter1_pz[0],2)),weight_factor)
-
-	h_dxy_Ks.Fill(tree._Ks_dxy[0],weight_factor)
-	h_dxy_AntiLambda.Fill(tree._Lambda_dxy[0],weight_factor)
-	h_dz_Ks.Fill(tree._Ks_dz[0],weight_factor)
-	h_dz_AntiLambda.Fill(tree._Lambda_dz[0],weight_factor)
-
-	h_dxy_Ks_daug0.Fill(tree._GEN_Ks_daughter0_dxy[0],weight_factor)
-	h_dxy_Ks_daug1.Fill(tree._GEN_Ks_daughter1_dxy[0],weight_factor)
-	h_dz_Ks_daug0.Fill(tree._GEN_Ks_daughter0_dz[0],weight_factor)
-	h_dz_Ks_daug1.Fill(tree._GEN_Ks_daughter1_dz[0],weight_factor)
-
-
-	h_pt_AntiLambda.Fill(tree._Lambda_pt[0],weight_factor)
-	h_p_AntiLambda.Fill( np.sqrt( tree._Lambda_pt[0]*tree._Lambda_pt[0] + tree._Lambda_pz[0]*tree._Lambda_pz[0] ) ,weight_factor)
-	h_pt_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_pt[0],weight_factor)
-	h_pt_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_pt[0],weight_factor)
-	h_p_AntiLambda_AntiProton.Fill( np.sqrt( np.power(tree._GEN_AntiLambda_AntiProton_pt[0],2) + np.power(tree._GEN_AntiLambda_AntiProton_pz[0],2) ) ,weight_factor)
-	h_p_AntiLambda_Pion.Fill( np.sqrt( np.power(tree._GEN_AntiLambda_Pion_pt[0],2) +  np.power(tree._GEN_AntiLambda_Pion_pz[0],2) ) ,weight_factor)
-	h_pz_AntiLambda.Fill(abs(tree._Lambda_pz[0]),weight_factor)
-	h_pz_AntiLambda_AntiProton.Fill(abs(tree._GEN_AntiLambda_AntiProton_pz[0]),weight_factor)
-	h_pz_AntiLambda_Pion.Fill(abs(tree._GEN_AntiLambda_Pion_pz[0]),weight_factor)
-	h2_pt_pz_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_pt[0],abs(tree._GEN_AntiLambda_AntiProton_pz[0]),weight_factor)
-	h2_pt_pz_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_pt[0],abs(tree._GEN_AntiLambda_Pion_pz[0]),weight_factor)
-	h2_eta_pt_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_eta[0],tree._GEN_AntiLambda_AntiProton_pt[0],weight_factor)
-	h2_eta_pt_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_eta[0],tree._GEN_AntiLambda_Pion_pt[0],weight_factor)
-	h2_eta_pz_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_eta[0],abs(tree._GEN_AntiLambda_AntiProton_pz[0]),weight_factor)
-	h2_eta_pz_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_eta[0],abs(tree._GEN_AntiLambda_Pion_pz[0]),weight_factor)
-	h2_eta_p_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_eta[0],np.sqrt(np.power(tree._GEN_AntiLambda_AntiProton_pz[0],2)+np.power(tree._GEN_AntiLambda_AntiProton_pt[0],2)),weight_factor)
-	h2_eta_p_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_eta[0],np.sqrt(np.power(tree._GEN_AntiLambda_Pion_pz[0],2)+np.power(tree._GEN_AntiLambda_Pion_pt[0],2)),weight_factor)
-
-
-	h_Ks_openings_angle_displacement_momentum.Fill(tree._Ks_openings_angle_displacement_momentum[0],weight_factor)
-	h_Lambda_openings_angle_displacement_momentum.Fill(tree._Lambda_openings_angle_displacement_momentum[0],weight_factor)
-	h_GEN_Ks_daughters_openings_angle_displacement_momentum.Fill(tree._GEN_Ks_daughter0_openings_angle_displacement_momentum[0],weight_factor)
-	h_GEN_Ks_daughters_openings_angle_displacement_momentum.Fill(tree._GEN_Ks_daughter1_openings_angle_displacement_momentum[0],weight_factor)
-	h_GEN_AntiLambda_AntiProton_openings_angle_displacement_momentum.Fill(tree._GEN_AntiLambda_AntiProton_openings_angle_displacement_momentum[0],weight_factor)
-	h_GEN_AntiLambda_Pion_openings_angle_displacement_momentum.Fill(tree._GEN_AntiLambda_Pion_openings_angle_displacement_momentum[0],weight_factor)
-
-	h_dxy_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_dxy[0],weight_factor)
-	h_dxy_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_dxy[0],weight_factor)
-	h_dz_AntiLambda_AntiProton.Fill(tree._GEN_AntiLambda_AntiProton_dz[0],weight_factor)
-	h_dz_AntiLambda_Pion.Fill(tree._GEN_AntiLambda_Pion_dz[0],weight_factor)
-	
-	#need only one of the granddaughter of each V0, as their creation vertex is the same
-	h_lxy_creation_vertex_Ks_daughters.Fill(tree._GEN_Ks_daughter0_lxy_zero[0],weight_factor)
-	h_vz_creation_vertex_Ks_daughters.Fill(tree._GEN_Ks_daughter0_vz[0],weight_factor)
-	h_lxy_creation_vertex_AntiLambda_daughters.Fill(tree._GEN_AntiLambda_AntiProton_lxy_zero[0],weight_factor)
-	h_vz_creation_vertex_AntiLambda_daughters.Fill(tree._GEN_AntiLambda_AntiProton_vz[0],weight_factor)
-
-	h2_vx_vy_creation_vertex_Ks_daughters.Fill(tree._GEN_Ks_daughter0_vx[0],tree._GEN_Ks_daughter0_vy[0],weight_factor)
-	h2_vz_lxy_creation_vertex_Ks_daughters.Fill(tree._GEN_Ks_daughter0_vz[0],tree._GEN_Ks_daughter0_lxy_zero[0],weight_factor)
-	h2_vx_vy_creation_vertex_AntiLambda_daughters.Fill(tree._GEN_AntiLambda_AntiProton_vx[0],tree._GEN_AntiLambda_AntiProton_vy[0],weight_factor)
-	h2_vz_lxy_creation_vertex_AntiLambda_daughters.Fill(tree._GEN_AntiLambda_AntiProton_vz[0],tree._GEN_AntiLambda_AntiProton_lxy_zero[0],weight_factor)
-
-	
+all_antiS_dir.cd()
+l_nom = [h_nom_vz_antiS_reconstructable,h_nom_eta_antiS_reconstructable,h_nom_pt_antiS_reconstructable,h_nom_pz_antiS_reconstructable]
+l_denom = [h_denom_vz_antiS_reconstructable,h_denom_eta_antiS_reconstructable,h_denom_pt_antiS_reconstructable,h_denom_pz_antiS_reconstructable]
+l_recobility_y_axis_range = [0.12,0.13, 0.07, 0.12]
+for i in range(0,len(l_nom)):
+    teff = TEfficiency(l_nom[i],l_denom[i])
+    teff.SetName('teff_'+l_nom[i].GetName())
+    c = ReadyCanvas("c_"+teff.GetName())
+    teff.Draw("")
+    gPad.Update()
+    graph = teff.GetPaintedGraph()
+    graph.SetMinimum(0)
+    graph.SetMaximum(l_recobility_y_axis_range[i])
+    graph.GetXaxis().SetLabelSize(0.03)
+    graph.GetYaxis().SetLabelSize(0.03)
+    CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
+    c.SaveAs(plots_output_dir+c.GetName()+".pdf")
+    c.Write()
+    teff.Write()
+    l_nom[i].GetYaxis().SetTitle("#Entries")
+    c2 = ReadyCanvas("c_"+l_nom[i].GetName())
+    l_nom[i].Draw("")
+    l_nom[i].GetXaxis().SetLabelSize(0.03)
+    l_nom[i].GetYaxis().SetLabelSize(0.03)
+    CMSStyle.setCMSLumiStyle(c2,11, lumiTextSize_=0.74)
+    c2.SaveAs(plots_output_dir+c2.GetName()+".pdf")
+    c2.Write()
 antiS_properties_dir.cd()
 
 l_TH2F = [h2_interaction_vertex_vz_lxy,h2_interaction_vertex_vz_lxy_zoom,h2_interaction_vertex_vx_vy,h2_interaction_vertex_vx_vy_zoom]
 for h in l_TH2F:
 	h.SetDirectory(0)
 for h in l_TH2F:
-	c= TCanvas(h.GetName(),"");
-	c.SetRightMargin(0.2) #make room for the tile of the z scale
-	if(h.GetSumw2N() == 0):
-		h.Sumw2(kTRUE)
-	#h.Scale(1./h.Integral(), "width");
-	h.Draw("colz")
-	h.SetStats(0)
-	CMS_lumi.CMS_lumi(c, 0, 11)
-	#c.SetLogz()
-	c.SaveAs(plots_output_dir+h.GetName()+".pdf")
-	c.Write()
-
+    c= ReadyCanvas(h.GetName())
+    c.SetRightMargin(0.25) #make room for the tile of the z scale
+    if(h.GetSumw2N() == 0):
+        h.Sumw2(kTRUE)
+    #h.Scale(1./h.Integral(), "width");
+    h.Draw("colz")
+    h.SetStats(0)
+    h.GetXaxis().SetLabelSize(0.03)
+    h.GetYaxis().SetLabelSize(0.03)
+    CMSStyle.setCMSLumiStyle(c,0, lumiTextSize_=0.74)
+    #c.SetLogz()
+    c.SaveAs(plots_output_dir+h.GetName()+".pdf")
+    c.Write()
+    
 h_antiS_eta.Write()
 
 h_antiS_lxy_creation_vertex.Write()
@@ -572,32 +623,41 @@ h_antiS_vz_creation_vertex.Write()
 h_antiS_lxy_creation_vertex_unreweighted.Write()
 h_antiS_vz_creation_vertex_unreweighted.Write()
 
-c_antiS_lxy_interaction_vertex = TCanvas("c_antiS_lxy_interaction_vertex","");
+c_antiS_lxy_interaction_vertex = ReadyCanvas("c_antiS_lxy_interaction_vertex")
+lxymaxval = h_antiS_lxy_interaction_vertex.GetMaximum()
+h_antiS_lxy_interaction_vertex.GetYaxis().SetRangeUser(0, lxymaxval*1.2)
 h_antiS_lxy_interaction_vertex.DrawNormalized()
 c_antiS_lxy_interaction_vertex.Write()
 
-c_antiS_vz_interaction_vertex = TCanvas("c_antiS_vz_interaction_vertex","");
+c_antiS_vz_interaction_vertex = ReadyCanvas("c_antiS_vz_interaction_vertex")
 h_antiS_vz_interaction_vertex.DrawNormalized()
 c_antiS_vz_interaction_vertex.Write()
 
 l_TH1F = [h_antiS_vz_creation_vertex,h_antiS_lxy_interaction_vertex,h_antiS_vz_interaction_vertex]
 for h in l_TH1F:
-        h.SetDirectory(0)
+    h.SetDirectory(0)
 i_l_TH1F = 0
 for h in l_TH1F:
-	c= TCanvas(h.GetName(),"");
-	if(h.GetSumw2N() == 0):
-		h.Sumw2(kTRUE)
-	h.Scale(1./h.Integral(), "width");
-	h.GetYaxis().SetTitle("1/N_{ev}"+h.GetYaxis().GetTitle())
-	h.Draw("CL")
-	h.SetStats(0)
-	CMS_lumi.CMS_lumi(c, 0, 11)
-	#if i_l_TH1F == 1:
-	#	c.SetLogy()
-	c.SaveAs(plots_output_dir+h.GetName()+".pdf")
-	c.Write()
-	i_l_TH1F+=1
+    c= ReadyCanvas(h.GetName())
+    if(h.GetSumw2N() == 0):
+        h.Sumw2(kTRUE)
+    h.Scale(1./h.Integral(), "width");
+    h.GetYaxis().SetTitle(h.GetYaxis().GetTitle()+"/N_{ev}")
+    if h.GetName() == "h_antiS_lxy_interaction_vertex":
+        lxymaxval = h.GetMaximum()
+        h.GetYaxis().SetRangeUser(0, lxymaxval*1.2)
+        h.Draw("HIST")
+    else:
+        h.Draw("CL")
+    h.SetStats(0)
+    h.GetXaxis().SetLabelSize(0.03)
+    h.GetYaxis().SetLabelSize(0.03)
+    CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
+    #if i_l_TH1F == 1:
+    #	c.SetLogy()
+    c.SaveAs(plots_output_dir+h.GetName()+".pdf")
+    c.Write()
+    i_l_TH1F+=1
 
 fermiMomentum_dir = fOut.mkdir("fermiMomentum")
 fermiMomentum_dir.cd()
@@ -605,34 +665,36 @@ fermiMomentum_dir.cd()
 h2_antiS_inv_mass_p.Write()
 h2_antiS_inv_mass_p_Ks_plus_Lambda.Write()
 
-l_TH2F = [h2_eta_pt_AntiLambda_Pion,h2_eta_pz_AntiLambda_Pion,h2_eta_p_AntiLambda_Pion]
+l_TH2F = [h2_eta_pt_AntiLambda_Pion,h2_eta_pz_AntiLambda_Pion,h2_eta_p_AntiLambda_Pion,h2_eta_pt_AntiLambda_AntiProton,h2_eta_pz_AntiLambda_AntiProton,h2_eta_p_AntiLambda_AntiProton, h2_pt_AntiLambda_Pion_AntiProton, h2_eta_AntiLambda_Pion_AntiProton]
 for h in l_TH2F:
-        h.SetDirectory(0)
+    h.SetDirectory(0)
 for h in l_TH2F:
-        c= TCanvas(h.GetName(),"");
-        c.SetRightMargin(0.2) #make room for the tile of the z scale
-        if(h.GetSumw2N() == 0):
-                h.Sumw2(kTRUE)
-        #h.Scale(1./h.Integral(), "width");
-        h.Draw("colz")
-        h.SetStats(0)
-	c.SetLogz()
-        CMS_lumi.CMS_lumi(c, 0, 11)
-        c.SaveAs(plots_output_dir+h.GetName()+".pdf")
-        c.Write()
-
-
-c_h_neutron_momentum = TCanvas("c_"+h_neutron_momentum.GetName(),"");
+    c= ReadyCanvas(h.GetName())
+    c.SetRightMargin(0.25) #make room for the tile of the z scale
+    if(h.GetSumw2N() == 0):
+        h.Sumw2(kTRUE)
+    #h.Scale(1./h.Integral(), "width");
+    h.Draw("colz")
+    h.SetStats(0)
+    h.GetXaxis().SetLabelSize(0.03)
+    h.GetYaxis().SetLabelSize(0.03)
+    c.SetLogz()
+    CMSStyle.setCMSLumiStyle(c,0, lumiTextSize_=0.74)
+    c.SaveAs(plots_output_dir+h.GetName()+".pdf")
+    c.Write()
+c_h_neutron_momentum = ReadyCanvas("c_"+h_neutron_momentum.GetName())
 h_neutron_momentum.Draw("PCE1")
 if(h_neutron_momentum.GetSumw2N() == 0):
 	h_neutron_momentum.Sumw2(kTRUE)
 h_neutron_momentum.Scale(1./h_neutron_momentum.Integral(), "width");
-h_neutron_momentum.GetYaxis().SetTitle("1/N_{ev}"+h_neutron_momentum.GetYaxis().GetTitle())
+h_neutron_momentum.GetYaxis().SetTitle(h_neutron_momentum.GetYaxis().GetTitle()+"/N_{ev}")
 h_neutron_momentum.SetLineColor(colours[0])
 h_neutron_momentum.SetMarkerStyle(22)
 h_neutron_momentum.SetMarkerColor(colours[0])
 h_neutron_momentum.SetStats(0)
-CMS_lumi.CMS_lumi(c_h_neutron_momentum, 0, 11)
+h.GetXaxis().SetLabelSize(0.03)
+h.GetYaxis().SetLabelSize(0.03)
+CMSStyle.setCMSLumiStyle(c_h_neutron_momentum,11, lumiTextSize_=0.74)
 c_h_neutron_momentum.SetLogy()
 c_h_neutron_momentum.SaveAs(plots_output_dir+c_h_neutron_momentum.GetName()+".pdf")
 c_h_neutron_momentum.Write()
@@ -640,24 +702,26 @@ c_h_neutron_momentum.Write()
 
 l_TH1F = [h_antiS_sumDaughters_openingsangle, h_antiS_sumDaughters_deltaPhi, h_antiS_sumDaughters_deltaEta, h_antiS_sumDaughters_deltaR]
 for h in l_TH1F:
-	c = TCanvas("c_"+h.GetName(),"");
-	h.Draw("PCE1")
-	if(h.GetSumw2N() == 0):
-		h.Sumw2(kTRUE)
-	h.Scale(1./h.Integral(), "width");
-	h.GetYaxis().SetTitle("1/N_{ev}"+h.GetYaxis().GetTitle())
-	h.SetLineColor(colours[0])
-	h.SetMarkerStyle(22)
-	h.SetMarkerColor(colours[0])
-	h.SetStats(0)
-	CMS_lumi.CMS_lumi(c, 0, 11)
-	#c_h_antiS_sumDaughters_openingsangle.SetLogy()
-	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
-	c.Write()
+    c = ReadyCanvas("c_"+h.GetName())
+    h.Draw("PCE1")
+    if(h.GetSumw2N() == 0):
+        h.Sumw2(kTRUE)
+    h.Scale(1./h.Integral(), "width");
+    h.GetYaxis().SetTitle(h.GetYaxis().GetTitle()+"/N_{ev}")
+    h.SetLineColor(colours[0])
+    h.SetMarkerStyle(22)
+    h.SetMarkerColor(colours[0])
+    h.SetStats(0)
+    h.GetXaxis().SetLabelSize(0.03)
+    h.GetYaxis().SetLabelSize(0.03)
+    CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
+    #c_h_antiS_sumDaughters_openingsangle.SetLogy()
+    c.SaveAs(plots_output_dir+c.GetName()+".pdf")
+    c.Write()
 
 
-c_h2_antiS_inv_mass_p_Ks_plus_Lambda= TCanvas(h2_antiS_inv_mass_p_Ks_plus_Lambda.GetName(),"");
-c_h2_antiS_inv_mass_p_Ks_plus_Lambda.SetRightMargin(0.2) #make room for the tile of the z scale
+c_h2_antiS_inv_mass_p_Ks_plus_Lambda= ReadyCanvas(h2_antiS_inv_mass_p_Ks_plus_Lambda.GetName())
+c_h2_antiS_inv_mass_p_Ks_plus_Lambda.SetRightMargin(0.25) #make room for the tile of the z scale
 if(h2_antiS_inv_mass_p_Ks_plus_Lambda.GetSumw2N() == 0):
 	h2_antiS_inv_mass_p_Ks_plus_Lambda.Sumw2(kTRUE)
 #h2_antiS_inv_mass_p_Ks_plus_Lambda.Scale(1./h2_antiS_inv_mass_p_Ks_plus_Lambda.Integral(), "width");
@@ -667,7 +731,9 @@ h2_antiS_inv_mass_p_Ks_plus_Lambda.SetStats(0)
 h2_antiS_inv_mass_p_Ks_plus_Lambda.GetXaxis().SetTitleOffset(1.5)
 h2_antiS_inv_mass_p_Ks_plus_Lambda.GetYaxis().SetTitleOffset(2)
 c_h2_antiS_inv_mass_p_Ks_plus_Lambda.SetLogz()
-CMS_lumi.CMS_lumi(c_h2_antiS_inv_mass_p_Ks_plus_Lambda, 0, 11)
+h2_antiS_inv_mass_p_Ks_plus_Lambda.GetXaxis().SetLabelSize(0.03)
+h2_antiS_inv_mass_p_Ks_plus_Lambda.GetYaxis().SetLabelSize(0.03)
+CMSStyle.setCMSLumiStyle(c_h2_antiS_inv_mass_p_Ks_plus_Lambda,0, lumiTextSize_=0.74)
 c_h2_antiS_inv_mass_p_Ks_plus_Lambda.SaveAs(plots_output_dir+h2_antiS_inv_mass_p_Ks_plus_Lambda.GetName()+".pdf")
 c_h2_antiS_inv_mass_p_Ks_plus_Lambda.Write()
 
@@ -699,33 +765,33 @@ for l in ll_TH1F:
 
 i_ll_TH1F = 0
 for l in ll_TH1F:
-	legend = TLegend(0.6,0.85,0.99,0.99)
-	c = TCanvas("c_"+l[0].GetName(),"");
-	i_l_TH1F = 0
-	for h in l:
-		if(i_l_TH1F==0):
-			h.Draw("PCE1")
-		else:	
-			h.Draw("PCE1same")
-		if(h.GetSumw2N() == 0):
-        	       h.Sumw2(kTRUE)
-        	h.Scale(1./h.Integral(), "width");
-		h.GetYaxis().SetTitle("1/N_{ev}"+h.GetYaxis().GetTitle())
-		h.SetLineColor(colours[i_l_TH1F])
-		h.SetMarkerStyle(22+i_l_TH1F)
-		h.SetMarkerColor(colours[i_l_TH1F])
-		h.SetStats(0)
-		legend.AddEntry(h,ll_legend_text[i_ll_TH1F][i_l_TH1F],"lep")
-		i_l_TH1F+=1
-
-	legend.Draw()
-	CMS_lumi.CMS_lumi(c, 0, 11)
-	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
-	c.Write()
-	i_ll_TH1F +=1
-
+    legend = TLegend(0.6,0.85,0.99,0.99)
+    c = ReadyCanvas("c_"+l[0].GetName())
+    i_l_TH1F = 0
+    for h in l:
+        if(i_l_TH1F==0):
+            h.Draw("PCE1")
+        else:	
+            h.Draw("PCE1same")
+        if(h.GetSumw2N() == 0):
+            h.Sumw2(kTRUE)
+        h.Scale(1./h.Integral(), "width");
+        h.GetYaxis().SetTitle(h.GetYaxis().GetTitle()+"/N_{ev}")
+        h.SetLineColor(colours[i_l_TH1F])
+        h.SetMarkerStyle(22+i_l_TH1F)
+        h.SetMarkerColor(colours[i_l_TH1F])
+        h.SetStats(0)
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
+        legend.AddEntry(h,ll_legend_text[i_ll_TH1F][i_l_TH1F],"lep")
+        i_l_TH1F+=1
+    legend.Draw()
+    CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
+    c.SaveAs(plots_output_dir+c.GetName()+".pdf")
+    c.Write()
+    i_ll_TH1F +=1
 PCA_granddaughters_dir.cd()
-c_dxyGranddaugthers = TCanvas("c_dxyGranddaugthers","");
+c_dxyGranddaugthers = ReadyCanvas("c_dxyGranddaugthers")
 h_dxy_AntiLambda_AntiProton.SetLineColor(38)
 h_dxy_AntiLambda_AntiProton.SetLineWidth(3)
 h_dxy_AntiLambda_AntiProton.SetFillColorAlpha(38,0.5)
@@ -745,7 +811,7 @@ legend_dxyGranddaughters.AddEntry(h_dxy_Ks_daug0,"K_{S}^{0} daughters","l")
 legend_dxyGranddaughters.Draw()
 c_dxyGranddaugthers.Write()
 
-c_dzGranddaugthers = TCanvas("c_dzGranddaugthers","");
+c_dzGranddaugthers = ReadyCanvas("c_dzGranddaugthers")
 h_dz_AntiLambda_AntiProton.SetLineColor(38)
 h_dz_AntiLambda_AntiProton.SetLineWidth(3)
 h_dz_AntiLambda_AntiProton.SetFillColorAlpha(38,0.5)
@@ -791,68 +857,70 @@ ll_legend_text =  [
 ]
 
 for l in ll_TH1F:
-	for h in l:
-		h.SetDirectory(0)
+    for h in l:
+        h.SetDirectory(0)
 
 i_ll_TH1F = 0
 ixy_2 = False
 iz_2 = False
-for l in ll_TH1F:
-	legend = TLegend(0.7,0.85,0.99,0.99)
-        if l[0].GetName() == "h_dxy_AntiLambda_AntiProton":
-            if not ixy_2:
-	        c = TCanvas("c_"+l[0].GetName(),"")
-                ixy_2 = True
-            else:
-	        c = TCanvas("c_"+l[0].GetName()+"_2","")
-        elif l[0].GetName() == "h_dz_AntiLambda_AntiProton":
-            if not iz_2:
-	        c = TCanvas("c_"+l[0].GetName(),"")
-                iz_2 = True
-            else:
-	        c = TCanvas("c_"+l[0].GetName()+"_2","")
+for i, l in enumerate(ll_TH1F):
+    legend = TLegend(0.7,0.85,0.99,0.99)
+    if l[0].GetName() == "h_dxy_AntiLambda_AntiProton":
+        if not ixy_2:
+            c = ReadyCanvas("c_"+l[0].GetName())
+            ixy_2 = True
         else:
-	    c = TCanvas("c_"+l[0].GetName(),"")
-	i_l_TH1F = 0
-	for h in l:
-		if(i_l_TH1F==0):
-			h.Draw("PCE1")
-		else:	
-			h.Draw("PCE1same")
-		if(h.GetSumw2N() == 0):
-        	       h.Sumw2(kTRUE)
-        	h.Scale(1./h.Integral(), "width");
-		h.GetYaxis().SetTitle("1/N_{ev}"+h.GetYaxis().GetTitle())
-		h.SetLineColor(colours[i_l_TH1F])
-		h.SetMarkerStyle(22+i_l_TH1F)
-		h.SetMarkerColor(colours[i_l_TH1F])
-		h.SetStats(0)
-		legend.AddEntry(h,ll_legend_text[i_ll_TH1F][i_l_TH1F],"lep")
-		i_l_TH1F+=1
-
-	legend.Draw()
-	CMS_lumi.CMS_lumi(c, 0, 11)
-	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
-	c.Write()
-	i_ll_TH1F +=1
-
-
+            c = ReadyCanvas("c_"+l[0].GetName()+"_2")
+    elif l[0].GetName() == "h_dz_AntiLambda_AntiProton":
+        if not iz_2:
+            c = ReadyCanvas("c_"+l[0].GetName())
+            iz_2 = True
+        else:
+            c = ReadyCanvas("c_"+l[0].GetName()+"_2")
+    else:
+        c = ReadyCanvas("c_"+l[0].GetName())
+    i_l_TH1F = 0
+    for h in l:
+        if(i_l_TH1F==0):
+            h.Draw("PCE1")
+        else:	
+            h.Draw("PCE1same")
+        if(h.GetSumw2N() == 0):
+            h.Sumw2(kTRUE)
+        h.Scale(1./h.Integral(), "width");
+        #Prevent double labeling of y-axes of histograms which are used twice in this loop
+        if i != 6 and i != 7:
+            h.GetYaxis().SetTitle(h.GetYaxis().GetTitle()+"/N_{ev}")
+        h.SetLineColor(colours[i_l_TH1F])
+        h.SetMarkerStyle(22+i_l_TH1F)
+        h.SetMarkerColor(colours[i_l_TH1F])
+        h.SetStats(0)
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
+        legend.AddEntry(h,ll_legend_text[i_ll_TH1F][i_l_TH1F],"lep")
+        i_l_TH1F+=1
+    legend.Draw()
+    CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
+    c.SaveAs(plots_output_dir+c.GetName()+".pdf")
+    c.Write()
+    i_ll_TH1F +=1
 l_TH2F = [h2_vx_vy_creation_vertex_Ks_daughters,h2_vz_lxy_creation_vertex_Ks_daughters,h2_vx_vy_creation_vertex_AntiLambda_daughters,h2_vz_lxy_creation_vertex_AntiLambda_daughters]
 for h in l_TH2F:
-        h.SetDirectory(0)
+    h.SetDirectory(0)
 for h in l_TH2F:
-        c= TCanvas(h.GetName(),"");
-        c.SetRightMargin(0.2) #make room for the tile of the z scale
-        if(h.GetSumw2N() == 0):
-                h.Sumw2(kTRUE)
-        #h.Scale(1./h.Integral(), "width");
-        h.Draw("colz")
-        h.SetStats(0)
-	c.SetLogz()
-        CMS_lumi.CMS_lumi(c, 0, 11)
-        c.SaveAs(plots_output_dir+h.GetName()+".pdf")
-        c.Write()
-
-
+    c= ReadyCanvas(h.GetName())
+    c.SetRightMargin(0.25) #make room for the tile of the z scale
+    if(h.GetSumw2N() == 0):
+        h.Sumw2(kTRUE)
+    #h.Scale(1./h.Integral(), "width");
+    h.Draw("colz")
+    h.GetXaxis().SetLabelSize(0.03)
+    h.GetXaxis().SetTitleSize(0.05)
+    h.GetYaxis().SetLabelSize(0.03)
+    h.SetStats(0)
+    c.SetLogz()
+    CMSStyle.setCMSLumiStyle(c,0, lumiTextSize_=0.74)
+    c.SaveAs(plots_output_dir+h.GetName()+".pdf")
+    c.Write()
 fOut.Write()
 fOut.Close()

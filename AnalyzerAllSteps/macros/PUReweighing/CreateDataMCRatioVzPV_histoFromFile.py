@@ -4,7 +4,7 @@ import numpy as np
 import sys
 #sys.path.append('/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
 sys.path.append('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
-import  CMS_lumi, tdrstyle
+import  CMSStyle
 
 sys.path.insert(1, '../../../TMVA')
 import configBDT as config
@@ -13,12 +13,32 @@ config_dict = config.config_dict
 gROOT.SetBatch(kTRUE)
 gStyle.SetLegendTextSize(0.08)
 
-CMS_lumi.writeExtraText = 0
-CMS_lumi.extraText = "Simulation"
-tdrstyle.setTDRStyle()
+CMSStyle.extraText = "(CMS data/simulation)"
+CMSStyle.lumiText = "Parked 2018 data, "+"237 #times 10^{9}"+" Collisions (13 TeV)"
+CMSStyle.cmsText = "Private Work"
+CMSStyle.cmsTextFont = 42
+CMSStyle.extraTextFont = 42
+CMSStyle.lumiTextSize = 0.74
+CMSStyle.cmsTextSize = 0.74
+CMSStyle.relPosX = 2.36*0.045
+CMSStyle.outOfFrame = False
+
+CMSStyle.setTDRStyle()
 
 colours = [1,2,4,35,38,41]
 
+def ReadyCanvas(name, W=700, H=500):
+    c = TCanvas(name, "", W, H)
+    c.Draw()
+    c.SetFillColor(0)
+    c.SetRightMargin(0.05)
+    c.SetBorderMode(0)
+    c.SetFrameFillStyle(0)
+    c.SetFrameBorderMode(0)
+#    c.SetTickx(0)
+#    c.SetTicky(0)
+    c.cd()
+    return c
 MaxEvents = 1e7
 
 
@@ -42,6 +62,7 @@ fData = TFile.Open('file:/afs/cern.ch/work/w/wvetens/Sexaquarks/data/CMSSW_10_6_
 h2_nPV_vzPV_Data = fData.Get('PV/h2_nPV_vzPV') 
 h2_nPV_vzPV_Data.SetName('h2_nPV_vzPV_Data')
 fMC = TFile('file:/afs/cern.ch/work/w/wvetens/Sexaquarks/data/CMSSW_10_6_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/PUReweighing/plots_MC/PVInfo_SbarSignal_PU.root')
+#fMC = TFile('file:/afs/cern.ch/work/w/wvetens/Sexaquarks/data/CMSSW_10_6_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/PUReweighing/plots_MC/PVInfo_QCD_MC.root')
 h2_nPV_vzPV_MC = fMC.Get('PV/h2_nPV_vzPV')
 h2_nPV_vzPV_MC.SetName('h2_nPV_vzPV_MC')
 
@@ -86,6 +107,7 @@ if(h2_nPV_vzPV_Data.GetNbinsY() != h2_nPV_vzPV_MC.GetNbinsY()):
 
 
 
+#f = open(plots_output_dir+'PUReweigh_QCDBGToDataBPH2018_FULL.txt', "w")
 f = open(plots_output_dir+'PUReweigh_SignalToDataBPH2018_FULL.txt', "w")
 
 #fill the plots with the reweighing parameter
@@ -151,7 +173,8 @@ h_vzPV_MC_reweighed_2D = h2_nPV_vzPV_MC_reweighed_2D.ProjectionY()
 h_vzPV_MC_reweighed_2D.SetName('h_vzPV_MC_reweighed_2D')
 
 
-fOut = TFile(plots_output_dir+'PUReweighing.root','RECREATE')
+#fOut = TFile(plots_output_dir+'QCDMC_PUReweighing.root','RECREATE')
+fOut = TFile(plots_output_dir+'SignalMC_PUReweighing.root','RECREATE')
 
 h_reweighingFactor_PVz.Write()
 
@@ -177,69 +200,97 @@ h_vzPV_MC.Rebin(5)
 h_vzPV_MC_reweighed_2D.Rebin(5)
 #Flipping around the ordering so that the THistPainter scales to the plot with the greatest Y value. In our current situation this is the MC
 TH1_l = [h_vzPV_Data,h_vzPV_MC_reweighed_2D,h_vzPV_MC]
+#TH1_l = [h_vzPV_Data,h_vzPV_MC,h_vzPV_MC_reweighed_2D]
 Legend_l = ["Data","MC reweighted","MC"]
+#Legend_l = ["Data","MC","MC reweighted"]
 Legend_l_type = ["l","p","l"]
+#Legend_l_type = ["l","l","p"]
 c_name = "c_PVz_2D_PUReweighing"
-c = TCanvas(c_name,"")
-legend = TLegend(0.8,0.85,0.99,0.99)
+c = ReadyCanvas(c_name)
+legend = TLegend(0.75,0.8,0.9,0.9)
 
 for j in [2,1,0]:
+#j=0
+#while j < 3:
 	h = TH1_l[j]
+        print "Plotting ", Legend_l[j]
 	#if(h.GetSumw2N() == 0):
 	#	h.Sumw2(kTRUE)
 	if j == 0:
+		#h.Draw("C HIST")
 		h.Draw("C HIST same")
 	        h.SetLineWidth(2)
 	        h.SetLineColor(colours[j])
 	elif j == 1:
 		h.Draw("P HIST same")
+		#h.Draw("C HIST same")
 	        h.SetMarkerStyle(23+j)
+	        #h.SetLineWidth(2)
 	        h.SetMarkerColor(colours[j+1])
+	        #h.SetLineColor(colours[j])
 	elif j == 2:
 		h.Draw("C HIST")
+		#h.Draw("P HIST same")
 	        h.SetLineWidth(2)
+	        #h.SetMarkerStyle(22+j)
 	        h.SetLineColor(colours[j-1])
+	        #h.SetMarkerColor(colours[j])
 	h.SetStats(0)
 	legend.AddEntry(h,Legend_l[j],Legend_l_type[j])
+        #j+=1
 
 legend.Draw()
-CMS_lumi.CMS_lumi(c, 0, 11)
-c.SaveAs(plots_output_dir+c_name.replace(".", "p")+".pdf")
+CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
+#c.SaveAs(plots_output_dir+c_name.replace(".", "p")+".pdf")
+c.SaveAs(plots_output_dir+c_name.replace(".", "p")+"_SignalMC.pdf")
 c.Write()
 
 
 c_name = "c_nPV_2D_PUReweighing"
-c = TCanvas(c_name,"")
-legend = TLegend(0.8,0.85,0.99,0.99)
+c = ReadyCanvas(c_name)
+legend = TLegend(0.75,0.8,0.9,0.9)
 h_nPV_Data.SetTitle(';# valid PVs;Arbitrary Units')
 h_nPV_MC.SetTitle(';# valid PVs;Arbitrary Units')
 h_nPV_MC_reweighed_2D.SetTitle(';# valid PVs;Arbitrary Units')
 
 TH1_l = [h_nPV_Data,h_nPV_MC_reweighed_2D,h_nPV_MC]
+#TH1_l = [h_nPV_Data,h_nPV_MC,h_nPV_MC_reweighed_2D]
 
 for j in [2,1,0]:
+#j=0
+#while j < 3:
+        print "Plotting ", Legend_l[j]
 	h = TH1_l[j]
 	#if(h.GetSumw2N() == 0):
 	#	h.Sumw2(kTRUE)
 	if j == 0:
+		#h.Draw("C HIST")
 		h.Draw("C HIST same")
 	        h.SetLineWidth(2)
 	        h.SetLineColor(colours[j])
 	elif j == 1:
 		h.Draw("P HIST same")
+		#h.Draw("C HIST same")
 	        h.SetMarkerStyle(23+j)
+	        #h.SetLineWidth(2)
 	        h.SetMarkerColor(colours[j+1])
+	        #h.SetLineColor(colours[j])
 	elif j == 2:
 		h.Draw("C HIST")
+		#h.Draw("P HIST same")
 	        h.SetLineWidth(2)
+	        #h.SetMarkerStyle(22+j)
 	        h.SetLineColor(colours[j-1])
+	        #h.SetMarkerColor(colours[j])
 	h.SetStats(0)
 	legend.AddEntry(h,Legend_l[j],Legend_l_type[j])
+#        j+=1
 
 
 legend.Draw()
-CMS_lumi.CMS_lumi(c, 0, 11)
-c.SaveAs(plots_output_dir+c_name.replace(".", "p")+".pdf")
+CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
+#c.SaveAs(plots_output_dir+c_name.replace(".", "p")+".pdf")
+c.SaveAs(plots_output_dir+c_name.replace(".", "p")+"_SignalMC.pdf")
 c.Write()
 
 fOut.Write()

@@ -2,39 +2,66 @@
 
 import numpy as np
 from ROOT import *
+import argparse
 
 import sys
 #sys.path.append('/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
 sys.path.append('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
-import  CMS_lumi, tdrstyle
+import CMSStyle
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--mass', dest='mass', action='store', default='1p7')
+args = parser.parse_args()
 
 gROOT.SetBatch(kTRUE)
 gStyle.SetLegendTextSize(0.08)
 
-CMS_lumi.writeExtraText = 1
-CMS_lumi.extraText = "Simulation"
-tdrstyle.setTDRStyle()
+CMSStyle.cmsText = "Private Work "
+CMSStyle.extraText = "(CMS Simulation)"
+CMSStyle.cmsTextFont = 42
+CMSStyle.extraTextFont = 42
+CMSStyle.lumiTextSize = 0.74
+CMSStyle.cmsTextSize = 0.74
+CMSStyle.relPosX = 2.36*0.045
+CMSStyle.outOfFrame = True
+CMSStyle.setTDRStyle()
 
 colours = [1,2,4,35,38,41]
 
+def ReadyCanvas(name):
+    c = TCanvas(name, "")
+    c.Draw()
+    c.SetFillColor(0)
+    c.SetRightMargin(0.05)
+    c.SetBorderMode(0)
+    c.SetFrameFillStyle(0)
+    c.SetFrameBorderMode(0)
+#    c.SetTickx(0)
+#    c.SetTicky(0)
+    c.cd()
+    return c
 #maxNEntries = 1e4
 maxNEntries = 1e12
 
-plots_output_dir = "plots_GENSIM_SingleSbar/"
+mass=args.mass
+#plots_output_dir = "plots_GENSIM_SingleSbar/"
+plots_output_dir = "plots_GENSIM_SingleSbar/Mass_"+mass+"/"
 #plots_output_dir = "plots_GENSIM_test/"
 
 #loading input
 #inputFile = '/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/test_FlatTreeGENSIM_Skimmed_trial17_1p8GeV_17102019_v1.root'
-inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/hadd_Trial4_SingleSbar_v4.root'
+#inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/hadd_Trial4_SingleSbar_v4.root'
+inputFile = 'root://cmsxrootd.hep.wisc.edu//store/user/wvetens/crmc_Sexaq/FlatTree_GENSIM/SingleSbar/SingleSbar_'+mass+'.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/GENSIM/output_Trial4_MultiSQEV.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/Skimmed_Final_out.root'
 #inputFile = '/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerGENSIM/Test_Ntuple_Trial4.root'
-fIn = TFile(inputFile,'read')
+fIn = TFile.Open(inputFile,'read')
 tree = fIn.Get('FlatTreeProducerGENSIM/FlatTreeGENLevel') 
 treeAllAntiS = fIn.Get('FlatTreeProducerGENSIM/FlatTreeGENLevelAllAntiS') 
 
 #define where output should go
-fOut = TFile('MacroOut_'+inputFile.rsplit('/', 1)[-1],'RECREATE')
+#fOut = TFile('MacroOut_'+inputFile.rsplit('/', 1)[-1],'RECREATE')
+fOut = TFile('MacroOut_SingleSbar_'+mass+'.root','RECREATE')
 
 #defining histograms
 all_antiS_dir = fOut.mkdir("all_antiS")
@@ -53,16 +80,17 @@ h_pz_all_AntiS = TH1F('h_pz_all_AntiS','; |p_{z}| #bar{S} (GeV/c); #Entries/1GeV
 h_vz_creation_vertex_all_AntiS = TH1F('h_vz_creation_vertex_all_AntiS','; v_{z} creation vertex #bar{S}; #Entries/cm',60,-30,30)
 h_nPV_all_AntiS = TH1F('h_nPV_all_AntiS','; #PV; #Entries',60,0,60)
 
-#investigate the reconstructability: have to use histograms for nominator and denominator, because teff does not support weights and using tprofile the bins with y = 0 are not displayed
-h_nom_vz_antiS_reconstructable = TH1F('h_nom_vz_antiS_reconstructable','; absolute v_{z} #bar{S} interaction vertex (cm); Reconstructability',60,-150,150)
-h_nom_eta_antiS_reconstructable = TH1F('h_nom_eta_antiS_reconstructable','; #eta #bar{S}; Reconstructability',160,-8,8)
-h_nom_pt_antiS_reconstructable = TH1F('h_nom_pt_antiS_reconstructable','; p_{T} #bar{S} (GeV/c); Reconstructability',50,0,10)
-h_nom_pz_antiS_reconstructable = TH1F('h_nom_pz_antiS_reconstructable','; |p_{z}| #bar{S} (GeV/c); Reconstructability',80,0,80)
-
 h_denom_vz_antiS_reconstructable = TH1F('h_denom_vz_antiS_reconstructable','; absolute v_{z} #bar{S} interaction vertex (cm); Reconstructability',60,-150,150)
 h_denom_eta_antiS_reconstructable = TH1F('h_denom_eta_antiS_reconstructable','; #eta #bar{S}; Reconstructability',160,-8,8)
 h_denom_pt_antiS_reconstructable = TH1F('h_denom_pt_antiS_reconstructable','; p_{T} #bar{S} (GeV/c); Reconstructability',50,0,10)
 h_denom_pz_antiS_reconstructable = TH1F('h_denom_pz_antiS_reconstructable','; |p_{z}| #bar{S} (GeV/c); Reconstructability',80,0,80)
+
+#investigate the reconstructability: have to use histograms for nominator and denominator, because teff does not support weights and using tprofile the bins with y = 0 are not displayed
+#these are created here but filled much later because they require information on the acceptance i.e. tracker hits
+h_nom_vz_antiS_reconstructable = TH1F('h_nom_vz_antiS_reconstructable','; absolute v_{z} #bar{S} interaction vertex (cm); Reconstructability',60,-150,150)
+h_nom_eta_antiS_reconstructable = TH1F('h_nom_eta_antiS_reconstructable','; #eta #bar{S}; Reconstructability',160,-8,8)
+h_nom_pt_antiS_reconstructable = TH1F('h_nom_pt_antiS_reconstructable','; p_{T} #bar{S} (GeV/c); Reconstructability',50,0,10)
+h_nom_pz_antiS_reconstructable = TH1F('h_nom_pz_antiS_reconstructable','; |p_{z}| #bar{S} (GeV/c); Reconstructability',80,0,80)
 
 #first do this small loop which runs over the tree containing all the antiS (i.e. also the ones which do not go the correct granddaughters)
 nAntiSReconstructable = 0.
@@ -73,9 +101,8 @@ for i in range(0,treeAllAntiS.GetEntries()):
 	treeAllAntiS.GetEntry(i)
 	#the AntiS does not necessarily have two daughters, so I cannot get the vz through that for all antiS, so have to calculate the vz from eta assuming the beampipe is infinitely thin and at a radius of 2.21cm 
 	vz_interaction_antiS = 2.21/np.tan( 2*np.arctan( np.exp(-treeAllAntiS._S_eta_all[0]) ) ) 
-# right now ignoring pileup weighting factor as this is carried out during reconstruction
-#	weight_factor = treeAllAntiS._S_event_weighting_factor_all[0]*treeAllAntiS._S_event_weighting_factor_PU_all[0]
-	weight_factor = treeAllAntiS._S_event_weighting_factor_all[0]
+	weight_factor = treeAllAntiS._S_event_weighting_factor_all[0]*treeAllAntiS._S_event_weighting_factor_PU_all[0]
+#	weight_factor = treeAllAntiS._S_event_weighting_factor_all[0]
 
 	h_eta_all_AntiS_non_weighted.Fill(treeAllAntiS._S_eta_all[0],1)
 	h_eta_all_AntiS.Fill(treeAllAntiS._S_eta_all[0],weight_factor)
@@ -93,13 +120,13 @@ for i in range(0,treeAllAntiS.GetEntries()):
 	h_vz_creation_vertex_all_AntiS.Fill(treeAllAntiS._S_vz_creation_vertex_all[0],weight_factor)
 	h_nPV_all_AntiS.Fill(treeAllAntiS._S_nGoodPV_all[0],weight_factor)
 
-	if(treeAllAntiS._S_reconstructable_all[0] == 1):
-		nAntiSReconstructable += weight_factor
-		nAntiSReconstructableUnweighted += 1
-		h_nom_vz_antiS_reconstructable.Fill(vz_interaction_antiS,weight_factor)
-		h_nom_eta_antiS_reconstructable.Fill(treeAllAntiS._S_eta_all[0],weight_factor)
-		h_nom_pt_antiS_reconstructable.Fill(treeAllAntiS._S_pt_all[0],weight_factor)
-		h_nom_pz_antiS_reconstructable.Fill(treeAllAntiS._S_pz_all[0],weight_factor)
+	#if(treeAllAntiS._S_reconstructable_all[0] == 1):
+	#	nAntiSReconstructable += weight_factor
+	#	nAntiSReconstructableUnweighted += 1
+	#	h_nom_vz_antiS_reconstructable.Fill(vz_interaction_antiS,weight_factor)
+	#	h_nom_eta_antiS_reconstructable.Fill(treeAllAntiS._S_eta_all[0],weight_factor)
+	#	h_nom_pt_antiS_reconstructable.Fill(treeAllAntiS._S_pt_all[0],weight_factor)
+	#	h_nom_pz_antiS_reconstructable.Fill(treeAllAntiS._S_pz_all[0],weight_factor)
 
 	h_denom_vz_antiS_reconstructable.Fill(vz_interaction_antiS,weight_factor)
 	h_denom_eta_antiS_reconstructable.Fill(treeAllAntiS._S_eta_all[0],weight_factor)
@@ -108,41 +135,17 @@ for i in range(0,treeAllAntiS.GetEntries()):
 	nAntiSTotal += weight_factor
 	nAntiSTotalUnweighted += 1
 
-print 'the unweighted antiS reconstructability: ', nAntiSReconstructableUnweighted, '/', nAntiSTotalUnweighted, '=', float(nAntiSReconstructableUnweighted)/float(nAntiSTotalUnweighted)
-print 'the overall antiS reconstructability: ', nAntiSReconstructable, '/', nAntiSTotal, '=', float(nAntiSReconstructable)/float(nAntiSTotal)
-
-l_nom = [h_nom_vz_antiS_reconstructable,h_nom_eta_antiS_reconstructable,h_nom_pt_antiS_reconstructable,h_nom_pz_antiS_reconstructable]
-l_denom = [h_denom_vz_antiS_reconstructable,h_denom_eta_antiS_reconstructable,h_denom_pt_antiS_reconstructable,h_denom_pz_antiS_reconstructable]
-l_recobility_y_axis_range = [0.12,0.13, 0.14, 0.12]
-for i in range(0,len(l_nom)):
-	teff = TEfficiency(l_nom[i],l_denom[i])
-	teff.SetName('teff_'+l_nom[i].GetName())
-	c = TCanvas("c_"+teff.GetName(),"");
-	teff.Draw("")
-        gPad.Update()
-        graph = teff.GetPaintedGraph()
-        graph.SetMinimum(0)
-        graph.SetMaximum(l_recobility_y_axis_range[i])
-	CMS_lumi.CMS_lumi(c, 0, 11)
-	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
-	c.Write()
-	teff.Write()
-        l_nom[i].GetYaxis().SetTitle("#Entries")
-        c2 = TCanvas("c_"+l_nom[i].GetName())
-        l_nom[i].Draw("")
-	CMS_lumi.CMS_lumi(c2, 0, 11)
-	c2.SaveAs(plots_output_dir+c2.GetName()+".pdf")
-	c2.Write()
-	
 l_tprof  = [h_eta_all_AntiS,h_vz_interaction_all_AntiS,h_vz_interaction_all_AntiS_zoom,h_pt_all_AntiS,h_pz_all_AntiS,tprof_eta_weighting_factor,tprof_vz_weighting_factor,tprof_vz_weighting_factor_zoom]
 for h in l_tprof:
-        c = TCanvas("c_"+h.GetName(),"");
+        c = ReadyCanvas("c_"+h.GetName())
         h.Draw("PCE1")
         h.SetLineColor(colours[0])
         h.SetMarkerStyle(22)
         h.SetMarkerColor(colours[0])
         h.SetStats(0)
-        CMS_lumi.CMS_lumi(c, 0, 11)
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
+        CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
         #c_h_antiS_sumDaughters_openingsangle.SetLogy()
         c.SaveAs(plots_output_dir+c.GetName()+".pdf")
         c.Write()	
@@ -208,7 +211,7 @@ for h in l_h_lxy_n_loops:
 	h.Write()
 
 #overlap the first five of l_h_lxy_n_loops
-c_lxy_n_loops = TCanvas("lxy_n_loops","");
+c_lxy_n_loops = ReadyCanvas("lxy_n_loops")
 legend_c_lxy_n_loops = TLegend(0.6,0.85,0.99,0.99)
 legend_c_lxy_n_loops_text = ["#bar{S} doing [0,100[ loops","#bar{S} doing [100,200[ loops","#bar{S} doing [200,300[ loops","#bar{S} doing [300,400[ loops"]
 for i in range(0,4):
@@ -224,10 +227,12 @@ for i in range(0,4):
 	h.SetFillColorAlpha(colours[i],0.9)
 	#h.SetMarkerStyle(22+i)
 	h.SetMarkerColor(colours[i])
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
 	legend_c_lxy_n_loops.AddEntry(h,legend_c_lxy_n_loops_text[i],"f")
 	h.SetStats(0)
 legend_c_lxy_n_loops.Draw()
-CMS_lumi.CMS_lumi(c_lxy_n_loops, 0, 11)
+CMSStyle.setCMSLumiStyle(c_lxy_n_loops,11, lumiTextSize_=0.74)
 c_lxy_n_loops.SaveAs(plots_output_dir+c_lxy_n_loops.GetName()+".pdf")
 c_lxy_n_loops.Write()
 	
@@ -284,7 +289,7 @@ l_TH1F = [h_n_interactions_vs_n_loops,h_n_interactions_vs_n_loops_barrel,h_n_int
 for h in l_TH1F:
         h.SetDirectory(0)
 
-c_n_interactions_vs_n_loops = TCanvas("c_n_interactions_vs_n_loops","");
+c_n_interactions_vs_n_loops = ReadyCanvas("c_n_interactions_vs_n_loops")
 legend_c_n_interactions_vs_n_loops = TLegend(0.7,0.85,0.99,0.99)
 legend_text_c_n_interactions_vs_n_loops = ["All #bar{S}","#bar{S} in the barrel","#bar{S} in the endcap","#bar{S} |#eta| > 2.5"]
 i_l_TH1F = 0
@@ -296,17 +301,19 @@ for h in l_TH1F:
 	h.SetLineColor(colours[i_l_TH1F])
 	h.SetMarkerStyle(22+i_l_TH1F)
 	h.SetMarkerColor(colours[i_l_TH1F])
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
 	h.SetStats(0)
 	legend_c_n_interactions_vs_n_loops.AddEntry(h,legend_text_c_n_interactions_vs_n_loops[i_l_TH1F],"lep")
 	i_l_TH1F+=1
 
 legend_c_n_interactions_vs_n_loops.Draw()
 c_n_interactions_vs_n_loops.SetLogy()
-CMS_lumi.CMS_lumi(c_n_interactions_vs_n_loops, 0, 11)
+CMSStyle.setCMSLumiStyle(c_n_interactions_vs_n_loops,11, lumiTextSize_=0.74)
 c_n_interactions_vs_n_loops.SaveAs(plots_output_dir+c_n_interactions_vs_n_loops.GetName()+".pdf")
 c_n_interactions_vs_n_loops.Write()
 
-c_interaction_vertex_lxy_unweighted = TCanvas("c_interaction_vertex_lxy_absolute_unweighted","");
+c_interaction_vertex_lxy_unweighted = ReadyCanvas("c_interaction_vertex_lxy_absolute_unweighted")
 h_interaction_vertex_lxy_absolute_unweighted.SetLineColor(colours[0])
 h_interaction_vertex_lxy_absolute_unweighted.SetMarkerStyle(22)
 h_interaction_vertex_lxy_absolute_unweighted.SetMarkerColor(colours[0])
@@ -319,14 +326,16 @@ l_TH2F = [h2_interaction_vertex_vz_lxy_unweighted,h2_interaction_vertex_vz_lxy_z
 for h in l_TH2F:
 	h.SetDirectory(0)
 for h in l_TH2F:
-	c= TCanvas(h.GetName(),"");
-	c.SetRightMargin(0.2) #make room for the tile of the z scale
+	c= ReadyCanvas(h.GetName())
+	c.SetRightMargin(0.25) #make room for the tile of the z scale
 	if(h.GetSumw2N() == 0):
 		h.Sumw2(kTRUE)
 	#h.Scale(1./h.Integral(), "width");
 	h.Draw("colz")
 	h.SetStats(0)
-	CMS_lumi.CMS_lumi(c, 0, 11)
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
+        CMSStyle.setCMSLumiStyle(c,0, lumiTextSize_=0.74)
 	#c.SetLogz()
 	c.SaveAs(plots_output_dir+h.GetName()+".pdf")
 	c.Write()
@@ -438,7 +447,6 @@ h2_vz_lxy_creation_vertex_Ks_daughters = TH2F("h2_vz_lxy_creation_vertex_Ks_daug
 h2_vx_vy_creation_vertex_AntiLambda_daughters = TH2F("h2_vx_vy_creation_vertex_AntiLambda_daughters",";absolute v_{x} decay vertex #bar{#Lambda}^{0} (cm); absolute v_{y} decay vertex #bar{#Lambda}^{0} (cm);Events/cm^{2}",160,-80,80,160,-80,80)
 h2_vz_lxy_creation_vertex_AntiLambda_daughters = TH2F("h2_vz_lxy_creation_vertex_AntiLambda_daughters",";absolute v_{z} decay vertex #bar{#Lambda}^{0} (cm);l_{0,bpc} decay vertex #bar{#Lambda}^{0} (cm);Events/cm^{2}",500,-250,250,80,0,80)
 
-
 for i in range(0,tree.GetEntries()):
 
 	if i > maxNEntries:
@@ -450,19 +458,25 @@ for i in range(0,tree.GetEntries()):
 	if(tree._GEN_Ks_daughter0_numberOfTrackerHits[0] < 7 or tree._GEN_Ks_daughter1_numberOfTrackerHits[0] < 7 or tree._GEN_AntiLambda_AntiProton_numberOfTrackerHits[0] < 7 or tree._GEN_AntiLambda_Pion_numberOfTrackerHits[0] < 7 ):
 		continue
 	weight_factor = tree._S_event_weighting_factor[0]*tree._S_event_weighting_factor_PU[0]
+	nAntiSReconstructable += weight_factor
+	nAntiSReconstructableUnweighted += 1
 
 	h2_interaction_vertex_vx_vy.Fill(tree._S_vx_interaction_vertex[0],tree._S_vy_interaction_vertex[0],weight_factor)
 	h2_interaction_vertex_vx_vy_zoom.Fill(tree._S_vx_interaction_vertex[0],tree._S_vy_interaction_vertex[0],weight_factor)
 	h2_interaction_vertex_vz_lxy.Fill(tree._S_vz_interaction_vertex[0],tree._S_lxy_interaction_vertex[0],weight_factor)
 	h2_interaction_vertex_vz_lxy_zoom.Fill(tree._S_vz_interaction_vertex[0],tree._S_lxy_interaction_vertex[0],weight_factor)
 
-	h_antiS_eta.Fill( tree._S_eta[0] )	
+	h_antiS_eta.Fill( tree._S_eta[0], weight_factor )	
+	h_nom_eta_antiS_reconstructable.Fill( tree._S_eta[0], weight_factor )	
+	h_nom_pt_antiS_reconstructable.Fill( tree._S_pt[0], weight_factor )	
+	h_nom_pz_antiS_reconstructable.Fill( tree._S_pz[0], weight_factor )	
 	h_antiS_lxy_creation_vertex.Fill( np.sqrt( np.power(tree._S_vx[0],2) + np.power(tree._S_vy[0],2) ),weight_factor )	
 	h_antiS_lxy_creation_vertex_unreweighted.Fill( np.sqrt( np.power(tree._S_vx[0],2) + np.power(tree._S_vy[0],2) ), tree._S_event_weighting_factor[0])	
 	h_antiS_vz_creation_vertex.Fill(tree._S_vz[0],weight_factor)	
 	h_antiS_vz_creation_vertex_unreweighted.Fill(tree._S_vz[0], tree._S_event_weighting_factor[0])	
 	h_antiS_lxy_interaction_vertex.Fill(tree._S_lxy_interaction_vertex[0],weight_factor)
 	h_antiS_vz_interaction_vertex.Fill(tree._S_vz_interaction_vertex[0],weight_factor)
+	h_nom_vz_antiS_reconstructable.Fill(tree._S_vz_interaction_vertex[0],weight_factor)
 	h_neutron_momentum.Fill(abs(tree._n_p[0]),weight_factor)
 	h_antiS_sumDaughters_openingsangle.Fill(tree._S_sumDaughters_openingsangle[0],weight_factor)	
 	h_antiS_sumDaughters_deltaPhi.Fill(tree._S_sumDaughters_deltaPhi[0],weight_factor)	
@@ -542,6 +556,36 @@ for i in range(0,tree.GetEntries()):
 	h2_vx_vy_creation_vertex_AntiLambda_daughters.Fill(tree._GEN_AntiLambda_AntiProton_vx[0],tree._GEN_AntiLambda_AntiProton_vy[0],weight_factor)
 	h2_vz_lxy_creation_vertex_AntiLambda_daughters.Fill(tree._GEN_AntiLambda_AntiProton_vz[0],tree._GEN_AntiLambda_AntiProton_lxy_zero[0],weight_factor)
 
+print 'the unweighted antiS reconstructability: ', nAntiSReconstructableUnweighted, '/', nAntiSTotalUnweighted, '=', float(nAntiSReconstructableUnweighted)/float(nAntiSTotalUnweighted)
+print 'the overall antiS reconstructability: ', nAntiSReconstructable, '/', nAntiSTotal, '=', float(nAntiSReconstructable)/float(nAntiSTotal)
+
+all_antiS_dir.cd()
+l_nom = [h_nom_vz_antiS_reconstructable,h_nom_eta_antiS_reconstructable,h_nom_pt_antiS_reconstructable,h_nom_pz_antiS_reconstructable]
+l_denom = [h_denom_vz_antiS_reconstructable,h_denom_eta_antiS_reconstructable,h_denom_pt_antiS_reconstructable,h_denom_pz_antiS_reconstructable]
+l_recobility_y_axis_range = [0.12,0.13, 0.14, 0.12]
+for i in range(0,len(l_nom)):
+	teff = TEfficiency(l_nom[i],l_denom[i])
+	teff.SetName('teff_'+l_nom[i].GetName())
+	c = ReadyCanvas("c_"+teff.GetName())
+	teff.Draw("")
+        gPad.Update()
+        graph = teff.GetPaintedGraph()
+        graph.SetMinimum(0)
+        graph.SetMaximum(l_recobility_y_axis_range[i])
+        graph.GetXaxis().SetLabelSize(0.03)
+        graph.GetYaxis().SetLabelSize(0.03)
+        CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
+	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
+	c.Write()
+	teff.Write()
+        l_nom[i].GetYaxis().SetTitle("#Entries")
+        c2 = ReadyCanvas("c_"+l_nom[i].GetName())
+        l_nom[i].Draw("")
+        l_nom[i].GetXaxis().SetLabelSize(0.03)
+        l_nom[i].GetYaxis().SetLabelSize(0.03)
+        CMSStyle.setCMSLumiStyle(c2,11, lumiTextSize_=0.74)
+	c2.SaveAs(plots_output_dir+c2.GetName()+".pdf")
+	c2.Write()
 	
 antiS_properties_dir.cd()
 
@@ -549,14 +593,16 @@ l_TH2F = [h2_interaction_vertex_vz_lxy,h2_interaction_vertex_vz_lxy_zoom,h2_inte
 for h in l_TH2F:
 	h.SetDirectory(0)
 for h in l_TH2F:
-	c= TCanvas(h.GetName(),"");
-	c.SetRightMargin(0.2) #make room for the tile of the z scale
+	c= ReadyCanvas(h.GetName())
+	c.SetRightMargin(0.25) #make room for the tile of the z scale
 	if(h.GetSumw2N() == 0):
 		h.Sumw2(kTRUE)
 	#h.Scale(1./h.Integral(), "width");
 	h.Draw("colz")
 	h.SetStats(0)
-	CMS_lumi.CMS_lumi(c, 0, 11)
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
+        CMSStyle.setCMSLumiStyle(c,0, lumiTextSize_=0.74)
 	#c.SetLogz()
 	c.SaveAs(plots_output_dir+h.GetName()+".pdf")
 	c.Write()
@@ -568,11 +614,11 @@ h_antiS_vz_creation_vertex.Write()
 h_antiS_lxy_creation_vertex_unreweighted.Write()
 h_antiS_vz_creation_vertex_unreweighted.Write()
 
-c_antiS_lxy_interaction_vertex = TCanvas("c_antiS_lxy_interaction_vertex","");
+c_antiS_lxy_interaction_vertex = ReadyCanvas("c_antiS_lxy_interaction_vertex")
 h_antiS_lxy_interaction_vertex.DrawNormalized()
 c_antiS_lxy_interaction_vertex.Write()
 
-c_antiS_vz_interaction_vertex = TCanvas("c_antiS_vz_interaction_vertex","");
+c_antiS_vz_interaction_vertex = ReadyCanvas("c_antiS_vz_interaction_vertex")
 h_antiS_vz_interaction_vertex.DrawNormalized()
 c_antiS_vz_interaction_vertex.Write()
 
@@ -581,14 +627,16 @@ for h in l_TH1F:
         h.SetDirectory(0)
 i_l_TH1F = 0
 for h in l_TH1F:
-	c= TCanvas(h.GetName(),"");
+	c= ReadyCanvas(h.GetName())
 	if(h.GetSumw2N() == 0):
 		h.Sumw2(kTRUE)
 	h.Scale(1./h.Integral(), "width");
 	h.GetYaxis().SetTitle("1/N_{ev}"+h.GetYaxis().GetTitle())
 	h.Draw("CL")
 	h.SetStats(0)
-	CMS_lumi.CMS_lumi(c, 0, 11)
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
+        CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
 	#if i_l_TH1F == 1:
 	#	c.SetLogy()
 	c.SaveAs(plots_output_dir+h.GetName()+".pdf")
@@ -605,20 +653,22 @@ l_TH2F = [h2_eta_pt_AntiLambda_Pion,h2_eta_pz_AntiLambda_Pion,h2_eta_p_AntiLambd
 for h in l_TH2F:
         h.SetDirectory(0)
 for h in l_TH2F:
-        c= TCanvas(h.GetName(),"");
-        c.SetRightMargin(0.2) #make room for the tile of the z scale
+        c= ReadyCanvas(h.GetName())
+        c.SetRightMargin(0.25) #make room for the tile of the z scale
         if(h.GetSumw2N() == 0):
                 h.Sumw2(kTRUE)
         #h.Scale(1./h.Integral(), "width");
         h.Draw("colz")
         h.SetStats(0)
 	c.SetLogz()
-        CMS_lumi.CMS_lumi(c, 0, 11)
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
+        CMSStyle.setCMSLumiStyle(c,0, lumiTextSize_=0.74)
         c.SaveAs(plots_output_dir+h.GetName()+".pdf")
         c.Write()
 
 
-c_h_neutron_momentum = TCanvas("c_"+h_neutron_momentum.GetName(),"");
+c_h_neutron_momentum = ReadyCanvas("c_"+h_neutron_momentum.GetName())
 h_neutron_momentum.Draw("PCE1")
 if(h_neutron_momentum.GetSumw2N() == 0):
 	h_neutron_momentum.Sumw2(kTRUE)
@@ -628,7 +678,9 @@ h_neutron_momentum.SetLineColor(colours[0])
 h_neutron_momentum.SetMarkerStyle(22)
 h_neutron_momentum.SetMarkerColor(colours[0])
 h_neutron_momentum.SetStats(0)
-CMS_lumi.CMS_lumi(c_h_neutron_momentum, 0, 11)
+h_neutron_momentum.GetXaxis().SetLabelSize(0.03)
+h_neutron_momentum.GetYaxis().SetLabelSize(0.03)
+CMSStyle.setCMSLumiStyle(c_h_neutron_momentum,11, lumiTextSize_=0.74)
 c_h_neutron_momentum.SetLogy()
 c_h_neutron_momentum.SaveAs(plots_output_dir+c_h_neutron_momentum.GetName()+".pdf")
 c_h_neutron_momentum.Write()
@@ -636,7 +688,7 @@ c_h_neutron_momentum.Write()
 
 l_TH1F = [h_antiS_sumDaughters_openingsangle, h_antiS_sumDaughters_deltaPhi, h_antiS_sumDaughters_deltaEta, h_antiS_sumDaughters_deltaR]
 for h in l_TH1F:
-	c = TCanvas("c_"+h.GetName(),"");
+	c = ReadyCanvas("c_"+h.GetName())
 	h.Draw("PCE1")
 	if(h.GetSumw2N() == 0):
 		h.Sumw2(kTRUE)
@@ -645,15 +697,17 @@ for h in l_TH1F:
 	h.SetLineColor(colours[0])
 	h.SetMarkerStyle(22)
 	h.SetMarkerColor(colours[0])
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
 	h.SetStats(0)
-	CMS_lumi.CMS_lumi(c, 0, 11)
+        CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
 	#c_h_antiS_sumDaughters_openingsangle.SetLogy()
 	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
 	c.Write()
 
 
-c_h2_antiS_inv_mass_p_Ks_plus_Lambda= TCanvas(h2_antiS_inv_mass_p_Ks_plus_Lambda.GetName(),"");
-c_h2_antiS_inv_mass_p_Ks_plus_Lambda.SetRightMargin(0.2) #make room for the tile of the z scale
+c_h2_antiS_inv_mass_p_Ks_plus_Lambda= ReadyCanvas(h2_antiS_inv_mass_p_Ks_plus_Lambda.GetName())
+c_h2_antiS_inv_mass_p_Ks_plus_Lambda.SetRightMargin(0.25) #make room for the tile of the z scale
 if(h2_antiS_inv_mass_p_Ks_plus_Lambda.GetSumw2N() == 0):
 	h2_antiS_inv_mass_p_Ks_plus_Lambda.Sumw2(kTRUE)
 #h2_antiS_inv_mass_p_Ks_plus_Lambda.Scale(1./h2_antiS_inv_mass_p_Ks_plus_Lambda.Integral(), "width");
@@ -663,7 +717,9 @@ h2_antiS_inv_mass_p_Ks_plus_Lambda.SetStats(0)
 h2_antiS_inv_mass_p_Ks_plus_Lambda.GetXaxis().SetTitleOffset(1.5)
 h2_antiS_inv_mass_p_Ks_plus_Lambda.GetYaxis().SetTitleOffset(2)
 c_h2_antiS_inv_mass_p_Ks_plus_Lambda.SetLogz()
-CMS_lumi.CMS_lumi(c_h2_antiS_inv_mass_p_Ks_plus_Lambda, 0, 11)
+h2_antiS_inv_mass_p_Ks_plus_Lambda.GetXaxis().SetLabelSize(0.03)
+h2_antiS_inv_mass_p_Ks_plus_Lambda.GetYaxis().SetLabelSize(0.03)
+CMSStyle.setCMSLumiStyle(c_h2_antiS_inv_mass_p_Ks_plus_Lambda,0, lumiTextSize_=0.74)
 c_h2_antiS_inv_mass_p_Ks_plus_Lambda.SaveAs(plots_output_dir+h2_antiS_inv_mass_p_Ks_plus_Lambda.GetName()+".pdf")
 c_h2_antiS_inv_mass_p_Ks_plus_Lambda.Write()
 
@@ -696,7 +752,7 @@ for l in ll_TH1F:
 i_ll_TH1F = 0
 for l in ll_TH1F:
 	legend = TLegend(0.6,0.85,0.99,0.99)
-	c = TCanvas("c_"+l[0].GetName(),"");
+	c = ReadyCanvas("c_"+l[0].GetName())
 	i_l_TH1F = 0
 	for h in l:
 		if(i_l_TH1F==0):
@@ -710,18 +766,20 @@ for l in ll_TH1F:
 		h.SetLineColor(colours[i_l_TH1F])
 		h.SetMarkerStyle(22+i_l_TH1F)
 		h.SetMarkerColor(colours[i_l_TH1F])
+                h.GetXaxis().SetLabelSize(0.03)
+                h.GetYaxis().SetLabelSize(0.03)
 		h.SetStats(0)
 		legend.AddEntry(h,ll_legend_text[i_ll_TH1F][i_l_TH1F],"lep")
 		i_l_TH1F+=1
 
 	legend.Draw()
-	CMS_lumi.CMS_lumi(c, 0, 11)
+        CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
 	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
 	c.Write()
 	i_ll_TH1F +=1
 
 PCA_granddaughters_dir.cd()
-c_dxyGranddaugthers = TCanvas("c_dxyGranddaugthers","");
+c_dxyGranddaugthers = ReadyCanvas("c_dxyGranddaugthers")
 h_dxy_AntiLambda_AntiProton.SetLineColor(38)
 h_dxy_AntiLambda_AntiProton.SetLineWidth(3)
 h_dxy_AntiLambda_AntiProton.SetFillColorAlpha(38,0.5)
@@ -741,7 +799,7 @@ legend_dxyGranddaughters.AddEntry(h_dxy_Ks_daug0,"K_{S}^{0} daughters","l")
 legend_dxyGranddaughters.Draw()
 c_dxyGranddaugthers.Write()
 
-c_dzGranddaugthers = TCanvas("c_dzGranddaugthers","");
+c_dzGranddaugthers = ReadyCanvas("c_dzGranddaugthers")
 h_dz_AntiLambda_AntiProton.SetLineColor(38)
 h_dz_AntiLambda_AntiProton.SetLineWidth(3)
 h_dz_AntiLambda_AntiProton.SetFillColorAlpha(38,0.5)
@@ -797,18 +855,18 @@ for l in ll_TH1F:
 	legend = TLegend(0.7,0.85,0.99,0.99)
         if l[0].GetName() == "h_dxy_AntiLambda_AntiProton":
             if not ixy_2:
-	        c = TCanvas("c_"+l[0].GetName(),"")
+	        c = ReadyCanvas("c_"+l[0].GetName())
                 ixy_2 = True
             else:
-	        c = TCanvas("c_"+l[0].GetName()+"_2","")
+	        c = ReadyCanvas("c_"+l[0].GetName()+"_2")
         elif l[0].GetName() == "h_dz_AntiLambda_AntiProton":
             if not iz_2:
-	        c = TCanvas("c_"+l[0].GetName(),"")
+	        c = ReadyCanvas("c_"+l[0].GetName())
                 iz_2 = True
             else:
-	        c = TCanvas("c_"+l[0].GetName()+"_2","")
+	        c = ReadyCanvas("c_"+l[0].GetName()+"_2")
         else:
-	    c = TCanvas("c_"+l[0].GetName(),"")
+	    c = ReadyCanvas("c_"+l[0].GetName())
 	i_l_TH1F = 0
 	for h in l:
 		if(i_l_TH1F==0):
@@ -822,12 +880,14 @@ for l in ll_TH1F:
 		h.SetLineColor(colours[i_l_TH1F])
 		h.SetMarkerStyle(22+i_l_TH1F)
 		h.SetMarkerColor(colours[i_l_TH1F])
+                h.GetXaxis().SetLabelSize(0.03)
+                h.GetYaxis().SetLabelSize(0.03)
 		h.SetStats(0)
 		legend.AddEntry(h,ll_legend_text[i_ll_TH1F][i_l_TH1F],"lep")
 		i_l_TH1F+=1
 
 	legend.Draw()
-	CMS_lumi.CMS_lumi(c, 0, 11)
+        CMSStyle.setCMSLumiStyle(c,11, lumiTextSize_=0.74)
 	c.SaveAs(plots_output_dir+c.GetName()+".pdf")
 	c.Write()
 	i_ll_TH1F +=1
@@ -837,15 +897,17 @@ l_TH2F = [h2_vx_vy_creation_vertex_Ks_daughters,h2_vz_lxy_creation_vertex_Ks_dau
 for h in l_TH2F:
         h.SetDirectory(0)
 for h in l_TH2F:
-        c= TCanvas(h.GetName(),"");
-        c.SetRightMargin(0.2) #make room for the tile of the z scale
+        c= ReadyCanvas(h.GetName())
+        c.SetRightMargin(0.25) #make room for the tile of the z scale
         if(h.GetSumw2N() == 0):
                 h.Sumw2(kTRUE)
         #h.Scale(1./h.Integral(), "width");
         h.Draw("colz")
         h.SetStats(0)
 	c.SetLogz()
-        CMS_lumi.CMS_lumi(c, 0, 11)
+        h.GetXaxis().SetLabelSize(0.03)
+        h.GetYaxis().SetLabelSize(0.03)
+        CMSStyle.setCMSLumiStyle(c,0, lumiTextSize_=0.74)
         c.SaveAs(plots_output_dir+h.GetName()+".pdf")
         c.Write()
 

@@ -305,7 +305,7 @@ void FlatTreeProducerTracking::analyze(edm::Event const& iEvent, edm::EventSetup
 	std::cout << v_antiS_momenta_and_itt[j][1] << " with eta " << v_antiS_momenta_and_itt[j][0] << std::endl;
   }
 //evaluate tracking performance, the below part works, but normally I do not use it, because this tree is very heavy
-/*  if(h_generalTracks.isValid() && h_TP.isValid() && h_trackAssociator.isValid()){
+  if(h_generalTracks.isValid() && h_TP.isValid() && h_trackAssociator.isValid()){
 	for(size_t i=0; i<TPColl.size(); ++i) {
 	  //first investigate whether this tp is a dauhgter of an AntiS. You need this because these granddaughter tracks you want to investigate separately from the rest of the tracks. 
 	  const TrackingParticle& tp = TPColl[i];
@@ -344,7 +344,6 @@ void FlatTreeProducerTracking::analyze(edm::Event const& iEvent, edm::EventSetup
 	  //if(tp.pdgId() == AnalyzerAllSteps::pdgIdAntiS)FillHistosAntiSTracks(tp, beamspot, TPColl,  h_TP, h_trackAssociator, h_generalTracks, h_V0Ks, h_V0L);
 	}
   }
-*/
 
 //fill a second tree: one entry in this tree will have the parameters of the antiS, the parameters of the daughters and the parameters of the granddaughters. And will check if they were reconstructed or not. 
   if(h_generalTracks.isValid() && h_TP.isValid() && h_trackAssociator.isValid() && h_V0Ks.isValid() && h_V0L.isValid()){

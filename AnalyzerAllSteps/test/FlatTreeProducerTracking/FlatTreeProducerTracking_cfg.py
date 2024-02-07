@@ -37,9 +37,10 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxE
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
-inlist = open("EDM_RECOSKIM_Trial4.txt")
+#inlist = open("EDM_RECOSKIM_Trial5.txt")
 process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring(*(inlist.readlines())),
+#	fileNames = cms.untracked.vstring(*(inlist.readlines())),
+	fileNames = cms.untracked.vstring(options.inputFiles),
   duplicateCheckMode = cms.untracked.string ("noDuplicateCheck")
 )
 #process.source = cms.Source("PoolSource",
@@ -79,7 +80,7 @@ process.validation = cms.Sequence(
 
 process.load("SexaQAnalysis.AnalyzerAllSteps.FlatTreeProducerTracking_cfi")
 process.FlatTreeProducerTracking.PUReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/PU_Reweigh_SignalToDataBPH2018_Block_A.txt")
-process.FlatTreeProducerGENSIM.MC_MultiToSingleReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/MultiToSingleSbar_EtaReweigh.txt")
+process.FlatTreeProducerTracking.MC_MultiToSingleReweighting = cms.FileInPath("SexaQAnalysis/AnalyzerAllSteps/data/MultiToSingleSbar_1p8GeV_EtaReweigh.txt")
 process.FlatTreeProducerTracking.innerHitPosCut = -1
 process.FlatTreeProducerTracking.cosThetaXYCut = -1
 process.FlatTreeProducerTracking.kShortMassCut = 0.03
