@@ -29,7 +29,7 @@ process.load('Configuration/EventContent/EventContent_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 
 if(options.isData==True):
-    process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v7', '')
+    process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v35', '') 
 else:
     process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v15', '')
 

@@ -2,7 +2,7 @@ import sys
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 
-runningOnData = False #this flag is used for choosing whether you want to produce trees for data or for MC.  
+runningOnData = True #this flag is used for choosing whether you want to produce trees for data or for MC.  
 lookAtAntiS =   True  #This flag should be False if you are running on data unless you want to unblind. If you are running on MC it should be True as you want to see the signal.
 
 options = VarParsing ('analysis')
@@ -29,7 +29,7 @@ process.load('Configuration/EventContent/EventContent_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 
 if(options.isData==True):
-    process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v7', '')
+    process.GlobalTag = GlobalTag(process.GlobalTag, '106X_dataRun2_v35', '') 
 else:
     process.GlobalTag = GlobalTag(process.GlobalTag, '102X_upgrade2018_realistic_v15', '')
 
@@ -48,6 +48,8 @@ process.source = cms.Source("PoolSource",
 process.load("SexaQAnalysis.AnalyzerAllSteps.FlatTreeProducerV0s_cfi")
 process.FlatTreeProducerV0s.runningOnData = runningOnData
 process.FlatTreeProducerV0s.lookAtAntiS = lookAtAntiS
+#for cross-event:
+#process.FlatTreeProducerV0s.sexaqCandidates = cms.InputTag("lambdaKshortXevtVertexFilter", "sParticlesXEvent","")
 process.flattreeproducer = cms.Path(process.FlatTreeProducerV0s)
 
 process.p = cms.Schedule(

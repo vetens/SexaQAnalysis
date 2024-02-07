@@ -2,21 +2,21 @@ import sys
 import FWCore.ParameterSet.Config as cms
 from FWCore.ParameterSet.VarParsing import VarParsing
 
-runningOnData = True#important, because this will choose rather to calculate lxy of the antiS interaction vertex wrt  (0,0) (for MC) or wrt the location of the center of the beampipe (for data)
 #lookAtAntiS =   True 
 
 options = VarParsing ('analysis')
-options.parseArguments()
-## data or MC options
 options.register(
 	'isData',True,VarParsing.multiplicity.singleton,VarParsing.varType.bool,
 	'flag to indicate data or MC')
-
 options.register(
 	'maxEvts',-1,VarParsing.multiplicity.singleton,VarParsing.varType.int,
 	'flag to indicate max events to process')
+options.register(
+	'ifList',"condor/flists/TestFiles.txt",VarParsing.multiplicity.singleton,VarParsing.varType.string,
+	'list of files to process')
 	
-options.isData==True
+options.parseArguments()
+## data or MC options
 
 process = cms.Process("SEXAQDATAANA")
 process.load("FWCore.MessageService.MessageLogger_cfi")
@@ -38,24 +38,24 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxE
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
-#inlist = open("crab/BPH2_Run2018B_BLOCK_A_Test.txt")
+#inlist = open("TestFiles.txt")
+inlist = open(options.ifList)
 process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring(options.inputFiles),
-	#fileNames = cms.untracked.vstring(*(inlist.readlines())),
+	#fileNames = cms.untracked.vstring(options.inputFiles),
+	fileNames = cms.untracked.vstring(*(inlist.readlines())),
+	#fileNames = cms.untracked.vstring(infile),
   duplicateCheckMode = cms.untracked.string ("noDuplicateCheck")
 )
 
 
 
 
-process.load("SexaQAnalysis.AnalyzerAllSteps.FlatTreeProducerBDT_cfi")
-process.FlatTreeProducerBDT.runningOnData = runningOnData
-process.FlatTreeProducerBDT.sexaqCandidates = cms.InputTag("lambdaKshortXevtVertexFilter", "sParticlesXEvent","")
-#process.FlatTreeProducerBDT.lookAtAntiS = lookAtAntiS
-process.flattreeproducer = cms.Path(process.FlatTreeProducerBDT)
+process.load("SexaQAnalysis.AnalyzerAllSteps.FilterEfficiencies_cfi")
+#process.FilterEfficiencies.lookAtAntiS = lookAtAntiS
+process.filtereff = cms.Path(process.FilterEfficiencies)
 
 process.p = cms.Schedule(
-  process.flattreeproducer
+  process.filtereff
 )
 
 

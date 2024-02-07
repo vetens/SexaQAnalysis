@@ -14,12 +14,14 @@ options.register(
 
 options.register(
 	'maxEvts',-1,VarParsing.multiplicity.singleton,VarParsing.varType.int,
+#	'maxEvts',1000,VarParsing.multiplicity.singleton,VarParsing.varType.int,
 	'flag to indicate max events to process')
 	
-options.isData==True
+options.isData==False
 
 process = cms.Process("SEXAQDATAANA")
 process.load("FWCore.MessageService.MessageLogger_cfi")
+process.load("FWCore.Modules.preScaler_cfi")
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load('Configuration/StandardSequences/MagneticField_38T_cff')
@@ -36,9 +38,11 @@ else:
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(options.maxEvts))
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(1000)
+process.preScaler.prescaleFactor = cms.int32(1000)
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 #inlist = open("crab/BPH2_Run2018B_BLOCK_A_Test.txt")
+#inlist = open("test.txt")
 process.source = cms.Source("PoolSource",
 	fileNames = cms.untracked.vstring(options.inputFiles),
 	#fileNames = cms.untracked.vstring(*(inlist.readlines())),
@@ -48,14 +52,12 @@ process.source = cms.Source("PoolSource",
 
 
 
-process.load("SexaQAnalysis.AnalyzerAllSteps.FlatTreeProducerBDT_cfi")
-process.FlatTreeProducerBDT.runningOnData = runningOnData
-process.FlatTreeProducerBDT.sexaqCandidates = cms.InputTag("lambdaKshortXevtVertexFilter", "sParticlesXEvent","")
-#process.FlatTreeProducerBDT.lookAtAntiS = lookAtAntiS
-process.flattreeproducer = cms.Path(process.FlatTreeProducerBDT)
+process.load("SexaQAnalysis.AnalyzerAllSteps.PileUpScraper_cfi")
+process.PileUpScraper.runningOnData = runningOnData
+process.pileupscraper= cms.Path(process.PileUpScraper)
 
 process.p = cms.Schedule(
-  process.flattreeproducer
+  process.pileupscraper
 )
 
 
