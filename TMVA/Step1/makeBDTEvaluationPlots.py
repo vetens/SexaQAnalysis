@@ -57,6 +57,7 @@ i = 0
 legend = TLegend(0.6,0.7,0.9,0.9)
 legend.SetFillStyle(0)
 legend.SetBorderSize(0)
+nentries = []
 for h in l_overlap:
         h1 = fIn.Get(h)
 	h1.SetTitle("")
@@ -73,12 +74,15 @@ for h in l_overlap:
 	h1.SetMarkerStyle(22+i)
 	h1.SetMarkerColor(colours[i])
 	h1.SetStats(0)
+        nentries += [h1.GetEntries()]
 	legend.AddEntry(h1,l_legend[i],"lep")
 	i+=1
 c.SetLogy()
 legend.Draw()
 CMSStyle.setCMSLumiStyle(c, 11, lumiTextSize_= 0.74)
 c.SaveAs(plots_output_dir+c.GetName()+".pdf")
+for i, entries in enumerate(nentries):
+    print l_legend[i], entries
 
 c.Write()
 

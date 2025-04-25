@@ -154,7 +154,8 @@ for i in range(1, nPoints+1):
         MultiToSingle = Single_Recobility_Eta / Multi_Recobility_Eta
         MultiToSingle_err = math.sqrt((Single_Recobility_Eta / Multi_Recobility_Eta**2 * Multi_Recobility_Eta_error)**2 + (Single_Recobility_Eta_error / Multi_Recobility_Eta)**2)
     h_reweighingFactor_eta.SetBinContent(i, MultiToSingle)
-    h_reweighingFactor_eta.SetBinError(i, MultiToSingle_err)
+    #h_reweighingFactor_eta.SetBinError(i, MultiToSingle_err)
+    h_reweighingFactor_eta.SetBinError(i, 0)
     f1.write(str(iEta) + '      ' + str(MultiToSingle) + '     ' + str(MultiToSingle_err) + "\n")
     if ( Single_Recobility_Eta_NoFit > 0 and Multi_Recobility_Eta > 0 ):
         MultiToSingle_NoFit = Single_Recobility_Eta_NoFit / Multi_Recobility_Eta
@@ -203,6 +204,12 @@ legend_reweigh.Draw("same")
 CMSStyle.setCMSLumiStyle(c2,11, lumiTextSize_=0.74)
 c2.Write()
 c2.SaveAs(c2.GetName()+".pdf")
+
+c3 = ReadyCanvas("c_Diffplot_"+args.mass)
+trp = TRatioPlot(h_reweighingFactor_eta, h_reweighingFactor_eta_NoFit, "diff")
+CMSStyle.setCMSLumiStyle(c3,11, lumiTextSize_=0.74)
+c3.Write()
+c3.SaveAs(c3.GetName()+".pdf")
 
 fOut.Close()
 

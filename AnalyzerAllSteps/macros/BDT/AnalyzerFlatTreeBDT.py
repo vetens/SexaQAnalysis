@@ -7,6 +7,7 @@ from ROOT import *
 import numpy as np
 import sys
 sys.path.append('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
+import argparse
 import  CMSStyle
 
 import sys
@@ -14,6 +15,19 @@ sys.path.insert(1, '../../../TMVA')
 import configBDT as config
 
 config_dict = config.config_dict
+
+#earlykill = 0
+parser = argparse.ArgumentParser()
+parser.add_argument('--preCuts', dest='preCuts', action='store_true', default=False)
+parser.add_argument('--CompareGenMass', dest='CompareGenMass', action='store_true', default=False)
+parser.add_argument('--HighBDTOnly', dest='HighBDTOnly', action='store_true', default=False)
+#NOTE: for CompareDataBGs and CompareDataMCBG, these assume BDT Evaluation
+parser.add_argument('--CompareDataBGs', dest='CompareDataBGs', action='store_true', default=False)
+parser.add_argument('--CompareDataMCBG', dest='CompareDataMCBG', action='store_true', default=False)
+parser.add_argument('--PVBeforeAfterCuts', dest='PVBeforeAfterCuts', action='store_true', default=False)
+parser.add_argument('--addXevtWeights', dest='addXevtWeights', action='store_true', default=False)
+
+args = parser.parse_args()
 
 gROOT.SetBatch(kTRUE)
 gStyle.SetLegendTextSize(0.08)
@@ -48,23 +62,22 @@ def ReadyCanvas(name, W=700, H=500):
 maxEvents = 1e5
 #maxEvents = 10
 
-#UseXevtWeights = True
-UseXevtWeights = False
+UseXevtWeights = args.addXevtWeights
 applyFiducial = True
 applyPreselection = True
 apply_optional_Preselection = True
-#applyFiducial = False
-#applyPreselection = False
-#apply_optional_Preselection = False
-#DoBeforeAfterPV = True
-DoBeforeAfterPV = False
-DoBGComparison = True
-HighBDT = True
-#HighBDT = False
-DoGenMass = False
-#DoGenMass = True
-DoPostCuts = True
-#DoPostCuts = False
+if args.preCuts:
+    applyFiducial = False
+    applyPreselection = False
+    apply_optional_Preselection = False
+DoBeforeAfterPV = args.PVBeforeAfterCuts
+DoBGComparison = args.CompareDataBGs
+BGMCCompare = args.CompareDataMCBG
+HighBDT = args.HighBDTOnly
+DoGenMass = args.CompareGenMass
+DoPostCuts = (not args.preCuts)
+if not DoPostCuts:
+    print "Doing pre-cut!"
 if DoGenMass:
     l_y_axis_ranges = [
     0.07,                   #nGoodPVs
@@ -91,7 +104,8 @@ if DoGenMass:
     33,                     #GEN_S_mass
     10                      #tprof_reweighing_factor
     ]
-elif not DoBGComparison:
+elif not DoBGComparison and not BGMCCompare:
+#elif not DoBGComparison:
     l_y_axis_ranges = [
     0.07,                   #nGoodPVs
     0.1,                    #S_vz_interaction_vertex
@@ -221,10 +235,11 @@ if DoGenMass:
     MC_AntiS_Sgn_Tree_M2SReweigh_1p85GeV = MC_AntiS_Sgn_File_M2SReweigh_1p85GeV.Get("FlatTreeProducerBDT/FlatTree")
     MC_AntiS_Sgn_File_M2SReweigh_2GeV = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Signal_2GeV.root")
     MC_AntiS_Sgn_Tree_M2SReweigh_2GeV = MC_AntiS_Sgn_File_M2SReweigh_2GeV.Get("FlatTreeProducerBDT/FlatTree")
-elif not DoBGComparison:
+elif not DoBGComparison and not BGMCCompare and DoPostCuts:
     MC_AntiS_Sgn_File_M2SReweigh_AllMass = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/SignalSbar_FULL.root")
     MC_AntiS_Sgn_Tree_M2SReweigh_AllMass = MC_AntiS_Sgn_File_M2SReweigh_AllMass.Get("FlatTreeProducerBDT/FlatTree")
 elif not DoGenMass and not DoPostCuts:
+#only looking at 1.8 GeV for PreCuts because these decisions were made pre-multiple mass points
     MC_AntiS_Sgn_File_M2SReweigh_1p8GeV = ROOT.TFile.Open("root://cmsxrootd.hep.wisc.edu//store/user/wvetens/crmc_Sexaq/FlatTree_BDT/BlockAPUReweighed_Signal_1p8_M2S.root")
     MC_AntiS_Sgn_Tree_M2SReweigh_1p8GeV = MC_AntiS_Sgn_File_M2SReweigh_1p8GeV.Get("FlatTreeProducerBDT/FlatTree")
 else:
@@ -243,6 +258,17 @@ if DoBGComparison:
     #Data Xevt S Bkg from Bparking UL 2018
     Data_S_XEvt_Bkg_File = ROOT.TFile.Open("root://cmsxrootd.hep.wisc.edu//store/user/wvetens/data_Sexaq/FlatTree_BDT/DiscrApplied_bkgReference/50PrevEvt_XEVT_reco/bkgReference_DiscrApplied_1p7GeV_BPH_XEVT_TrialB_50PrevEvt_Full.root")
     Data_S_XEvt_Bkg_Tree = Data_S_XEvt_Bkg_File.Get("FlatTree")
+elif BGMCCompare:
+    #MC S BKG from QCD MuEnriched sample
+    MC_S_Bkg_File = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/TMVA/Step2/BDTApplied_bkgReference_dataset_BDT_AllFeatures_dataset_BDT_BPH_Full_TrialB_AllPreSelection_SignalWeighing_PV_MultiToSingle_Eta_OverlapCheckFalse/DiscrApplied_QCD_MC_BG.root")
+    MC_S_Bkg_Tree = MC_S_Bkg_File.Get("FlatTree")
+    
+    #MC Sbar BKG from QCD MuEnriched sample (Same file, just look at sbar instead of s)
+    MC_Sbar_Bkg_File = MC_S_Bkg_File
+    MC_Sbar_Bkg_Tree = MC_Sbar_Bkg_File.Get("FlatTree")
+
+    Data_S_Bkg_File = ROOT.TFile.Open("/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/TMVA/Step2/BDTApplied_bkgReference_dataset_BDT_AllFeatures_dataset_BDT_BPH_Full_TrialB_AllPreSelection_SignalWeighing_PV_MultiToSingle_Eta_OverlapCheckFalse/DiscrApplied_Data_BPH_Full_trialB.root")
+    Data_S_Bkg_Tree = Data_S_Bkg_File.Get("FlatTree")
 
 
 #Legend = ["MC-S-BKG"   ,"MC-#bar{S}-BKG" ,"Data-S-BKG"   ,"Data-#bar{S}-BKG (BDT < 0.1)  ","Data-#bar{S}-X event BKG" ,"MC-#bar{S}-Signal"]
@@ -258,21 +284,39 @@ if DoBGComparison:
 
 if not DoGenMass and DoPostCuts:
     #For Data S BG to Signal MC with Cross-Event as well
-    colours = [2,4,35,30,43,1,6]
-    markerStyle = [21,20,22,23,33,34,35]
-    Legend = ["MC-AllMass-Multi-to-Single-Reweighed-#bar{S}-Signal","Data-S-BKG"   ,"Data-#bar{S}-BKG BDT<0.1"   ]
-    l_tree = [MC_AntiS_Sgn_Tree_M2SReweigh_AllMass                 ,Data_S_Bkg_Tree,Data_Sbar_Bkg_Tree]
-    if DoBGComparison:
-        Legend += ["Data-S-BKG-X-event","Data-#bar{S}-BKG-X-event"]
-        l_tree += [Data_S_XEvt_Bkg_Tree,Data_Sbar_XEvt_Bkg_Tree   ]
+    if BGMCCompare:
+        colours = [1,2,4,35,30,43,6]
+        markerStyle = [21,20,22,23,33,34,35]
+        Legend = ["MC-AllMass-Multi-to-Single-Reweighed-#bar{S}-Signal","Data-S-BKG"   ]
+        l_tree = [MC_AntiS_Sgn_Tree_M2SReweigh_AllMass                 ,Data_S_Bkg_Tree]
+        Legend += ["QCD_MC_S_Bkg", "QCD_MC_Sbar_Bkg"]
+        l_tree += [MC_S_Bkg_Tree,  MC_Sbar_Bkg_Tree ]
+    else:
+        colours = [1,2,4,35,30,43,6]
+        markerStyle = [21,20,22,23,33,34,35]
+        Legend = ["MC-AllMass-Multi-to-Single-Reweighed-#bar{S}-Signal","Data-S-BKG"   ,"Data-#bar{S}-BKG BDT<0.1"   ]
+        l_tree = [MC_AntiS_Sgn_Tree_M2SReweigh_AllMass                 ,Data_S_Bkg_Tree,Data_Sbar_Bkg_Tree]
+        if DoBGComparison:
+            Legend += ["Data-S-BKG-X-event","Data-#bar{S}-BKG-X-event"]
+            l_tree += [Data_S_XEvt_Bkg_Tree,Data_Sbar_XEvt_Bkg_Tree   ]
 elif not DoPostCuts and not DoGenMass:
-    colours = [2,4,35,30,43,1,6]
+    colours = [1,2,4,35,30,43,6]
     markerStyle = [21,20,22,23,33,34,35]
-    Legend = ["MC-1.8GeV-Multi-to-Single-Reweighed-#bar{S}-Signal","Data-S-BKG"   ,"Data-#bar{S}-BKG BDT<0.1"   ]
-    l_tree = [MC_AntiS_Sgn_Tree_M2SReweigh_1p8GeV                 ,Data_S_Bkg_Tree,Data_Sbar_Bkg_Tree           ]
+    Legend = ["MC-1.8GeV-Multi-to-Single-Reweighed-#bar{S}-Signal","Data-S-BKG"   ]#,"Data-#bar{S}-BKG BDT<0.1"   ]
+    l_tree = [MC_AntiS_Sgn_Tree_M2SReweigh_1p8GeV                 ,Data_S_Bkg_Tree]#,Data_Sbar_Bkg_Tree           ]
     if DoBGComparison:
         Legend += ["Data-S-BKG-X-event","Data-#bar{S}-BKG-X-event"]
         l_tree += [Data_S_XEvt_Bkg_Tree,Data_Sbar_XEvt_Bkg_Tree   ]
+    if BGMCCompare:
+        Legend += ["QCD_MC_S_Bkg","QCD_MC_Sbar_Bkg"]
+        l_tree += [MC_S_Bkg_Tree ,MC_Sbar_Bkg_Tree ]
+elif BGMCCompare:
+    colours = [1,2,4,35,30,43,6]
+    markerStyle = [21,20,22,23,33,34,35]
+    Legend = ["MC-AllMass-Multi-to-Single-Reweighed-#bar{S}-Signal","Data-S-BKG"   ]
+    l_tree = [MC_AntiS_Sgn_Tree_M2SReweigh_AllMass                 ,Data_S_Bkg_Tree]
+    Legend += ["QCD_MC_S_Bkg", "QCD_MC_Sbar_Bkg"]
+    l_tree += [MC_S_Bkg_Tree,  MC_Sbar_Bkg_Tree ]
 
 #For comparisons of different GEN masses to the full sample:
 if DoGenMass:
@@ -297,12 +341,17 @@ if DoGenMass:
 elif DoPostCuts:
     if HighBDT:
         subdir = "HighClassifier/"
+    elif BGMCCompare:
+        subdir = "BGMCCompare/"
     else:
         subdir = "BDTInputs/"
 else:
     subdir = "NoCuts/"
+if not args.addXevtWeights:
+    subdir = 'NoXevtnPVWeight/'
 #subdir = ""
 plots_output_dir = "plots_BDTInputs_05Oct2023/"+subdir
+print "Saving plots in: ", plots_output_dir
 #plots_output_dir = "plots_BDTInputs_Test/"
 
 FiducialRegionptMin = 0.33
@@ -389,24 +438,24 @@ for tree in l_tree:
 	#h_S_bestPVz = TH1F('h_S_bestPVz','; PV Z location (cm); Events/N_{ev}/3cm',50,-25,25)
 
 	h_S_vz_interaction_vertex= TH1F('h_S_vz_interaction_vertex','; absolute v_{z} iv ^{(}#bar{S} ^{)} (cm); Events/N_{ev}/cm',60,-30,30)
-	h_S_lxy_interaction_vertex = TH1F('h_S_lxy_interaction_vertex','; l_{0,bpc} iv ^{(}#bar{S} ^{)} (cm); Events/N_{ev}/0.01mm',38,2.02,2.4)
+	#h_S_lxy_interaction_vertex = TH1F('h_S_lxy_interaction_vertex','; l_{0,bpc} iv ^{(}#bar{S} ^{)} (cm); Events/N_{ev}/0.01mm',38,2.02,2.4)
 
 	h_S_daughters_deltaphi = TH1F('h_S_daughters_deltaphi','; #Delta#phi( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0}) (rad); Events/N_{ev}/0.2rad',32,-3.2,3.2)
 	h_S_daughters_deltaeta = TH1F('h_S_daughters_deltaeta','; #Delta#eta( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0}) ; Events/N_{ev}/0.2rad',21,-2.1,2.1)
-	h_S_daughters_openingsangle = TH1F('h_S_daughters_openingsangle','; openings angle( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0} ) (rad); Events/N_{ev}/0.05rad',34,0.4,2.1)
+	#h_S_daughters_openingsangle = TH1F('h_S_daughters_openingsangle','; openings angle( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0} ) (rad); Events/N_{ev}/0.05rad',34,0.4,2.1)
 	h_S_daughters_DeltaR = TH1F('h_S_daughters_DeltaR','; #DeltaR( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0} ); Events/N_{ev}/0.1rad',35,0.5,4)
-	h_S_Ks_openingsangle = TH1F('h_S_Ks_openingsangle','; openings angle( ^{(} #bar{S} ^{)} , K_{S}^{0}) (rad); Events/N_{ev}/0.1rad',20,0,2)
-	h_S_Lambda_openingsangle = TH1F('h_S_Lambda_openingsangle','; openings angle( ^{(} #bar{#Lambda} ^{)} ^{0} ,  ^{(} #bar{S} ^{)} ) (rad); Events/N_{ev}/0.05rad',20,0,1)
+	#h_S_Ks_openingsangle = TH1F('h_S_Ks_openingsangle','; openings angle( ^{(} #bar{S} ^{)} , K_{S}^{0}) (rad); Events/N_{ev}/0.1rad',20,0,2)
+	#h_S_Lambda_openingsangle = TH1F('h_S_Lambda_openingsangle','; openings angle( ^{(} #bar{#Lambda} ^{)} ^{0} ,  ^{(} #bar{S} ^{)} ) (rad); Events/N_{ev}/0.05rad',20,0,1)
 
 	h_S_eta = TH1F('h_S_eta','; #eta( ^{(} #bar{S} ^{)} ); Events/N_{ev}/0.25rad',38,-3.5,3.5)
 	h_Ks_eta = TH1F('h_Ks_eta','; #eta(K_{S}^{0}) ; Events/N_{ev}/0.25rad',20,-2.5,2.5)
 	#h_Lambda_eta = TH1F('h_Lambda_eta','; #eta( ^{(} #bar{#Lambda} ^{)} ^{0}); Events/N_{ev}/0.5#eta',20,-5,5)
 
-	h_S_dxy_over_lxy = TH1F('h_S_dxy_over_lxy','; d_{0,bs}/l_{0,bs} ( ^{(} #bar{S} ^{)} ); Events/N_{ev}/0.025',20,0,0.5)
+	#h_S_dxy_over_lxy = TH1F('h_S_dxy_over_lxy','; d_{0,bs}/l_{0,bs} ( ^{(} #bar{S} ^{)} ); Events/N_{ev}/0.025',20,0,0.5)
 	h_Ks_dxy_over_lxy = TH1F('h_Ks_dxy_over_lxy','; d_{0,bs}/l_{0,bs} (K_{S}^{0}); Events/N_{ev}/0.1',20,-1,1)
 	h_Lambda_dxy_over_lxy = TH1F('h_Lambda_dxy_over_lxy','; d_{0,bs}/l_{0,bs} ( ^{(} #bar{#Lambda} ^{)} ^{0}) ; Events/N_{ev}/0.1',20,-1,1)
 
-	h_S_dz_min = TH1F('h_S_dz_min','; min d_{z,bs}  ^{(} #bar{S} ^{)}  (cm); Events/N_{ev}/0.5cm',24,-6,6)
+#	h_S_dz_min = TH1F('h_S_dz_min','; min d_{z,bs}  ^{(} #bar{S} ^{)}  (cm); Events/N_{ev}/0.5cm',24,-6,6)
 	h_Ks_dz_min = TH1F('h_Ks_dz_min','; min d_{z,bs} K_{S}^{0} (cm); Events/N_{ev}/cm',60,-30,30)
 	h_Lambda_dz_min = TH1F('h_Lambda_dz_min','; min d_{z,bs}  ^{(} #bar{#Lambda} ^{)} ^{0}  (cm); Events/N_{ev}/cm',60,-30,30)
 
@@ -419,13 +468,27 @@ for tree in l_tree:
 
 	#h_S_error_lxy_interaction_vertex = TH1F('h_S_error_lxy_interaction_vertex','; #sigma(l_{0,bpc} iv ^{(}#bar{S} ^{)} ) (cm); Events/N_{ev}/0.004mm',10,0,0.04)
 	h_S_mass = TH1F('h_S_mass','; m_{ ^{(} #bar{S} ^{)} ,obs} (GeV/c^{2}); Events/N_{ev}/0.25GeV/c^{2}',40,-5,5)
+        if DoPostCuts:
+	    h_S_lxy_interaction_vertex = TH1F('h_S_lxy_interaction_vertex','; l_{0,bpc} iv ^{(}#bar{S} ^{)} (cm); Events/N_{ev}/0.01mm',38,2.02,2.4)
+	    h_S_dxy_over_lxy = TH1F('h_S_dxy_over_lxy','; d_{0,bs}/l_{0,bs} ( ^{(} #bar{S} ^{)} ); Events/N_{ev}/0.025',20,0,0.5)
+	    h_S_daughters_openingsangle = TH1F('h_S_daughters_openingsangle','; openings angle( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0} ) (rad); Events/N_{ev}/0.05rad',34,0.4,2.1)
+	    h_S_Ks_openingsangle = TH1F('h_S_Ks_openingsangle','; openings angle( ^{(} #bar{S} ^{)} , K_{S}^{0}) (rad); Events/N_{ev}/0.1rad',20,0,2)
+	    h_S_Lambda_openingsangle = TH1F('h_S_Lambda_openingsangle','; openings angle( ^{(} #bar{#Lambda} ^{)} ^{0} ,  ^{(} #bar{S} ^{)} ) (rad); Events/N_{ev}/0.05rad',20,0,1)
+	    h_S_dz_min = TH1F('h_S_dz_min','; min d_{z,bs}  ^{(} #bar{S} ^{)}  (cm); Events/N_{ev}/0.5cm',24,-6,6)
+        else:
+            h_S_lxy_interaction_vertex = TH1F('h_S_lxy_interaction_vertex','; l_{0,bpc} iv ^{(}#bar{S} ^{)} (cm); Events/N_{ev}/0.01mm',100,2.00,3.0)
+	    h_S_dxy_over_lxy = TH1F('h_S_dxy_over_lxy','; d_{0,bs}/l_{0,bs} ( ^{(} #bar{S} ^{)} ); Events/N_{ev}/0.025',80,-1,1)
+	    h_S_daughters_openingsangle = TH1F('h_S_daughters_openingsangle','; openings angle( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0} ) (rad); Events/N_{ev}/0.05rad',64,0,3.2)
+	    h_S_Ks_openingsangle = TH1F('h_S_Ks_openingsangle','; openings angle( ^{(} #bar{S} ^{)} , K_{S}^{0}) (rad); Events/N_{ev}/0.1rad',32,0,3.2)
+	    h_S_Lambda_openingsangle = TH1F('h_S_Lambda_openingsangle','; openings angle( ^{(} #bar{#Lambda} ^{)} ^{0} ,  ^{(} #bar{S} ^{)} ) (rad); Events/N_{ev}/0.05rad',64,0,3.2)
+	    h_S_dz_min = TH1F('h_S_dz_min','; min d_{z,bs}  ^{(} #bar{S} ^{)}  (cm); Events/N_{ev}/0.5cm',48,-12,12)
         if DoGenMass:
 	    h_GEN_S_mass = TH1F('h_GEN_S_mass','; m_{ ^{(} #bar{S} ^{)} ,GEN} (GeV/c^{2}); Events/N_{ev}/10MeV/c^{2}',50,1.6,2.1)
 
 	h2_S_daughters_DeltaR_vs_S_lxy_interaction_vertex = TH2F('h_S_daughters_DeltaR_vs_S_lxy_interaction_vertex','; #DeltaR( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0} ); l_{0,bpc} iv ^{(}#bar{S} ^{)} (cm); Events/N_{ev}/0.25GeV/c^{2}',35,0,3.5,31,1.9,2.52)
 	h2_S_daughters_openingsangle_vs_S_lxy_interaction_vertex = TH2F('h_S_daughters_openingsangle_vs_S_lxy_interaction_vertex','; openings angle( ^{(} #bar{#Lambda} ^{)} ^{0} , K_{S}^{0} ) (rad); l_{0,bpc} iv ^{(}#bar{S} ^{)} (cm);Events/N_{ev}/0.25GeV/c^{2}',35,0,3.5,31,1.9,2.52)
 
-        if DoBGComparison:
+        if DoBGComparison or BGMCCompare:
 	    h_S_BDT = TH1F('h_S_BDT','; BDT classifier; Events/N_{ev}/0.05 BDT class.',40,-1,1)
 	tprof_reweighing_factor = TProfile('tprof_reweighing_factor',';#eta ^{(}#bar{S} ^{)};reweighing factor',20,-5,5,0,50)
 
@@ -435,8 +498,12 @@ for tree in l_tree:
 		if(i==maxEvents):
 			break
 		if(i%1e4 == 0):
+		#if(i%1e2 == 0):
 			print "reached entry: ", i
 		tree.GetEntry(i)
+		#if(i%1e2 == 0):
+		#	print "accessed entry: ", i
+                    
 		#if(i==0): print 'charge of the S/antiS: ', tree._S_charge[0]
 		
 		#for when you have the BDT parameter in your tree:
@@ -446,6 +513,8 @@ for tree in l_tree:
 		###need to reweigh the MC signal events, because the ones with high eta are more important, because they will pass more material
 		##reweighing_factor = config.calc_reweighing_factor(tree._S_eta[0],'MC-#bar{S}-Signal' in Legend[iTree])
 		reweighing_factor = 1
+                #if 'x-event' not in Legend[iTree].lower():
+                #    continue
 		if('#bar{S}-Signal' in Legend[iTree] or 'MC-Multi-#bar{S}-Signal' in Legend[iTree] or 'Multi-to-Single-Reweighed-#bar{S}-Signal' in Legend[iTree]): #if MC signal reweigh both for the pathlength through the beampipe and for the z location of the PV and PU
                         nSbar+=1
                         if(tree._S_deltaLInteractionVertexAntiSmin[0] > MC_Signal_Truth_cutoff_deltaL and tree._S_deltaRAntiSmin[0] > MC_Signal_Truth_cutoff_deltaR): 
@@ -460,6 +529,11 @@ for tree in l_tree:
                 # PV Reweighting for Xevt
                 if 'x-event' in Legend[iTree].lower() and DoPostCuts and DoBGComparison and UseXevtWeights:
                     reweighing_factor = float(weights_PU_Xevt[str(int(tree._S_nGoodPVs[0]))])
+                    #print tree._S_nGoodPVs[0]
+                    #print int(tree._S_nGoodPVs[0])
+                    #earlykill += 1
+                    #if earlykill >= 10:
+                    #    quit()
 		#elif('MC-S-BKG' in Legend[iTree] or 'MC-#bar{S}-BKG' or 'MC-#bar{S}-Xevt-BKG' in Legend[iTree]):#if MC background only reweigh for the z location of the PV and PU
 		#	reweighing_factor = tree._S_event_weighting_factorPU[0]
                 # for the S background we want to look at S, otherwise we want to look at Sbar
@@ -533,7 +607,7 @@ for tree in l_tree:
                 if DoGenMass:
 		    h_GEN_S_mass.Fill(round(tree._GEN_S_mass[0],2),reweighing_factor)
                 
-                if DoBGComparison:
+                if DoBGComparison or BGMCCompare:
 		    h_S_BDT.Fill(tree.SexaqBDT,reweighing_factor)
 	        h2_S_daughters_DeltaR_vs_S_lxy_interaction_vertex.Fill(tree._S_daughters_DeltaR[0], tree._S_lxy_interaction_vertex_beampipeCenter[0], reweighing_factor)
 	        h2_S_daughters_openingsangle_vs_S_lxy_interaction_vertex.Fill(tree._S_daughters_openingsangle[0], tree._S_lxy_interaction_vertex_beampipeCenter[0], reweighing_factor)
@@ -545,7 +619,7 @@ for tree in l_tree:
         TH1_l = []
         if DoGenMass:
 	    TH1_l = [h_S_nGoodPVs, h_S_vz_interaction_vertex,h_S_lxy_interaction_vertex,h_S_daughters_deltaphi,h_S_daughters_deltaeta,h_S_daughters_openingsangle,h_S_daughters_DeltaR,h_S_Ks_openingsangle,h_S_Lambda_openingsangle,h_S_eta,h_Ks_eta,h_S_dxy_over_lxy,h_Ks_dxy_over_lxy,h_Lambda_dxy_over_lxy,h_S_dz_min,h_Ks_dz_min,h_Lambda_dz_min,h_Ks_pt,h_Lambda_lxy_decay_vertex,h_S_chi2_ndof,h_S_mass,h_GEN_S_mass,tprof_reweighing_factor]
-        elif not DoBGComparison:
+        elif not DoBGComparison and not BGMCCompare:
 	    TH1_l = [h_S_nGoodPVs, h_S_vz_interaction_vertex,h_S_lxy_interaction_vertex,h_S_daughters_deltaphi,h_S_daughters_deltaeta,h_S_daughters_openingsangle,h_S_daughters_DeltaR,h_S_Ks_openingsangle,h_S_Lambda_openingsangle,h_S_eta,h_Ks_eta,h_S_dxy_over_lxy,h_Ks_dxy_over_lxy,h_Lambda_dxy_over_lxy,h_S_dz_min,h_Ks_dz_min,h_Lambda_dz_min,h_Ks_pt,h_Lambda_lxy_decay_vertex,h_S_chi2_ndof,h_S_mass,tprof_reweighing_factor]
         else:
 	    TH1_l = [h_S_nGoodPVs, h_S_vz_interaction_vertex,h_S_lxy_interaction_vertex,h_S_daughters_deltaphi,h_S_daughters_deltaeta,h_S_daughters_openingsangle,h_S_daughters_DeltaR,h_S_Ks_openingsangle,h_S_Lambda_openingsangle,h_S_eta,h_Ks_eta,h_S_dxy_over_lxy,h_Ks_dxy_over_lxy,h_Lambda_dxy_over_lxy,h_S_dz_min,h_Ks_dz_min,h_Lambda_dz_min,h_Ks_pt,h_Lambda_lxy_decay_vertex,h_S_chi2_ndof,h_S_mass,h_S_BDT,tprof_reweighing_factor]

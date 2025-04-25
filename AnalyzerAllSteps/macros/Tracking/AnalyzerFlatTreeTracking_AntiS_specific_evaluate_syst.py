@@ -4,8 +4,12 @@ import numpy as np
 from ROOT import *
 import pandas as pd
 
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('--mass', dest='mass', action='store', default='1p7')
+args = parser.parse_args()
 import sys
-sys.path.append('/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
+sys.path.append('/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/tdrStyle')
 import  CMS_lumi, tdrstyle 
 
 sys.path.insert(1, '../../../TMVA')
@@ -25,10 +29,11 @@ maxEvents = 1e99
 
 verbose = False
 
-plots_output_dir = "plots_syst_evaluation/"
+plots_output_dir = "plots_syst_evaluation/"+args.mass+"GeV/"
 
 #inFiles = [TFile("/user/jdeclerc/CMSSW_8_0_30_bis/src/SexaQAnalysis/AnalyzerAllSteps/test/FlatTreeProducerTracking/test_FlatTreeSkimming_Step1_Step2_Skimming_FlatTree_trial17_1p8GeV_17102019_v1_191017_220444_numberOfTrackerHits.root",'read')]
-inFiles = [TFile("file:/pnfs/iihe/cms/store/user/jdeclerc/crmc_Sexaq/FlatTree_Skimmed/CRAB_SimSexaq_trial21/crab_FlatTreeProducerTracking_trial21_02112019_v1_1p8GeV/191102_062811/0000/combined/combined_FlatTreeTracking_trial21_02112019_v1_1p8GeV.root",'read')]
+iflist = open("Tracking_"+args.mass+".txt", 'r').readlines()
+#inFiles = [TFile("file:/pnfs/iihe/cms/store/user/jdeclerc/crmc_Sexaq/FlatTree_Skimmed/CRAB_SimSexaq_trial21/crab_FlatTreeProducerTracking_trial21_02112019_v1_1p8GeV/191102_062811/0000/combined/combined_FlatTreeTracking_trial21_02112019_v1_1p8GeV.root",'read')]
 
 fOut = TFile(plots_output_dir+'macro_syst_evaluation_antiS_RECO_eff2.root','RECREATE')
 
@@ -56,12 +61,12 @@ FidReg_maxdz = config_dict["config_fidRegion_FiducialRegiondzMax"]
 
 
 #the files with the correction factors, produced by ../MCToData/loop_macro_exc_inc.C
-corr_factors_pt = pd.read_csv("../MCToData/Data_MC_plots_8_final/h_RECO_Ks_pt_tracks1_and_2.dat") 
-corr_factors_pz = pd.read_csv("../MCToData/Data_MC_plots_8_final/h_RECO_Ks_pz_tracks1_and_2.dat") 
-corr_factors_dxy = pd.read_csv("../MCToData/Data_MC_plots_8_final/h_RECO_Ks_Track1_and_2_dxy_beamspot.dat") 
-corr_factors_dz = pd.read_csv("../MCToData/Data_MC_plots_8_final/h_RECO_Ks_Track1_and_2_dz_min_PV.dat") 
-corr_factors_lxy = pd.read_csv("../MCToData/Data_MC_plots_8_final/h_RECO_Ks_lxy.dat") 
-corr_factors_vz = pd.read_csv("../MCToData/Data_MC_plots_8_final/h_RECO_Ks_vz.dat") 
+corr_factors_pt = pd.read_csv("../MCToData/Data_MC_plots/h_RECO_Ks_pt_tracks1_and_2.dat") 
+corr_factors_pz = pd.read_csv("../MCToData/Data_MC_plots/h_RECO_Ks_pz_tracks1_and_2.dat") 
+corr_factors_dxy = pd.read_csv("../MCToData/Data_MC_plots/h_RECO_Ks_Track1_and_2_dxy_beamspot.dat") 
+corr_factors_dz = pd.read_csv("../MCToData/Data_MC_plots/h_RECO_Ks_Track1_and_2_dz_min_PV.dat") 
+corr_factors_lxy = pd.read_csv("../MCToData/Data_MC_plots/h_RECO_Ks_lxy.dat") 
+corr_factors_vz = pd.read_csv("../MCToData/Data_MC_plots/h_RECO_Ks_vz.dat") 
 
 #histograms:
 h_corr_factor_pt = TH1F("corr_factor_pt",";correction factor pt;",100,0.2,1.8)
@@ -70,7 +75,8 @@ h_corr_factor_dxy = TH1F("corr_factor_dxy",";correction factor dxy;",100,0.2,1.8
 h_corr_factor_dz = TH1F("corr_factor_dz",";correction factor dz;",100,0.2,1.8)
 h_corr_factor_lxy = TH1F("corr_factor_lxy",";correction factor lxy;",100,0.2,1.8)
 h_corr_factor_vz = TH1F("corr_factor_vz",";correction factor vz;",100,0.2,1.8)
-h_corr_factor_this_antiS = TH1F("h_corr_factor_this_antiS",";correction factor (C_{k});#Events;",16,0.2,1.8)
+#h_corr_factor_this_antiS = TH1F("h_corr_factor_this_antiS",";correction factor (C_{k});#Events;",16,0.2,1.8)
+h_corr_factor_this_antiS = TH1F("h_corr_factor_this_antiS",";correction factor (C_{k});#Events;",16,0.05,1.65)
 
 #for each kinematic variable plot the correction factor of that kinematic variable versus the correction parameters of the others to investigate if there are any correlations between the correction factors of hte two parameters
 nbins_corr_par = 60
@@ -147,8 +153,9 @@ nAntiLambdaTOTALIfBothDaughtersReco = 0.
 nAntiSRECOIfBothDaughtersReco = 0.
 nAntiSTOTALIfBothDaughtersReco = 0.
 
-for iFile, fIn in enumerate(inFiles,start = 1):
-	print "Starting with inputFile: ", str(iFile) ,"/",str(len(inFiles)), ':', fIn.GetName()
+for iFile, fIn_name in enumerate(iflist,start = 1):
+        fIn = TFile.Open(fIn_name, 'read')
+	print "Starting with inputFile: ", str(iFile) ,"/",str(len(iflist)), ':', fIn.GetName()
 	tree = fIn.Get('FlatTreeProducerTracking/FlatTreeTpsAntiS') 
 	for i in range(0,tree.GetEntries()):
 		if(i>maxEvents):
