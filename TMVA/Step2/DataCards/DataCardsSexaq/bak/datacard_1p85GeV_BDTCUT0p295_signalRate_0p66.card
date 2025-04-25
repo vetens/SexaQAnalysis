@@ -1,0 +1,18 @@
+#0.295
+#0.664330708255
+imax 1  number of channels
+jmax 1  number of backgrounds
+kmax 4  number of nuisance parameters (sources of systematical uncertainties)
+------------
+bin bin1
+observation 6.5646394441
+------------
+bin             bin1            bin1
+process         Sexaq_1p85       BKG
+process         0               1
+rate           0.664330708255    6.5646394441
+------------
+lumi            lnN    1.05    -
+tracking        lnN    1.24    -
+S_to_AntiS      lnN    -  1.35558130503
+BKG_norm_stat   lnN    -  1.39029641399

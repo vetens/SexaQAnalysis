@@ -46,12 +46,14 @@ dataset = "dataset_BDT_AllFeatures_dataset_BDT_BPH_Full_TrialB_AllPreSelection_S
 #fileIn = "/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/QCD_MC_BG.root"
 #MC with Cross-event reconstruction (NOTE: Use isXevt = True)
 #fileIn = "root://cmsxrootd.hep.wisc.edu//store/user/wvetens/data_Sexaq/FlatTree_BDT/QCD_MC_Xevt.root"
+#MC without Cross-event reconstruction (NOTE: Use isXevt = True)
+#fileIn = "/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/QCD_MC_BG.root"
 #for data BPH - DO NOT FULLY UNBLIND
-#fileIn= "/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Data_BPH_Full_trialB.root"
+fileIn= "/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/Data_BPH_Full_trialB.root"
 #Data with Cross-event reconstruction (NOTE: Use isXevt = True) (Ok to unblind)
 #fileIn = "root://cmsxrootd.hep.wisc.edu//store/user/wvetens/data_Sexaq/FlatTree_BDT/BPH_XEVT_TrialB_Full_0.root"
 #fileIn = "root://cmsxrootd.hep.wisc.edu//store/user/wvetens/data_Sexaq/FlatTree_BDT/BPH_XEVT_TrialB_Full_"+str(args.splitno)+".root"
-fileIn = "root://cmsxrootd.hep.wisc.edu//store/user/wvetens/data_Sexaq/FlatTree_BDT/BPH_XEVT_TrialB_50PrevEvt_Full_"+str(args.splitno)+".root"
+#fileIn = "root://cmsxrootd.hep.wisc.edu//store/user/wvetens/data_Sexaq/FlatTree_BDT/BPH_XEVT_TrialB_50PrevEvt_Full_"+str(args.splitno)+".root"
 #fileIn = "/afs/cern.ch/work/w/wvetens/Sexaquarks/CMSSW_10_2_26/src/SexaQAnalysis/AnalyzerAllSteps/macros/BDT/BPH_XEVT_TrialB_Full.root"
 
 overlapList = []

@@ -5,14 +5,14 @@ jmax 1  number of backgrounds
 kmax 4  number of nuisance parameters (sources of systematical uncertainties)
 ------------
 bin bin1
-observation 0.0524117612907
+observation 0.0280457432172
 ------------
 bin             bin1            bin1
 process         Sexaq_1p85       BKG
 process         0               1
-rate           0.0229394255995    0.0524117612907
+rate           0.0229394255995    0.0280457432172
 ------------
 lumi            lnN    1.05    -
 tracking        lnN    1.24    -
-S_to_AntiS      lnN    -  1.61352255388
-BKG_norm_stat   lnN    -  5.36803010402
+S_to_AntiS      lnN    -  1.67628346056
+BKG_model       lnN    -  1.34811896379
